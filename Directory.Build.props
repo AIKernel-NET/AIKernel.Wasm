@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <Version>0.1.1</Version>
+    <AssemblyVersion>0.1.1.0</AssemblyVersion>
+    <FileVersion>0.1.1.0</FileVersion>
+    <InformationalVersion>0.1.1</InformationalVersion>
+    <AIKernelPackageVersion>[0.1.1]</AIKernelPackageVersion>
+    <AIKernelCorePackageVersion>0.1.1</AIKernelCorePackageVersion>
+    <AIKernelProvidersPackageVersion>[0.1.1]</AIKernelProvidersPackageVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Authors>Takuya Sogawa</Authors>
+    <Company>AIKernel-NET</Company>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://www.nuget.org/profiles/AIKernel-NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AIKernel-NET/AIKernel.Wasm</RepositoryUrl>
+    <Copyright>Copyright © 2026 Takuya Sogawa of AIKernel-NET</Copyright>
+    <PackageTags>aikernel;wasm;webgpu;browser;runtime;process;memory;stdin;filesystem;event;audio;screenshot;savestate;time</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>AIKernel.Wasm runtime isolation package for browser/WASM runtime services and WebGPU compute boundaries.</Description>
+    <PackageReleaseNotes>
+      AIKernel.Wasm v0.1.1 - Aligns the WASM runtime and WebGPU provider with AIKernel.NET, AIKernel.Core, and AIKernel.Providers 0.1.1 while preserving monadic Result/Try/Option runtime provider lookup, adapter success checks, and WebGPU initialization fallback.
+    </PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)README-ja.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

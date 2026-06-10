@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aikernel-wasm"
+version = "0.1.1"
+description = "Python wrapper for AIKernel.Wasm 0.1.1 runtime and WebGPU provider assemblies."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [{ name = "Takuya Sogawa" }]
+dependencies = ["pythonnet>=3.0.3"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://github.com/AIKernel-NET/AIKernel.Wasm"
+Repository = "https://github.com/AIKernel-NET/AIKernel.Wasm"
+Documentation = "https://aikernel.net/reference/"
+Issues = "https://github.com/AIKernel-NET/AIKernel.Wasm/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aikernel_wasm = ["py.typed"]
+"aikernel_wasm.native" = ["*.dll", "*.json"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

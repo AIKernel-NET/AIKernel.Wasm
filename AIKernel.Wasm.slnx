@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/Compute/">
+    <Project Path="src/Compute/WebGpuComputeProvider/WebGpuComputeProvider.csproj" />
+  </Folder>
+  <Folder Name="/src/Runtime/">
+    <Project Path="src/Runtime/AIKernel.Wasm.Runtime/AIKernel.Wasm.Runtime.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AIKernel.Wasm.Tests/AIKernel.Wasm.Tests.csproj" />
+    <Project Path="tests/WebGpuComputeProvider.Tests/WebGpuComputeProvider.Tests.csproj" />
+  </Folder>
+</Solution>

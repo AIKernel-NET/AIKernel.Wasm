@@ -1,0 +1,22 @@
+{
+  "providerId": "wasm.runtime",
+  "name": "AIKernel WASM Runtime",
+  "version": "0.1.1",
+  "assembly": "AIKernel.Wasm.Runtime.dll",
+  "capabilities": [
+    "wasm.runtime",
+    "wasm.process",
+    "wasm.memory",
+    "wasm.stdin",
+    "wasm.filesystem",
+    "wasm.event",
+    "wasm.audio",
+    "wasm.screenshot",
+    "wasm.savestate",
+    "wasm.time"
+  ],
+  "metadata": {
+    "scope": "browser-wasm",
+    "status": "runtime-service"
+  }
+}
