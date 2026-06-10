@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.WebGpuComputeProvider</Title>
+    <PackageId>AIKernel.Wasm.WebGpuComputeProvider</PackageId>
+    <Description>EN: Official AIKernel.NET WASM provider for WebGPU compute with deterministic CPU fallback.
+
+JA: deterministic CPU fallback を備えた WebGPU compute 向け AIKernel.NET 公式 WASM Provider です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Common" Version="[$(AIKernelCorePackageVersion)]" />
+    <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Providers.Standard" Version="$(AIKernelProvidersPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="webgpu.provider.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="providers\" />
+    <None Include="samples\vector-add.wgsl" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="samples\" />
+  </ItemGroup>
+</Project>

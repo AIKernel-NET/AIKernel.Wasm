@@ -1,0 +1,27 @@
+{
+  "providerId": "webgpu.compute",
+  "name": "WebGPU Compute",
+  "version": "0.1.1",
+  "assembly": "WebGpuComputeProvider.dll",
+  "capabilities": [
+    "compute.dispatch",
+    "compute.vector_add"
+  ],
+  "metadata": {
+    "adapterProfile": "webgpu-browser",
+    "backend": "browser-webgpu",
+    "fallback": "cpu",
+    "providerType": "AIKernel.Wasm.Comput.WebGpuComputeProvider",
+    "invokerType": "AIKernel.Wasm.Comput.WebGpuComputeInvoker"
+  },
+  "cli": {
+    "command": "gpu",
+    "defaultOperation": "compute.vector_add",
+    "configKeys": [
+      "adapterProfile",
+      "backend",
+      "forceCpuFallback"
+    ],
+    "requiredEnvironment": []
+  }
+}

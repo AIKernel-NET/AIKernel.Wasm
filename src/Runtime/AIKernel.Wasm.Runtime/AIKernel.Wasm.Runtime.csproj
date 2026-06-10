@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.Runtime</Title>
+    <PackageId>AIKernel.Wasm.Runtime</PackageId>
+    <Description>EN: AIKernel WASM runtime service package for browser/WebAssembly process, memory, stdin, file system, event, audio, screenshot, save-state, and time providers.
+
+JA: browser / WebAssembly の process、memory、stdin、file system、event、audio、screenshot、save-state、time Provider を提供する AIKernel WASM runtime service package です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Common" Version="[$(AIKernelCorePackageVersion)]" />
+    <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wasm.provider.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="providers\" />
+  </ItemGroup>
+</Project>
