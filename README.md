@@ -14,11 +14,43 @@ Core abstractions such as `IProcess`, `IProcessHost`, `IComputeProvider`, and
 browser/WebAssembly implementations without leaking WASM runtime concerns back
 into Core or AIKernel.Providers.
 
+In the AIOS SDK, AIKernel.Wasm is the sandboxed runtime layer: a lightweight VM
+surface for browser/WebAssembly processes, isolated memory, WASI-style services,
+and WebGPU boundaries. Users add it only when their AIOS distribution needs a
+WASM sandbox.
+
+AIKernel also provides an official AIOS distribution, codenamed
+**AIKernel.Monolith**. Monolith has begun development as the standard AIOS that
+will integrate the sandboxed runtime layer with the broader SDK after the 0.1.x
+line stabilizes.
+
 ## Package
 
 - `AIKernel.Wasm.Runtime`
 - `AIKernel.Wasm.WebGpuComputeProvider`
 - `aikernel-wasm`
+
+## Quick Start
+
+Install only the package surface your host needs. Runtime tests and CPU fallback
+paths work on Windows and Linux; real browser WebGPU validation remains a
+separate manual check.
+
+```bash
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.1
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1
+```
+
+For Python hosts:
+
+```bash
+pip install aikernel-wasm
+```
+
+Use `AIKernel.Wasm.Runtime` for process, memory, stdin, file system, event,
+audio, screenshot, save-state, and time providers. Add
+`AIKernel.Wasm.WebGpuComputeProvider` only when the host needs the WebGPU
+compute boundary.
 
 ## Documentation
 

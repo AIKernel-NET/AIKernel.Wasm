@@ -6,6 +6,14 @@
 developer 向けです。内部 architecture ではなく、public runtime、process、
 WebGPU、Python surface の使い方に焦点を当てます。
 
+Wasm は AIOS SDK の sandboxed runtime layer です。AIOS distribution に軽量 VM 的な
+process isolation、linear memory、WASI-style file bridge、screenshot / audio
+surface、save state、WebGPU boundary が必要な場合に追加します。
+
+公式 AIOS ディストリビューション **AIKernel.Monolith** の開発も開始されています。
+Monolith は 0.1.x 系の安定化後に sandboxed runtime service をより広い SDK と
+統合する標準 reference distribution として位置づけられます。
+
 ## What You Can Do
 
 AIKernel.Wasm により、AIKernel host は次を実行できます。

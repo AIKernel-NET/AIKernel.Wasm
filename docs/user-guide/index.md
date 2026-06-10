@@ -6,6 +6,14 @@ This guide is for developers who want to consume AIKernel.Wasm from an
 application or operator workflow. It focuses on the public runtime, process,
 WebGPU, and Python surfaces rather than internal architecture.
 
+Wasm is the AIOS SDK sandboxed runtime layer. Add it when an AIOS distribution
+needs lightweight VM-style process isolation, linear memory, WASI-style file
+bridges, screenshot/audio surfaces, save state, or WebGPU boundaries.
+
+AIKernel.Monolith is the official AIOS distribution now in development. It will
+serve as the standard reference distribution that integrates sandboxed runtime
+services with the broader SDK after the 0.1.x line stabilizes.
+
 ## What You Can Do
 
 AIKernel.Wasm lets an AIKernel host:

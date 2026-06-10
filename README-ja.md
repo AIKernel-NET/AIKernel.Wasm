@@ -14,11 +14,41 @@ AIKernel.Abstractions から参照します。AIKernel.Wasm は browser /
 WebAssembly 実装を提供し、WASM runtime の関心事を Core や
 AIKernel.Providers に逆流させません。
 
+AIOS SDK において、AIKernel.Wasm は sandboxed runtime layer です。browser /
+WebAssembly process、isolated memory、WASI-style service、WebGPU boundary を
+扱う軽量 VM surface として、WASM sandbox が必要な AIOS distribution に追加します。
+
+AIKernel には、公式 AIOS ディストリビューションである **AIKernel.Monolith** もあります。
+Monolith は 0.1.x 系の安定化後に、sandboxed runtime layer をより広い SDK と
+統合する標準 AIOS として開発が開始されています。
+
 ## Package
 
 - `AIKernel.Wasm.Runtime`
 - `AIKernel.Wasm.WebGpuComputeProvider`
 - `aikernel-wasm`
+
+## クイックスタート
+
+host が必要とする package surface だけを導入してください。runtime test と CPU fallback
+path は Windows / Linux で検証できます。実 browser WebGPU validation は、別の
+manual check として扱います。
+
+```bash
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.1
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1
+```
+
+Python host:
+
+```bash
+pip install aikernel-wasm
+```
+
+process、memory、stdin、file system、event、audio、screenshot、save-state、
+time Provider を使う場合は `AIKernel.Wasm.Runtime` を導入してください。
+WebGPU compute boundary が必要な host だけ
+`AIKernel.Wasm.WebGpuComputeProvider` を追加します。
 
 ## Documentation
 
