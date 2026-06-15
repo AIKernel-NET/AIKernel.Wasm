@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.Models</Title>
+    <PackageId>AIKernel.Wasm.Models</PackageId>
+    <Description>EN: AIKernel WASM model execution package for descriptor-driven WebGPU resident model boundaries.
+
+JA: descriptor-driven な WebGPU resident model 境界を提供する AIKernel WASM model execution package です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Common" Version="[$(AIKernelCorePackageVersion)]" />
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Compute\WebGpuComputeProvider\WebGpuComputeProvider.csproj" />
+    <ProjectReference Include="..\..\Runtime\AIKernel.Wasm.Runtime\AIKernel.Wasm.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="webgpu-model.provider.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="providers\" />
+  </ItemGroup>
+</Project>

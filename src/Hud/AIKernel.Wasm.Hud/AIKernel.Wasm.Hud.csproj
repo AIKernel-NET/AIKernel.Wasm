@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.Hud</Title>
+    <PackageId>AIKernel.Wasm.Hud</PackageId>
+    <Description>EN: AIKernel WASM HUD package for signal and overlay annotation DTO generation without rendering.
+
+JA: rendering を行わず signal / overlay annotation DTO を生成する AIKernel WASM HUD package です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Runtime\AIKernel.Wasm.Runtime\AIKernel.Wasm.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wasm-hud.provider.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="providers\" />
+  </ItemGroup>
+</Project>

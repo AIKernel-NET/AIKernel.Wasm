@@ -2,17 +2,13 @@
 
 [日本語](index-ja.md)
 
-`aikernel-wasm` exposes the public AIKernel.Wasm C# surface to Python through a
-thin pythonnet wrapper.
+`aikernel-wasm` is reference-only material for exposing the public
+AIKernel.Wasm C# surface to Python through a thin pythonnet wrapper.
 
-## Package
+## Package Policy
 
-```bash
-pip install aikernel-wasm
-```
-
-During local development, run tests with the package source on `PYTHONPATH` or
-install the package in editable mode.
+The 0.1.1.1 update line is NuGet-only. Do not build, install, or publish
+`aikernel-wasm` as a PyPI package for this line.
 
 ## Import Surface
 
@@ -38,7 +34,8 @@ from aikernel_wasm import (
 
 ## Managed Assembly Resolution
 
-Assemblies are resolved in this order:
+If a future Python release is scheduled, assemblies should be resolved in this
+order:
 
 1. bundled files under `aikernel_wasm/native`
 2. repository Release build output during local development
@@ -50,7 +47,7 @@ If a required assembly is missing, the wrapper fails closed with a clear
 
 ## Contract Coverage
 
-Python covers:
+The reference material covers:
 
 - runtime provider descriptors
 - runtime provider construction wrappers

@@ -1,4 +1,4 @@
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 /// <summary>
 /// [EN] Python bridge that exposes the public WebGPU compute provider contract surface.

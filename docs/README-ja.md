@@ -3,8 +3,8 @@
 [English](README.md)
 
 AIKernel.Wasm は AIKernel の browser / WebAssembly runtime layer です。WASM
-process execution、WebGPU compute、browser 境界の runtime service、Python
-wrapper coverage を Core や host 側 Providers から分離します。
+process execution、WebGPU compute、browser 境界の runtime service を Core や
+host 側 Providers から分離します。
 
 この docs は、AIOS SDK の sandboxed runtime layer として Wasm を説明します。
 browser / WebAssembly process、isolated memory、WASI-style service、WebGPU
@@ -14,6 +14,17 @@ boundary を扱う軽量 VM surface として機能します。
 Monolith は 0.1.x 系の安定化後に WASM sandbox を kernel runtime、providers、
 control、tools と統合する標準 reference distribution として位置づけられます。
 
+## リポジトリ横断整合
+
+共有の repository boundary、0.1.1.1 local NuGet versioning、この更新ラインでの
+NuGet-only / no-PyPI rule は
+[AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1-ja.md)
+で定義します。
+
+Wasm は browser/WebAssembly execution、WebGPU/WebAudio、display、input、
+perception、spatial、HUD、runtime surface を所有します。Doom semantics、
+Providers substrate ownership、Gate/CTG decision は所有しません。
+
 ## Sections
 
 - [Getting Started](getting-started/index-ja.md)
@@ -22,6 +33,8 @@ control、tools と統合する標準 reference distribution として位置づ�
 - [Provider Catalog](providers/index-ja.md)
 - [Runtime Providers](runtime/index-ja.md)
 - [WebGPU Compute](webgpu/index-ja.md)
+- [Concept Elevation Notes](development/concept-elevation.md) /
+  [概念昇格ノート](development/concept-elevation-ja.md)
 - [Manifests and Metadata](manifests/index-ja.md)
 - [Python Wrapper](python/index-ja.md)
 - [Testing](testing/index-ja.md)
@@ -53,15 +66,23 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.1 は AIKernel.Wasm の初回公開 package line です。次を提供します。
+Version 0.1.1.1 は現在の NuGet-only development line です。local package
+reference には `0.1.1.1-dev{build-number}` を使います。次を提供します。
 
 - `AIKernel.Wasm.Runtime`
-- `WebGpuComputeProvider`
-- `aikernel-wasm` Python wrapper
+- `AIKernel.Wasm.Audio`
+- `AIKernel.Wasm.Display`
+- `AIKernel.Wasm.Input`
+- `AIKernel.Wasm.WebGpuComputeProvider`
 - WASM process、memory、stdin、file system、event、audio、screenshot、
   save-state、time Provider surface
+- browser audio、frame-source、framebuffer、分解済み virtual input の
+  boundary surface
 - `AIKernel.Providers.Standard` 経由の deterministic CPU fallback 付き
   WebGPU compute
+
+Python wrapper 関連資料は、この update line では reference-only です。0.1.1.1
+では PyPI package として build / install / publish しません。
 
 AIKernel.Wasm は AIKernel Core contract と Providers.Standard fallback driver に
 依存しますが、browser / WASM 固有の実装責務を Core へ戻しません。

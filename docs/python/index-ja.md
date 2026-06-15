@@ -3,16 +3,12 @@
 [English](index.md)
 
 `aikernel-wasm` は public な AIKernel.Wasm C# surface を薄い pythonnet wrapper
-として Python へ公開します。
+として Python へ公開するための reference-only 資料です。
 
-## Package
+## Package Policy
 
-```bash
-pip install aikernel-wasm
-```
-
-local development では、package source を `PYTHONPATH` に追加するか editable mode
-で install して test します。
+0.1.1.1 update line は NuGet-only です。この line では `aikernel-wasm` を PyPI
+package として build / install / publish しません。
 
 ## Import Surface
 
@@ -38,7 +34,7 @@ from aikernel_wasm import (
 
 ## Managed Assembly Resolution
 
-Assembly は次の順で解決されます。
+将来 Python release が予定された場合、Assembly は次の順で解決します。
 
 1. `aikernel_wasm/native` 配下の同梱 file
 2. local development 中の repository Release build output
@@ -50,7 +46,7 @@ fail-closed します。
 
 ## Contract Coverage
 
-Python が網羅する範囲:
+reference material が網羅する範囲:
 
 - runtime provider descriptor
 - runtime provider construction wrapper

@@ -1,4 +1,4 @@
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 using AIKernel.Abstractions.Compute;
 using System.Runtime.InteropServices;
@@ -58,7 +58,7 @@ internal sealed class NullWebGpuBackend : IWebGpuBackend
 /// [EN] Native WebGPU backend adapter for host-side bindings.
 /// [JA] host-side binding 向けの native WebGPU backend adapter です。
 /// </summary>
-public sealed class WebGpuNativeBackend : IWebGpuBackend
+public class WebGpuNativeBackend : IWebGpuBackend
 {
     /// <summary>[EN] Returns whether the native backend is available. [JA] native backend が利用可能かどうかを返します。</summary>
     public bool IsAvailable { get; private set; }
@@ -92,7 +92,7 @@ public sealed class WebGpuNativeBackend : IWebGpuBackend
 /// [EN] Browser/WASM WebGPU backend adapter for JavaScript interop.
 /// [JA] JavaScript interop 向けの browser/WASM WebGPU backend adapter です。
 /// </summary>
-public sealed class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend
+public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend
 {
     private readonly IWebGpuJsInterop? _jsInterop = jsInterop;
     private readonly Dictionary<ComputeBuffer, byte[]> _buffers = new();
@@ -217,7 +217,7 @@ public interface IWebGpuJsInterop
 /// [EN] In-memory handle representing a WASM WebGPU buffer.
 /// [JA] WASM WebGPU buffer を表す in-memory handle です。
 /// </summary>
-public sealed class WebGpuWasmBuffer
+public class WebGpuWasmBuffer
 {
     /// <summary>
     /// [EN] Initializes a WASM WebGPU buffer handle.

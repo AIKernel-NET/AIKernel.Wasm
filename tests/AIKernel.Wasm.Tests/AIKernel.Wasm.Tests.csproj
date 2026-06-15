@@ -18,7 +18,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Audio\AIKernel.Wasm.Audio\AIKernel.Wasm.Audio.csproj" />
+    <ProjectReference Include="..\..\src\Display\AIKernel.Wasm.Display\AIKernel.Wasm.Display.csproj" />
+    <ProjectReference Include="..\..\src\Hud\AIKernel.Wasm.Hud\AIKernel.Wasm.Hud.csproj" />
+    <ProjectReference Include="..\..\src\Input\AIKernel.Wasm.Input\AIKernel.Wasm.Input.csproj" />
+    <ProjectReference Include="..\..\src\Models\AIKernel.Wasm.Models\AIKernel.Wasm.Models.csproj" />
+    <ProjectReference Include="..\..\src\Perception\AIKernel.Wasm.Perception\AIKernel.Wasm.Perception.csproj" />
     <ProjectReference Include="..\..\src\Runtime\AIKernel.Wasm.Runtime\AIKernel.Wasm.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Spatial\AIKernel.Wasm.Spatial\AIKernel.Wasm.Spatial.csproj" />
   </ItemGroup>
 
   <ItemGroup>

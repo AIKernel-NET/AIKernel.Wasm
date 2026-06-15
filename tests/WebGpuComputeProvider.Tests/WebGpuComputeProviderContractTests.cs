@@ -2,7 +2,7 @@ using AIKernel.Dtos.Capabilities;
 using AIKernel.Enums;
 using AIKernel.Abstractions.Compute;
 using AIKernel.Providers.Standard.EventBus;
-using AIKernel.Wasm.Comput;
+using AIKernel.Wasm.Compute;
 using System.Runtime.InteropServices;
 
 namespace AIKernel.Wasm.Tests;
@@ -38,7 +38,7 @@ public sealed class WebGpuComputeProviderContractTests
     [Fact]
     public void Provider_DefaultIdentityMatchesWasmManifest()
     {
-        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider();
+        var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider();
 
         Assert.Equal("webgpu.compute", provider.ProviderId);
         Assert.True(provider.GetCapabilities().SupportsOperation("compute.dispatch"));
@@ -47,7 +47,7 @@ public sealed class WebGpuComputeProviderContractTests
     [Fact]
     public async Task Provider_LifecycleAndCapabilitiesRemainContractPure()
     {
-        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider(new WebGpuComputeSettings
+        var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider(new WebGpuComputeSettings
         {
             ProviderId = "providers.webgpu",
             ForceCpuFallback = true
@@ -70,7 +70,7 @@ public sealed class WebGpuComputeProviderContractTests
     public async Task CpuFallback_VectorAdd1000ElementsMatchesExpected()
     {
         const int count = 1000;
-        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider(new WebGpuComputeSettings
+        var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider(new WebGpuComputeSettings
         {
             ForceCpuFallback = true
         });
@@ -99,7 +99,7 @@ public sealed class WebGpuComputeProviderContractTests
     public async Task GpuRequested_UsesCpuFallbackWhenBackendUnavailableAndMatchesExpected()
     {
         const int count = 1000;
-        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider(new WebGpuComputeSettings
+        var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider(new WebGpuComputeSettings
         {
             ForceCpuFallback = false
         });
@@ -128,7 +128,7 @@ public sealed class WebGpuComputeProviderContractTests
     public async Task WasmBackend_WhenInteropAvailable_ExecutesVectorAddPipeline()
     {
         const int count = 4;
-        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider(
+        var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider(
             new WebGpuComputeSettings { ForceCpuFallback = false },
             new WebGpuWasmBackend(new FakeWebGpuJsInterop()));
         var left = new[] { 1.0f, 2.0f, 3.0f, 4.0f };
@@ -161,7 +161,7 @@ public sealed class WebGpuComputeProviderContractTests
             return Task.CompletedTask;
         });
 
-        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider(
+        var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider(
             new WebGpuComputeSettings { ForceCpuFallback = true },
             eventBus: eventBus);
         using var left = await provider.CreateBufferAsync(sizeof(float));
@@ -178,7 +178,7 @@ public sealed class WebGpuComputeProviderContractTests
     [Fact]
     public async Task BufferSizeMismatch_Throws()
     {
-        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider();
+        var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider();
         using var buffer = await provider.CreateBufferAsync(4);
 
         await Assert.ThrowsAsync<ArgumentException>(
@@ -230,6 +230,15 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal(
             ["adapter_profile", "backend", "fallback", "version"],
             settings.ToMetadata().Keys.ToArray());
+    }
+
+    [Fact]
+    public void CompatibilityNamespace_DefaultProvider_RemainsAvailable()
+    {
+        var provider = new global::AIKernel.Wasm.Comput.WebGpuComputeProvider();
+
+        Assert.Equal("webgpu.compute", provider.ProviderId);
+        Assert.True(provider.GetCapabilities().SupportsOperation("compute.dispatch"));
     }
 
     private sealed class FakeWebGpuJsInterop : IWebGpuJsInterop

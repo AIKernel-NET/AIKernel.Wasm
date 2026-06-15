@@ -27,8 +27,15 @@ line stabilizes.
 ## Package
 
 - `AIKernel.Wasm.Runtime`
+- `AIKernel.Wasm.Audio`
+- `AIKernel.Wasm.Display`
+- `AIKernel.Wasm.Input`
 - `AIKernel.Wasm.WebGpuComputeProvider`
-- `aikernel-wasm`
+
+AIKernel.Wasm 0.1.1.1 follows the same development policy as AIKernel.Core,
+AIKernel.Control, and AIKernel.Providers 0.1.1.1. The line is NuGet-only, uses
+`0.1.1.1-dev{build-number}` for local development packages, and does not create
+or publish a PyPI package.
 
 ## Quick Start
 
@@ -37,20 +44,22 @@ paths work on Windows and Linux; real browser WebGPU validation remains a
 separate manual check.
 
 ```bash
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1
-```
-
-For Python hosts:
-
-```bash
-pip install aikernel-wasm
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.1.1
+dotnet add package AIKernel.Wasm.Audio --version 0.1.1.1
+dotnet add package AIKernel.Wasm.Display --version 0.1.1.1
+dotnet add package AIKernel.Wasm.Input --version 0.1.1.1
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1.1
 ```
 
 Use `AIKernel.Wasm.Runtime` for process, memory, stdin, file system, event,
-audio, screenshot, save-state, and time providers. Add
-`AIKernel.Wasm.WebGpuComputeProvider` only when the host needs the WebGPU
-compute boundary.
+save-state, and time providers. Add `AIKernel.Wasm.Audio`,
+`AIKernel.Wasm.Display`, and `AIKernel.Wasm.Input` when the host needs the
+browser audio boundary, frame surfaces, or virtual input boundary. Add
+`AIKernel.Wasm.WebGpuComputeProvider` only when the host needs the WebGPU compute
+boundary.
+
+Python materials in `python/` are reference-only for this update line. Do not
+build, install, or publish a PyPI package for 0.1.1.1.
 
 ## Documentation
 
@@ -60,6 +69,8 @@ compute boundary.
 - [Provider Catalog](docs/providers/index.md)
 - [Runtime Providers](docs/runtime/index.md)
 - [WebGPU Compute](docs/webgpu/index.md)
+- [Concept Elevation Notes](docs/development/concept-elevation.md) /
+  [概念昇格ノート](docs/development/concept-elevation-ja.md)
 - [Manifests and Metadata](docs/manifests/index.md)
 - [Python Wrapper](docs/python/index.md)
 - [Testing](docs/testing/index.md)
@@ -106,6 +117,17 @@ The current runtime model is deterministic and testable on Windows and Linux.
 Browser-specific host bindings can be supplied at the boundary without changing
 the Core contracts.
 
+## Browser Boundary Packages
+
+`AIKernel.Wasm.Audio`, `AIKernel.Wasm.Display`, and `AIKernel.Wasm.Input` split
+browser-facing runtime surfaces from the base runtime package:
+
+- `WasmAudioProvider` keeps WebAudio interop behind the audio boundary.
+- `WasmFramebufferProvider` and `WasmFrameSourceProvider` expose frame snapshots
+  with frame index, hash, timestamp, dimensions, and pixel format metadata.
+- `WasmInputProvider` accepts decomposed keyboard, pointer, drag, and state
+  requests without creating Gate or Council decisions.
+
 ## WebGPU Compute
 
 `WebGpuComputeProvider` lives under `src/Compute/WebGpuComputeProvider` and
@@ -132,19 +154,20 @@ publishes `GpuKernelExecuted` when an `IEventBus` is supplied.
 
 ## Python Wrapper
 
-`python/` contains the `aikernel-wasm` Python package. It exposes the public
-WASM runtime providers and WebGPU compute provider through pythonnet as a thin
-managed wrapper:
+`python/` contains reference-only `aikernel-wasm` Python wrapper materials. They
+document how the public WASM runtime providers and WebGPU compute provider may
+be exposed through pythonnet as a thin managed wrapper:
 
 - `WasmRuntime`, `WasmRuntimeContext`
 - `WasmProcessProvider`, `WasmMemoryProvider`, `WasmStdinProvider`
 - `WasmFileSystemProvider`, `WasmEventProvider`, `WasmAudioProvider`
 - `WasmScreenshotProvider`, `WasmSaveStateProvider`, `WasmTimeProvider`
+- `WasmFramebufferProvider`, `WasmFrameSourceProvider`, `WasmInputProvider`
 - `WebGpuComputeProvider`, `WebGpuComputeInvoker`, `WebGpuComputeCapability`
 
-The wrapper does not re-implement WASM runtime semantics in Python. It resolves
-bundled assemblies from `aikernel_wasm/native` or local NuGet packages and can
-use `AIKERNEL_WASM_ASSEMBLY_PATH` for additional assembly roots.
+The wrapper does not re-implement WASM runtime semantics in Python. In the
+0.1.1.1 development line these materials are not built, installed, or published
+as a PyPI package.
 
 ## Control Integration
 

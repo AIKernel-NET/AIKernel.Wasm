@@ -9,16 +9,14 @@ Use this checklist before publishing AIKernel.Wasm packages.
 ```powershell
 dotnet build AIKernel.Wasm.slnx -c Release -p:WarningsAsErrors=1591
 dotnet test AIKernel.Wasm.slnx -c Release --no-build
-py -m compileall python/src
-py -c "import sys, pytest; sys.path[:0]=['python/src']; raise SystemExit(pytest.main(['python/tests']))"
 ```
 
 Success criteria:
 
 - no XML documentation warnings for public C# members
 - all runtime tests pass
+- all audio, display, input, and concept-elevation boundary tests pass
 - all WebGPU provider tests pass
-- Python wrapper imports compile and pass tests
 
 ## Package Metadata
 
@@ -33,14 +31,8 @@ Check NuGet package metadata:
 - README inclusion
 - release notes
 
-Check Python package metadata:
-
-- package name: `aikernel-wasm`
-- version
-- license
-- project URLs
-- README
-- typed package marker: `py.typed`
+For the 0.1.1.1 line, Python wrapper materials are reference-only. Do not build,
+install, or publish a PyPI package.
 
 ## Documentation
 
@@ -50,8 +42,10 @@ Required documentation:
 - docs index in English and Japanese
 - architecture guide
 - runtime provider guide
+- browser boundary provider guide for audio, display, and input
 - WebGPU guide
-- Python wrapper guide
+- concept elevation notes
+- Python wrapper reference guide
 - testing guide
 - licensing guide
 - manifest and metadata guide
@@ -64,7 +58,7 @@ driver, adapter, and platform state.
 
 ## Safety Checks
 
-Before release, scan docs and Python sources for:
+Before release, scan docs and reference Python sources for:
 
 - stale capability IDs
 - temporary or incomplete wording

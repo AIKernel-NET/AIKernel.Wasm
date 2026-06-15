@@ -2,6 +2,28 @@
 
 [English](RELEASE_NOTES.md)
 
+## 0.1.1.1
+
+**June 2026 - Local development alignment.**
+
+AIKernel.Wasm は AIKernel.Core / AIKernel.Control / AIKernel.Providers
+0.1.1.1 と同じ開発方針へ揃えます。
+
+- Wasm package family を `0.1.1.1` に設定しました。
+- local development package versioning を `0.1.1.1-dev{build-number}` 形式に
+  揃えました。
+- AIKernel.NET contract package は `0.1.1.1` を参照します。
+- AIKernel.Core は local `0.1.1.1-dev1` package family を参照します。
+- AIKernel.Providers は local `0.1.1.1-dev2` package family を参照します。
+- audio、display/frame capture、分解済み virtual input 向けに WASM owned の
+  browser boundary package を追加しました。
+- canonical WebGPU namespace を `AIKernel.Wasm.Compute` に補正しつつ、
+  `AIKernel.Wasm.Comput` の互換 wrapper を維持しました。
+- Aisthesis、Phantasia、Chronos、Kairos を facade vocabulary に限定する
+  concept-elevation architecture guard を追加しました。
+- この update line は NuGet-only です。Python wrapper 関連資料は
+  reference-only とし、PyPI package として build / install / publish しません。
+
 ## 0.1.1
 
 **June 10th, 2026 - Activating the WASM runtime surface.**

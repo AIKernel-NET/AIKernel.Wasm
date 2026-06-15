@@ -50,10 +50,6 @@ surface を公開します。host file-system write は直接実行しません�
 
 `WasmEventProvider` は WASM 起点 event を AIKernel `IEventBus` へ bridge します。
 
-### WasmAudioProvider
-
-`WasmAudioProvider` は browser / WebAudio bridge 向けの audio buffer byte を保持します。
-
 ### WasmScreenshotProvider
 
 `WasmScreenshotProvider` は capture / diagnostic flow 向けに framebuffer byte を返します。
@@ -66,6 +62,30 @@ surface を公開します。host file-system write は直接実行しません�
 
 `WasmTimeProvider` は pause、resume、scale、tick operation を通じて deterministic
 runtime time を制御します。
+
+## Browser Boundary Provider
+
+### WasmAudioProvider
+
+`WasmAudioProvider` は runtime audio byte を保持し、任意の `IWebAudioJsInterop` を
+`AIKernel.Wasm.Audio` の背後に閉じます。public API は platform audio SDK 型ではなく、
+neutral な buffer / timing record を使います。
+
+### WasmFramebufferProvider
+
+`WasmFramebufferProvider` は現在の runtime framebuffer を、width、height、stride、
+pixel format、observed timestamp、content hash metadata とともに公開します。
+
+### WasmFrameSourceProvider
+
+`WasmFrameSourceProvider` は WASM runtime surface 向けの frame capture と
+virtual surface listing を実装します。
+
+### WasmInputProvider
+
+`WasmInputProvider` は keyboard、pointer、drag、gamepad、input-state request に
+分解された virtual input を受け取ります。virtual input packet を記録し runtime event
+を publish しますが、Council vote や Gate decision は出力しません。
 
 ## WebGPU Provider
 
@@ -84,7 +104,8 @@ runtime time を制御します。
 Provider は `compute.dispatch` と `compute.vector_add` を持つ `webgpu.compute` を
 公開します。
 
-## Python Coverage
+## Python Reference
 
-`aikernel-wasm` Python package は、この catalog のすべての Provider に対する
-wrapper と descriptor を公開します。Provider logic は再実装しません。
+`aikernel-wasm` 関連資料は 0.1.1.1 line では reference-only です。Provider logic
+を再実装せずに wrapper / descriptor を公開する方法を示しますが、この line では
+PyPI package として build / install / publish しません。

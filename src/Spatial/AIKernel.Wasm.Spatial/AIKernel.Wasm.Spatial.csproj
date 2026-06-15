@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.Spatial</Title>
+    <PackageId>AIKernel.Wasm.Spatial</PackageId>
+    <Description>EN: AIKernel WASM spatial cognition package for scenario-independent visual and auditory perception composition.
+
+JA: scenario 非依存の visual / auditory perception composition を提供する AIKernel WASM spatial cognition package です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Perception\AIKernel.Wasm.Perception\AIKernel.Wasm.Perception.csproj" />
+    <ProjectReference Include="..\..\Runtime\AIKernel.Wasm.Runtime\AIKernel.Wasm.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wasm-spatial.provider.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="providers\" />
+  </ItemGroup>
+</Project>

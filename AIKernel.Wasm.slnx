@@ -1,9 +1,30 @@
 <Solution>
+  <Folder Name="/src/Audio/">
+    <Project Path="src/Audio/AIKernel.Wasm.Audio/AIKernel.Wasm.Audio.csproj" />
+  </Folder>
   <Folder Name="/src/Compute/">
     <Project Path="src/Compute/WebGpuComputeProvider/WebGpuComputeProvider.csproj" />
   </Folder>
+  <Folder Name="/src/Display/">
+    <Project Path="src/Display/AIKernel.Wasm.Display/AIKernel.Wasm.Display.csproj" />
+  </Folder>
+  <Folder Name="/src/Input/">
+    <Project Path="src/Input/AIKernel.Wasm.Input/AIKernel.Wasm.Input.csproj" />
+  </Folder>
+  <Folder Name="/src/Hud/">
+    <Project Path="src/Hud/AIKernel.Wasm.Hud/AIKernel.Wasm.Hud.csproj" />
+  </Folder>
+  <Folder Name="/src/Models/">
+    <Project Path="src/Models/AIKernel.Wasm.Models/AIKernel.Wasm.Models.csproj" />
+  </Folder>
+  <Folder Name="/src/Perception/">
+    <Project Path="src/Perception/AIKernel.Wasm.Perception/AIKernel.Wasm.Perception.csproj" />
+  </Folder>
   <Folder Name="/src/Runtime/">
     <Project Path="src/Runtime/AIKernel.Wasm.Runtime/AIKernel.Wasm.Runtime.csproj" />
+  </Folder>
+  <Folder Name="/src/Spatial/">
+    <Project Path="src/Spatial/AIKernel.Wasm.Spatial/AIKernel.Wasm.Spatial.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/AIKernel.Wasm.Tests/AIKernel.Wasm.Tests.csproj" />

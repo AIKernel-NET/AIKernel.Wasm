@@ -19,6 +19,8 @@ execution:
 - WASM module loading and runtime context state
 - deterministic linear memory and save-state handling
 - stdin, file, event, audio, screenshot, and time services for WASM processes
+- browser audio, framebuffer, frame-source, and decomposed virtual input
+  boundary packages
 - browser/WebGPU backend integration
 - process lifecycle mapping to Core `IProcess` / `IProcessHost`
 
@@ -69,6 +71,12 @@ AIKernel.Wasm/
   src/
     Runtime/
       AIKernel.Wasm.Runtime/
+    Audio/
+      AIKernel.Wasm.Audio/
+    Display/
+      AIKernel.Wasm.Display/
+    Input/
+      AIKernel.Wasm.Input/
     Compute/
       WebGpuComputeProvider/
   python/

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.Audio</Title>
+    <PackageId>AIKernel.Wasm.Audio</PackageId>
+    <Description>EN: AIKernel WASM audio package for runtime audio buffers and WebAudio boundary contracts.
+
+JA: runtime audio buffer と WebAudio boundary contract を提供する AIKernel WASM audio package です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Runtime\AIKernel.Wasm.Runtime\AIKernel.Wasm.Runtime.csproj" />
+  </ItemGroup>
+</Project>

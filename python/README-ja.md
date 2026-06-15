@@ -1,8 +1,8 @@
 # aikernel-wasm
 
-AIKernel.Wasm runtime と WebGPU Provider の public surface を公開する Python
-wrapper です。C# の契約境界を pythonnet 経由で公開し、WASM runtime semantics
-は Python 側で再実装しません。
+AIKernel.Wasm runtime と WebGPU Provider の public surface を公開するための
+reference-only Python wrapper 資料です。0.1.1.1 update line は NuGet-only です。
+この directory を PyPI package として build / install / publish しません。
 
 ```python
 from aikernel_wasm import (
@@ -33,6 +33,6 @@ process_provider = WasmProcessProvider.create()
 - `WebGpuComputeInvoker`
 - `WebGpuComputeCapabilityContracts`
 
-managed assembly は `aikernel_wasm/native` に同梱するか、NuGet/local package
-cache から解決します。追加の assembly 探索 root は
+将来の Python release では、managed assembly を `aikernel_wasm/native` に同梱するか、
+NuGet/local package cache から解決します。追加の assembly 探索 root は
 `AIKERNEL_WASM_ASSEMBLY_PATH` で指定できます。

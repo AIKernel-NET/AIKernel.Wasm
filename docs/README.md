@@ -3,8 +3,8 @@
 [日本語](README-ja.md)
 
 AIKernel.Wasm is the browser/WebAssembly runtime layer for AIKernel. It keeps
-WASM process execution, WebGPU compute, browser-bound runtime services, and
-Python wrapper coverage outside Core and host-side Providers.
+WASM process execution, WebGPU compute, and browser-bound runtime services
+outside Core and host-side Providers.
 
 These docs describe Wasm as the AIOS SDK sandboxed runtime layer. It acts as a
 lightweight VM surface for browser/WebAssembly processes, isolated memory,
@@ -14,6 +14,16 @@ AIKernel.Monolith is the official AIOS distribution now in development. It is
 planned as the standard reference distribution that integrates the WASM sandbox
 with kernel runtime, providers, control, and tools after the 0.1.x line stabilizes.
 
+## Cross-Repository Alignment
+
+Shared repository boundaries, 0.1.1.1 local NuGet versioning, and the
+NuGet-only / no-PyPI rule for this update line are defined by
+[AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1.md).
+
+Wasm owns browser/WebAssembly execution, WebGPU/WebAudio, display, input,
+perception, spatial, HUD, and runtime surfaces. It must not own Doom semantics,
+Providers substrate ownership, or Gate/CTG decisions.
+
 ## Sections
 
 - [Getting Started](getting-started/index.md)
@@ -22,6 +32,8 @@ with kernel runtime, providers, control, and tools after the 0.1.x line stabiliz
 - [Provider Catalog](providers/index.md)
 - [Runtime Providers](runtime/index.md)
 - [WebGPU Compute](webgpu/index.md)
+- [Concept Elevation Notes](development/concept-elevation.md) /
+  [概念昇格ノート](development/concept-elevation-ja.md)
 - [Manifests and Metadata](manifests/index.md)
 - [Python Wrapper](python/index.md)
 - [Testing](testing/index.md)
@@ -53,15 +65,23 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.1 is the first public AIKernel.Wasm package line. It provides:
+Version 0.1.1.1 is the current NuGet-only development line. Use
+`0.1.1.1-dev{build-number}` for local package references. It provides:
 
 - `AIKernel.Wasm.Runtime`
-- `WebGpuComputeProvider`
-- `aikernel-wasm` Python wrapper
+- `AIKernel.Wasm.Audio`
+- `AIKernel.Wasm.Display`
+- `AIKernel.Wasm.Input`
+- `AIKernel.Wasm.WebGpuComputeProvider`
 - WASM process, memory, stdin, file system, event, audio, screenshot,
   save-state, and time provider surfaces
+- Browser audio, frame-source, framebuffer, and decomposed virtual input
+  boundary surfaces
 - WebGPU compute with deterministic CPU fallback through
   `AIKernel.Providers.Standard`
+
+Python wrapper materials are reference-only in this update line. Do not build,
+install, or publish a PyPI package for 0.1.1.1.
 
 AIKernel.Wasm depends on AIKernel Core contracts and Providers.Standard fallback
 drivers, but it does not move browser/WASM-specific implementation concerns

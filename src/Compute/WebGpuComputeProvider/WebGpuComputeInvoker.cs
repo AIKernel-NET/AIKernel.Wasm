@@ -2,13 +2,13 @@ using AIKernel.Abstractions.Capabilities;
 using AIKernel.Common.Results;
 using AIKernel.Dtos.Capabilities;
 
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 /// <summary>
 /// [EN] Capability module invoker for WebGPU compute provider operations.
 /// [JA] WebGPU compute Provider operation 用の capability module invoker です。
 /// </summary>
-public sealed class WebGpuComputeInvoker : ICapabilityModuleInvoker
+public class WebGpuComputeInvoker : ICapabilityModuleInvoker
 {
     /// <summary>
     /// [EN] Invokes a WebGPU compute capability operation.

@@ -4,6 +4,9 @@ from dataclasses import dataclass
 
 from .managed import ManagedObject, call_static, create_managed
 
+_WEBGPU_BRIDGE_TYPE = "AIKernel.Wasm.Compute.WebGpuComputePythonBridge"
+_WEBGPU_ASSEMBLY = "WebGpuComputeProvider"
+
 
 @dataclass(frozen=True)
 class CapabilityContract:
@@ -72,8 +75,8 @@ class WebGpuComputeCapability:
         """
         return CapabilityContract(
             call_static(
-                "AIKernel.Wasm.Comput.WebGpuComputePythonBridge",
-                "WebGpuComputeProvider",
+                _WEBGPU_BRIDGE_TYPE,
+                _WEBGPU_ASSEMBLY,
                 "ToContract",
                 self.provider_id,
                 self.adapter_profile,
@@ -93,7 +96,7 @@ class WebGpuComputeProvider(ManagedObject):
 
         [JA] managed WebGPU compute Provider を作成します。
         """
-        return cls(call_static("AIKernel.Wasm.Comput.WebGpuComputePythonBridge", "WebGpuComputeProvider", "CreateProvider"))
+        return cls(call_static(_WEBGPU_BRIDGE_TYPE, _WEBGPU_ASSEMBLY, "CreateProvider"))
 
 
 class WebGpuComputeInvoker(ManagedObject):
@@ -108,7 +111,7 @@ class WebGpuComputeInvoker(ManagedObject):
 
         [JA] managed WebGPU compute invoker を作成します。
         """
-        return cls(call_static("AIKernel.Wasm.Comput.WebGpuComputePythonBridge", "WebGpuComputeProvider", "CreateInvoker"))
+        return cls(call_static(_WEBGPU_BRIDGE_TYPE, _WEBGPU_ASSEMBLY, "CreateInvoker"))
 
 
 class WebGpuNativeBackend(ManagedObject):
@@ -123,7 +126,7 @@ class WebGpuNativeBackend(ManagedObject):
 
         [JA] native backend adapter を作成します。
         """
-        return cls(create_managed("AIKernel.Wasm.Comput.WebGpuNativeBackend", "WebGpuComputeProvider"))
+        return cls(create_managed("AIKernel.Wasm.Compute.WebGpuNativeBackend", _WEBGPU_ASSEMBLY))
 
 
 class WebGpuWasmBackend(ManagedObject):
@@ -138,4 +141,4 @@ class WebGpuWasmBackend(ManagedObject):
 
         [JA] WASM backend adapter を作成します。
         """
-        return cls(create_managed("AIKernel.Wasm.Comput.WebGpuWasmBackend", "WebGpuComputeProvider"))
+        return cls(create_managed("AIKernel.Wasm.Compute.WebGpuWasmBackend", _WEBGPU_ASSEMBLY))

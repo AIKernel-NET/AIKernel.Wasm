@@ -1,7 +1,7 @@
 using AIKernel.Dtos.Capabilities;
 using AIKernel.Enums;
 
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 /// <summary>
 /// [EN] Contract mapper for WebGPU compute provider capabilities.
