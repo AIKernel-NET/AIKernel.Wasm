@@ -13,15 +13,15 @@ public interface IWasmProcessProvider : IProcessHost
     /// [EN] Safely creates a WASM process handle.
     /// [JA] WASM process handle を安全に作成します。
     /// </summary>
-    /// <param name="name">
+    /// <param name="name">EN:  JA: name パラメーターです。
     /// [EN] Process name.
     /// [JA] process name です。
     /// </param>
-    /// <param name="args">
+    /// <param name="args">EN:  JA: args パラメーターです。
     /// [EN] Optional process options.
     /// [JA] 任意の process option です。
     /// </param>
-    /// <returns>
+    /// <returns>EN:  JA: 結果を返します。
     /// [EN] Process result.
     /// [JA] process result です。
     /// </returns>
@@ -31,15 +31,15 @@ public interface IWasmProcessProvider : IProcessHost
     /// [EN] Safely starts a named WASM process.
     /// [JA] 指定した WASM process を安全に開始します。
     /// </summary>
-    /// <param name="processName">
+    /// <param name="processName">EN:  JA: processName パラメーターです。
     /// [EN] Process name.
     /// [JA] process name です。
     /// </param>
-    /// <param name="cancellationToken">
+    /// <param name="cancellationToken">EN:  JA: cancellationToken パラメーターです。
     /// [EN] Cancellation token.
     /// [JA] cancellation token です。
     /// </param>
-    /// <returns>
+    /// <returns>EN:  JA: 結果を返します。
     /// [EN] Start result.
     /// [JA] start result です。
     /// </returns>
@@ -49,7 +49,7 @@ public interface IWasmProcessProvider : IProcessHost
     /// [EN] Returns currently created WASM processes.
     /// [JA] 現在作成済みの WASM process を返します。
     /// </summary>
-    /// <returns>
+    /// <returns>EN:  JA: 結果を返します。
     /// [EN] WASM process list.
     /// [JA] WASM process list です。
     /// </returns>

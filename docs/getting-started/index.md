@@ -67,4 +67,5 @@ The package line is:
 
 Version 0.1.1.1 is the current NuGet-only development line. Python wrapper
 materials remain reference-only and are not built, installed, or published as a
-PyPI package in this line.
+PyPI package in this line. Prepare refreshed Python wrapper packages for the
+next official v0.1.2 canonical series together with the NuGet package family.

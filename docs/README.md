@@ -16,9 +16,12 @@ with kernel runtime, providers, control, and tools after the 0.1.x line stabiliz
 
 ## Cross-Repository Alignment
 
-Shared repository boundaries, 0.1.1.1 local NuGet versioning, and the
-NuGet-only / no-PyPI rule for this update line are defined by
+Shared repository boundaries, 0.1.1.1 local NuGet versioning, the
+NuGet-only / no-PyPI rule for this validation line, and the v0.1.2
+NuGet + PyPI release assumption are defined by
 [AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1.md).
+When a change crosses repositories, start with the
+[Cross-Repository Developer Guide v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/cross-repository-developer-guide-v0.1.1.1.md).
 
 Wasm owns browser/WebAssembly execution, WebGPU/WebAudio, display, input,
 perception, spatial, HUD, and runtime surfaces. It must not own Doom semantics,
@@ -80,8 +83,10 @@ Version 0.1.1.1 is the current NuGet-only development line. Use
 - WebGPU compute with deterministic CPU fallback through
   `AIKernel.Providers.Standard`
 
-Python wrapper materials are reference-only in this update line. Do not build,
-install, or publish a PyPI package for 0.1.1.1.
+Python wrapper materials are reference-only in this validation line. Do not
+build, install, or publish a PyPI package for 0.1.1.1. Prepare refreshed
+Python wrapper packages for the next official v0.1.2 canonical series together
+with the NuGet packages.
 
 AIKernel.Wasm depends on AIKernel Core contracts and Providers.Standard fallback
 drivers, but it does not move browser/WASM-specific implementation concerns

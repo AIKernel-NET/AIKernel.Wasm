@@ -7,8 +7,10 @@ AIKernel.Wasm C# surface to Python through a thin pythonnet wrapper.
 
 ## Package Policy
 
-The 0.1.1.1 update line is NuGet-only. Do not build, install, or publish
-`aikernel-wasm` as a PyPI package for this line.
+The 0.1.1.1 validation line is NuGet-only. Do not build, install, or publish
+`aikernel-wasm` as a PyPI package for this line. Prepare the wrapper for the
+next official v0.1.2 canonical series, where synchronized NuGet and PyPI
+package families are expected.
 
 ## Import Surface
 
@@ -34,8 +36,8 @@ from aikernel_wasm import (
 
 ## Managed Assembly Resolution
 
-If a future Python release is scheduled, assemblies should be resolved in this
-order:
+For the next official v0.1.2 Python release line, assemblies should be resolved
+in this order:
 
 1. bundled files under `aikernel_wasm/native`
 2. repository Release build output during local development

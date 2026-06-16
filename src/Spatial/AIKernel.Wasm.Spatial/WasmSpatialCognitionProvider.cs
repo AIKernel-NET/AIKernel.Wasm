@@ -135,6 +135,8 @@ public sealed class WasmSpatialCognitionProvider : WasmKernelProviderBase, IWasm
 
         var projectionInput = MergeAuditoryEnergy(request.ProjectionInput, leftTotal, rightTotal, energyCount);
         var projection = WasmSpatialCognitionKernel.Project(in projectionInput);
+        var sensorInputs = CopySortedSensors(request.SensorInputs);
+        var retryIntent = ResolveRetryIntent(sensorInputs);
         signals.Add(CreateSignal(
             "spatial.visual_direction",
             "spatial.direction.visual",
@@ -179,7 +181,9 @@ public sealed class WasmSpatialCognitionProvider : WasmKernelProviderBase, IWasm
             ["fusedDirection"] = projection.FusedDirection.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture),
             ["hudX"] = projection.HudX.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture),
             ["hudY"] = projection.HudY.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture),
-            ["confidence"] = projection.Confidence.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)
+            ["confidence"] = projection.Confidence.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture),
+            ["sensorCount"] = sensorInputs.Count.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["retryRequested"] = (retryIntent?.Requested == true).ToString(System.Globalization.CultureInfo.InvariantCulture)
         };
         var hasPerception = request.VisualPerceptions.Count > 0 || request.AuditoryPerceptions.Count > 0;
 
@@ -190,6 +194,8 @@ public sealed class WasmSpatialCognitionProvider : WasmKernelProviderBase, IWasm
                 : request.RequestId,
             Succeeded = hasPerception,
             Signals = signals,
+            SensorInputs = sensorInputs,
+            RetryIntent = retryIntent,
             ErrorCode = hasPerception ? null : "WASM_SPATIAL_NO_PERCEPTION",
             ErrorMessage = hasPerception ? null : "Spatial cognition requires at least one perception result.",
             Diagnostics = hasPerception ? [] : ["WASM_SPATIAL_NO_PERCEPTION"],
@@ -223,6 +229,80 @@ public sealed class WasmSpatialCognitionProvider : WasmKernelProviderBase, IWasm
         items.Sort(static (left, right) => string.Compare(left.ObservationId, right.ObservationId, StringComparison.Ordinal));
         return items;
     }
+
+    private static IReadOnlyDictionary<string, WasmSensorStateDescriptor> CopySortedSensors(
+        IReadOnlyDictionary<string, WasmSensorStateDescriptor> source)
+    {
+        var copy = new SortedDictionary<string, WasmSensorStateDescriptor>(StringComparer.Ordinal);
+        foreach (var item in source.OrderBy(item => item.Key, StringComparer.Ordinal))
+        {
+            var name = NormalizeSensorName(item.Key);
+            var sensor = item.Value;
+            copy[name] = sensor with
+            {
+                Name = name,
+                ConceptName = string.IsNullOrWhiteSpace(sensor.ConceptName) ? ConceptName(name) : sensor.ConceptName,
+                EnglishName = string.IsNullOrWhiteSpace(sensor.EnglishName) ? name : sensor.EnglishName,
+                Category = string.IsNullOrWhiteSpace(sensor.Category)
+                    ? (name is "movement" or "spatial" ? "derived" : "primary")
+                    : sensor.Category,
+                Metadata = new Dictionary<string, string>(sensor.Metadata, StringComparer.Ordinal)
+            };
+        }
+
+        return new Dictionary<string, WasmSensorStateDescriptor>(copy, StringComparer.Ordinal);
+    }
+
+    private static WasmRetryIntentCarrier? ResolveRetryIntent(
+        IReadOnlyDictionary<string, WasmSensorStateDescriptor> sensorInputs)
+    {
+        if (!sensorInputs.TryGetValue("health", out var health) || !health.Enabled)
+        {
+            return null;
+        }
+
+        var likelyDead = TryMetadataBool(health.Metadata, "likelyDead", out var parsedLikelyDead) && parsedLikelyDead;
+        var zeroScore = TryMetadataDouble(health.Metadata, "zeroScore", out var parsedZeroScore)
+            ? Math.Clamp(parsedZeroScore, 0, 1)
+            : 0;
+        if (!likelyDead && zeroScore < 0.78)
+        {
+            return null;
+        }
+
+        return new WasmRetryIntentCarrier
+        {
+            Requested = true,
+            ReasonCode = "health-death",
+            Priority = 100,
+            Confidence = Math.Round(Math.Max(zeroScore, Math.Clamp(health.Confidence ?? 0, 0, 1)), 2, MidpointRounding.AwayFromZero),
+            SourceSensor = "health",
+            Metadata = new Dictionary<string, string>(health.Metadata, StringComparer.Ordinal)
+        };
+    }
+
+    private static string NormalizeSensorName(string name)
+    {
+        var normalized = StringComparer.OrdinalIgnoreCase.Equals(name, "vision")
+            ? "visual"
+            : StringComparer.OrdinalIgnoreCase.Equals(name, "auditory")
+                ? "audio"
+                : StringComparer.OrdinalIgnoreCase.Equals(name, "heading")
+                    || StringComparer.OrdinalIgnoreCase.Equals(name, "bearing")
+                        ? "compass"
+                        : name;
+        return normalized.Trim().ToLowerInvariant();
+    }
+
+    private static string ConceptName(string name)
+        => name switch
+        {
+            "visual" or "audio" => "Aisthesis",
+            "motor" or "movement" => "Kinesis",
+            "compass" or "spatial" => "Phantasia",
+            "health" => "Aisthesis",
+            _ => string.Empty
+        };
 
     private static List<WasmAuditoryPerceptionResult> CopySortedAuditory(IReadOnlyList<WasmAuditoryPerceptionResult> source)
     {
@@ -266,6 +346,16 @@ public sealed class WasmSpatialCognitionProvider : WasmKernelProviderBase, IWasm
                 System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture,
                 out value);
+    }
+
+    private static bool TryMetadataBool(
+        IReadOnlyDictionary<string, string> metadata,
+        string key,
+        out bool value)
+    {
+        value = false;
+        return metadata.TryGetValue(key, out var text)
+            && bool.TryParse(text, out value);
     }
 
     private static IReadOnlyList<ProviderCapability> Capabilities()

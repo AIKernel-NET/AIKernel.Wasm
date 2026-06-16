@@ -48,7 +48,8 @@ local development package では、shared local NuGet source の
 `0.1.1.1-dev1` と AIKernel.Providers `0.1.1.1-dev2` を参照します。
 
 Python wrapper 関連資料は 0.1.1.1 では reference-only です。この line では
-PyPI package として build / install / publish しません。
+PyPI package として build / install / publish しません。次の公式 v0.1.2 正典シリーズで
+NuGet と PyPI の package family を同期公開できるように準備します。
 
 ## Create a Runtime Context
 
@@ -273,7 +274,8 @@ Console.WriteLine(string.Join(", ", descriptor.ProvidedOperations));
 
 Python wrapper material は managed wrapper の reference です。Python 側で WASM
 execution や WebGPU logic を再実装せず、0.1.1.1 development line では PyPI
-package として配布しません。
+package として配布しません。次の公式 v0.1.2 正典シリーズでは、NuGet と合わせて
+更新済み PyPI package family を公開する前提です。
 
 ## Common Failure Modes
 

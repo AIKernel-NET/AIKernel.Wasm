@@ -31,8 +31,9 @@ Check NuGet package metadata:
 - README inclusion
 - release notes
 
-For the 0.1.1.1 line, Python wrapper materials are reference-only. Do not build,
-install, or publish a PyPI package.
+For the 0.1.1.1 validation line, Python wrapper materials are reference-only.
+Do not build, install, or publish a PyPI package. Prepare synchronized NuGet +
+PyPI package updates for the next official v0.1.2 canonical series.
 
 ## Documentation
 

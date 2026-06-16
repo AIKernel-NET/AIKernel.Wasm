@@ -25,6 +25,7 @@ public sealed class WasmRuntime : WasmProviderBase, IWasmRuntime, IDisposable
     public Task BootAsync(CancellationToken cancellationToken = default)
         => RequireSuccessAsync(TryBootAsync(cancellationToken));
 
+    /// <summary>EN: Documentation for public API. JA: TryBootAsync を実行します。</summary>
     /// <inheritdoc />
     public Task<Result<bool>> TryBootAsync(CancellationToken cancellationToken = default)
     {
@@ -37,6 +38,7 @@ public sealed class WasmRuntime : WasmProviderBase, IWasmRuntime, IDisposable
     public WasmRuntimeContext CreateContext(int initialMemoryBytes = 65536)
         => RequireSuccess(TryCreateContext(initialMemoryBytes));
 
+    /// <summary>EN: Documentation for public API. JA: TryCreateContext を実行します。</summary>
     /// <inheritdoc />
     public Result<WasmRuntimeContext> TryCreateContext(int initialMemoryBytes = 65536)
     {
@@ -52,6 +54,7 @@ public sealed class WasmRuntime : WasmProviderBase, IWasmRuntime, IDisposable
     public async Task<IProcess> CreateProcessAsync(string name, object? args = null)
         => RequireSuccess(await TryCreateProcessAsync(name, args).ConfigureAwait(false));
 
+    /// <summary>EN: Documentation for public API. JA: TryCreateProcessAsync を実行します。</summary>
     /// <inheritdoc />
     public Task<Result<IProcess>> TryCreateProcessAsync(string name, object? args = null)
     {

@@ -13,11 +13,11 @@ public interface IWasmRuntime : IProcessHost
     /// [EN] Safely boots the runtime.
     /// [JA] runtime を安全に boot します。
     /// </summary>
-    /// <param name="cancellationToken">
+    /// <param name="cancellationToken">EN:  JA: cancellationToken パラメーターです。
     /// [EN] Cancellation token.
     /// [JA] cancellation token です。
     /// </param>
-    /// <returns>
+    /// <returns>EN:  JA: 結果を返します。
     /// [EN] Boot result.
     /// [JA] boot result です。
     /// </returns>
@@ -27,11 +27,11 @@ public interface IWasmRuntime : IProcessHost
     /// [EN] Safely creates a runtime context.
     /// [JA] runtime context を安全に作成します。
     /// </summary>
-    /// <param name="initialMemoryBytes">
+    /// <param name="initialMemoryBytes">EN:  JA: initialMemoryBytes パラメーターです。
     /// [EN] Initial linear memory size.
     /// [JA] 初期 linear memory size です。
     /// </param>
-    /// <returns>
+    /// <returns>EN:  JA: 結果を返します。
     /// [EN] Runtime context result.
     /// [JA] runtime context result です。
     /// </returns>
@@ -41,15 +41,15 @@ public interface IWasmRuntime : IProcessHost
     /// [EN] Safely creates a WASM process.
     /// [JA] WASM process を安全に作成します。
     /// </summary>
-    /// <param name="name">
+    /// <param name="name">EN:  JA: name パラメーターです。
     /// [EN] Process name.
     /// [JA] process name です。
     /// </param>
-    /// <param name="args">
+    /// <param name="args">EN:  JA: args パラメーターです。
     /// [EN] Optional process options.
     /// [JA] 任意の process option です。
     /// </param>
-    /// <returns>
+    /// <returns>EN:  JA: 結果を返します。
     /// [EN] Process result.
     /// [JA] process result です。
     /// </returns>

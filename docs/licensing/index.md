@@ -21,7 +21,9 @@ The public package metadata should include:
 AIKernel.Wasm uses AIKernel contracts, Core runtime packages, and
 Providers.Standard CPU fallback. Browser WebGPU bindings are kept behind the
 `IWebGpuJsInterop` boundary. Python wrapper materials are reference-only for the
-0.1.1.1 line and are not packaged for PyPI.
+0.1.1.1 validation line and are not packaged for PyPI. The next official
+v0.1.2 canonical series is expected to publish refreshed PyPI packages together
+with NuGet.
 
 When adding new browser or native dependencies, keep license information visible
 in release notes and package metadata.

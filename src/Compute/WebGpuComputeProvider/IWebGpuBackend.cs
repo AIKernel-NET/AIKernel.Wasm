@@ -30,25 +30,53 @@ public interface IWebGpuBackend
 
 internal sealed class NullWebGpuBackend : IWebGpuBackend
 {
+    /// <summary>
+    /// EN: Executes Instance.
+    /// EN: Documentation for public API. JA: Instance を実行します。
+    /// </summary>
     public static readonly NullWebGpuBackend Instance = new();
 
     private NullWebGpuBackend()
     {
     }
+    /// <summary>
+    /// EN: Gets IsAvailable.
+    /// EN: Documentation for public API. JA: IsAvailable を取得します。
+    /// </summary>
 
     public bool IsAvailable => false;
+    /// <summary>
+    /// EN: Executes InitializeAsync.
+    /// EN: Documentation for public API. JA: InitializeAsync を実行します。
+    /// </summary>
 
     public Task InitializeAsync(CancellationToken cancellationToken = default)
         => Task.CompletedTask;
+    /// <summary>
+    /// EN: Executes CreateBufferAsync.
+    /// EN: Documentation for public API. JA: CreateBufferAsync を実行します。
+    /// </summary>
 
     public Task<object?> CreateBufferAsync(int size)
         => Task.FromResult<object?>(null);
+    /// <summary>
+    /// EN: Executes WriteBufferAsync.
+    /// EN: Documentation for public API. JA: WriteBufferAsync を実行します。
+    /// </summary>
 
     public Task WriteBufferAsync(ComputeBuffer buffer, ReadOnlyMemory<byte> data)
         => Task.CompletedTask;
+    /// <summary>
+    /// EN: Executes ReadBufferAsync.
+    /// EN: Documentation for public API. JA: ReadBufferAsync を実行します。
+    /// </summary>
 
     public Task ReadBufferAsync(ComputeBuffer buffer, Memory<byte> destination)
         => Task.CompletedTask;
+    /// <summary>
+    /// EN: Executes ExecuteKernelAsync.
+    /// EN: Documentation for public API. JA: ExecuteKernelAsync を実行します。
+    /// </summary>
 
     public Task ExecuteKernelAsync(ComputeKernel kernel, IReadOnlyList<ComputeBuffer> buffers)
         => throw new NotSupportedException("A WebGPU backend binding is not available.");

@@ -16,10 +16,13 @@ control、tools と統合する標準 reference distribution として位置づ�
 
 ## リポジトリ横断整合
 
-共有の repository boundary、0.1.1.1 local NuGet versioning、この更新ラインでの
-NuGet-only / no-PyPI rule は
+共有の repository boundary、0.1.1.1 local NuGet versioning、この検証ラインでの
+NuGet-only / no-PyPI rule、v0.1.2 の NuGet + PyPI release assumption は
 [AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1-ja.md)
 で定義します。
+複数 repository をまたぐ変更を行う場合は、まず
+[リポジトリ横断開発者ガイド v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/cross-repository-developer-guide-v0.1.1.1-ja.md)
+を読んでください。
 
 Wasm は browser/WebAssembly execution、WebGPU/WebAudio、display、input、
 perception、spatial、HUD、runtime surface を所有します。Doom semantics、
@@ -81,8 +84,9 @@ reference には `0.1.1.1-dev{build-number}` を使います。次を提供し�
 - `AIKernel.Providers.Standard` 経由の deterministic CPU fallback 付き
   WebGPU compute
 
-Python wrapper 関連資料は、この update line では reference-only です。0.1.1.1
-では PyPI package として build / install / publish しません。
+Python wrapper 関連資料は、この validation line では reference-only です。0.1.1.1
+では PyPI package として build / install / publish しません。次の公式 v0.1.2
+正典シリーズでは、NuGet package と合わせて Python wrapper package も更新する前提です。
 
 AIKernel.Wasm は AIKernel Core contract と Providers.Standard fallback driver に
 依存しますが、browser / WASM 固有の実装責務を Core へ戻しません。

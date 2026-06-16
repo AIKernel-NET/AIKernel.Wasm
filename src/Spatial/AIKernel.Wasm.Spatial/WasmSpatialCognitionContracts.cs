@@ -39,6 +39,10 @@ public sealed record WasmSpatialCognitionRequest
     /// <summary>[EN] Gets low-level projection input used by the WASM spatial kernel. [JA] WASM spatial kernel が使用する low-level projection input を取得します。</summary>
     public WasmSpatialProjectionInput ProjectionInput { get; init; } = new();
 
+    /// <summary>[EN] Gets named sensor inputs for extensible spatial fusion. [JA] 拡張可能な spatial fusion 用の名前付き sensor input を取得します。</summary>
+    public IReadOnlyDictionary<string, WasmSensorStateDescriptor> SensorInputs { get; init; } =
+        new Dictionary<string, WasmSensorStateDescriptor>(StringComparer.Ordinal);
+
     /// <summary>[EN] Gets request metadata. [JA] request metadata を取得します。</summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } =
         new Dictionary<string, string>(StringComparer.Ordinal);
@@ -137,6 +141,13 @@ public sealed record WasmSpatialCognitionSnapshot
     /// <summary>[EN] Gets composed spatial signals. [JA] 合成された spatial signal を取得します。</summary>
     public IReadOnlyList<WasmSpatialSignal> Signals { get; init; } = [];
 
+    /// <summary>[EN] Gets normalized sensor inputs used by spatial cognition. [JA] spatial cognition で使用した正規化済み sensor input を取得します。</summary>
+    public IReadOnlyDictionary<string, WasmSensorStateDescriptor> SensorInputs { get; init; } =
+        new Dictionary<string, WasmSensorStateDescriptor>(StringComparer.Ordinal);
+
+    /// <summary>[EN] Gets an optional retry intent carrier emitted by priority sensors. [JA] 優先 sensor が出力した任意の retry intent carrier を取得します。</summary>
+    public WasmRetryIntentCarrier? RetryIntent { get; init; }
+
     /// <summary>[EN] Gets stable failure code when composition failed. [JA] composition が失敗した場合の stable failure code を取得します。</summary>
     public string? ErrorCode { get; init; }
 
@@ -147,6 +158,67 @@ public sealed record WasmSpatialCognitionSnapshot
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
 
     /// <summary>[EN] Gets snapshot metadata. [JA] snapshot metadata を取得します。</summary>
+    public IReadOnlyDictionary<string, string> Metadata { get; init; } =
+        new Dictionary<string, string>(StringComparer.Ordinal);
+}
+
+/// <summary>
+/// [EN] Describes one WASM-local sensor input state aligned with provider-neutral perception vocabulary.
+/// [JA] provider-neutral perception vocabulary と整合する 1 つの WASM-local sensor input state を記述します。
+/// </summary>
+public sealed record WasmSensorStateDescriptor
+{
+    /// <summary>[EN] Gets the stable sensor name. [JA] 安定した sensor 名を取得します。</summary>
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>[EN] Gets the ASCII-safe philosophical concept name. [JA] ASCII-safe な哲学的 concept 名を取得します。</summary>
+    public string ConceptName { get; init; } = string.Empty;
+
+    /// <summary>[EN] Gets the English sensor name associated with the concept. [JA] concept に対応する英語 sensor 名を取得します。</summary>
+    public string EnglishName { get; init; } = string.Empty;
+
+    /// <summary>[EN] Gets the sensor category such as primary or derived. [JA] primary / derived などの sensor category を取得します。</summary>
+    public string Category { get; init; } = string.Empty;
+
+    /// <summary>[EN] Gets whether this sensor is enabled. [JA] この sensor が有効かどうかを取得します。</summary>
+    public bool Enabled { get; init; }
+
+    /// <summary>[EN] Gets whether this sensor is directly observed. [JA] この sensor が直接観測されたものかどうかを取得します。</summary>
+    public bool Observed { get; init; }
+
+    /// <summary>[EN] Gets normalized sensor confidence outside CTG GateInput. [JA] CTG GateInput の外側に保持する正規化済み sensor confidence を取得します。</summary>
+    public double? Confidence { get; init; }
+
+    /// <summary>[EN] Gets sensor timestamp in ISO-8601 form. [JA] ISO-8601 形式の sensor timestamp を取得します。</summary>
+    public string? Timestamp { get; init; }
+
+    /// <summary>[EN] Gets deterministic sensor metadata. [JA] deterministic sensor metadata を取得します。</summary>
+    public IReadOnlyDictionary<string, string> Metadata { get; init; } =
+        new Dictionary<string, string>(StringComparer.Ordinal);
+}
+
+/// <summary>
+/// [EN] Carries a WASM-local high-priority retry intent without invoking Gate logic.
+/// [JA] Gate logic を呼び出さない WASM-local な高優先 retry intent を保持します。
+/// </summary>
+public sealed record WasmRetryIntentCarrier
+{
+    /// <summary>[EN] Gets whether retry is requested. [JA] retry が要求されているかどうかを取得します。</summary>
+    public bool Requested { get; init; }
+
+    /// <summary>[EN] Gets the retry reason code. [JA] retry reason code を取得します。</summary>
+    public string ReasonCode { get; init; } = string.Empty;
+
+    /// <summary>[EN] Gets deterministic retry priority where larger values win. [JA] 値が大きいほど優先される deterministic retry priority を取得します。</summary>
+    public int Priority { get; init; }
+
+    /// <summary>[EN] Gets normalized retry confidence outside CTG GateInput. [JA] CTG GateInput の外側に保持する正規化済み retry confidence を取得します。</summary>
+    public double Confidence { get; init; }
+
+    /// <summary>[EN] Gets the source sensor name. [JA] source sensor 名を取得します。</summary>
+    public string SourceSensor { get; init; } = string.Empty;
+
+    /// <summary>[EN] Gets deterministic retry metadata. [JA] deterministic retry metadata を取得します。</summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } =
         new Dictionary<string, string>(StringComparer.Ordinal);
 }

@@ -7,8 +7,9 @@
 
 ## Package Policy
 
-0.1.1.1 update line は NuGet-only です。この line では `aikernel-wasm` を PyPI
-package として build / install / publish しません。
+0.1.1.1 validation line は NuGet-only です。この line では `aikernel-wasm` を PyPI
+package として build / install / publish しません。次の公式 v0.1.2 正典シリーズで
+NuGet と PyPI の package family を同期公開できるように準備します。
 
 ## Import Surface
 
@@ -34,7 +35,7 @@ from aikernel_wasm import (
 
 ## Managed Assembly Resolution
 
-将来 Python release が予定された場合、Assembly は次の順で解決します。
+次の公式 v0.1.2 Python release line では、Assembly は次の順で解決します。
 
 1. `aikernel_wasm/native` 配下の同梱 file
 2. local development 中の repository Release build output

@@ -48,7 +48,9 @@ local NuGet source. The current baseline references AIKernel.Core
 `0.1.1.1-dev1` and AIKernel.Providers `0.1.1.1-dev2`.
 
 Python wrapper materials are reference-only for 0.1.1.1. Do not build, install,
-or publish a PyPI package for this line.
+or publish a PyPI package for this line. Prepare them for the next official
+v0.1.2 canonical series, where synchronized NuGet and PyPI package families are
+expected.
 
 ## Create a Runtime Context
 
@@ -274,7 +276,8 @@ Expected capability:
 
 The Python wrapper material is a managed-wrapper reference. It does not execute
 WASM or WebGPU logic in Python, and it is not packaged for PyPI in the 0.1.1.1
-development line.
+development line. The next official v0.1.2 canonical series is expected to
+publish the refreshed PyPI package family together with NuGet.
 
 ## Common Failure Modes
 

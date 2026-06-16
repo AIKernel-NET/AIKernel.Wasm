@@ -171,6 +171,134 @@ public sealed class WasmModelPerceptionSpatialHudTests
     }
 
     /// <summary>
+    /// [EN] Verifies spatial cognition carries ASCII-safe sensor concepts and retry intent.
+    /// [JA] spatial cognition が ASCII-safe な sensor concept と retry intent を保持することを検証します。
+    /// </summary>
+    [Fact]
+    public async Task WasmSpatialCognitionProvider_HealthSensor_ReturnsRetryIntent()
+    {
+        var provider = new WasmSpatialCognitionProvider();
+
+        var result = await provider.BuildSnapshotAsync(
+            new WasmSpatialCognitionRequest
+            {
+                RequestId = "spatial-health",
+                VisualPerceptions =
+                [
+                    new FramePerceptionResult
+                    {
+                        ObservationId = "visual",
+                        FrameId = "frame",
+                        FrameIndex = 1
+                    }
+                ],
+                SensorInputs = new Dictionary<string, WasmSensorStateDescriptor>(StringComparer.Ordinal)
+                {
+                    ["health"] = new()
+                    {
+                        Enabled = true,
+                        Observed = true,
+                        Confidence = 0.93,
+                        Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+                        {
+                            ["likelyDead"] = "true",
+                            ["zeroScore"] = "0.91"
+                        }
+                    }
+                }
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.NotNull(result.RetryIntent);
+        Assert.True(result.RetryIntent.Requested);
+        Assert.Equal("health-death", result.RetryIntent.ReasonCode);
+        Assert.Equal("Aisthesis", result.SensorInputs["health"].ConceptName);
+        Assert.Equal("True", result.Metadata["retryRequested"]);
+    }
+
+    /// <summary>
+    /// [EN] Verifies resident perception algorithms expose WebGPU descriptors with CPU fallback results.
+    /// [JA] resident perception algorithm が WebGPU descriptor と CPU fallback result を公開することを検証します。
+    /// </summary>
+    [Fact]
+    public async Task WasmResidentPerceptionAlgorithmLibrary_ValidInputs_ReturnsDescriptorsAndFallbackResults()
+    {
+        var library = new WasmResidentPerceptionAlgorithmLibrary();
+
+        var hsv = await library.CreateHsvThresholdMaskAsync(
+            new WasmHsvThresholdMaskRequest
+            {
+                Buffer = new WasmRgbBuffer
+                {
+                    Width = 2,
+                    Height = 1,
+                    RgbBytes = [255, 80, 20, 20, 20, 20]
+                },
+                MinHue = 0,
+                MaxHue = 40,
+                MinSaturation = 0.4,
+                IgnoreValue = true
+            },
+            TestContext.Current.CancellationToken);
+        var pool = await library.MaxPoolAsync(
+            new WasmMaxPoolingRequest
+            {
+                Buffer = new WasmScalarBuffer
+                {
+                    Width = 4,
+                    Height = 4,
+                    Values = [0, 0, 0.2, 0.1, 0, 0.9, 0, 0, 0.1, 0, 0.8, 0, 0, 0, 0, 0.7]
+                },
+                OutputWidth = 2,
+                OutputHeight = 2
+            },
+            TestContext.Current.CancellationToken);
+        var morphology = await library.ApplyMorphologyAsync(
+            new WasmMorphologyRequest
+            {
+                Buffer = new WasmScalarBuffer
+                {
+                    Width = 3,
+                    Height = 3,
+                    Values = [0, 0, 0, 0, 1, 0, 0, 0, 0]
+                },
+                Operation = "dilation"
+            },
+            TestContext.Current.CancellationToken);
+        var flow = await library.EstimateDenseOpticalFlowAsync(
+            new WasmDenseOpticalFlowRequest
+            {
+                Previous = new WasmScalarBuffer { Width = 2, Height = 2, Values = [0, 1, 0, 0] },
+                Current = new WasmScalarBuffer { Width = 2, Height = 2, Values = [0, 0, 1, 0] }
+            },
+            TestContext.Current.CancellationToken);
+        var spectrum = await library.ComputeAudioSpectrumAsync(
+            new WasmAudioSpectrumRequest
+            {
+                Buffer = new WasmPcmBuffer { Samples = [0, 1, 0, -1, 0, 1, 0, -1], Channels = 1 },
+                MaxFftSize = 8
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.True(hsv.Succeeded);
+        Assert.Equal("hsv-threshold-mask", hsv.Kernel.AlgorithmName);
+        Assert.Equal([1, 0], hsv.Mask);
+        Assert.True(pool.Succeeded);
+        Assert.Equal("max-pooling-downsample", pool.Kernel.AlgorithmName);
+        Assert.Equal(4, pool.Buffer.Values.Count);
+        Assert.True(morphology.Succeeded);
+        Assert.Equal("morphology", morphology.Kernel.AlgorithmName);
+        Assert.All(morphology.Buffer.Values, value => Assert.Equal(1, value));
+        Assert.True(flow.Succeeded);
+        Assert.Equal("dense-optical-flow", flow.Kernel.AlgorithmName);
+        Assert.Equal(4, flow.Vectors.Count);
+        Assert.True(spectrum.Succeeded);
+        Assert.Equal("audio-fft-spectrum", spectrum.Kernel.AlgorithmName);
+        Assert.NotEmpty(spectrum.Magnitudes);
+    }
+
+    /// <summary>
     /// [EN] Verifies HUD and overlay providers generate DTOs without rendering.
     /// [JA] HUD / overlay Provider が rendering なしで DTO を生成することを検証します。
     /// </summary>

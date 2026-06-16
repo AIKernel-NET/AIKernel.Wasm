@@ -66,4 +66,5 @@ package line は次の通りです。
 
 Version 0.1.1.1 は現在の NuGet-only development line です。Python wrapper
 関連資料は reference-only とし、この line では PyPI package として build /
-install / publish しません。
+install / publish しません。次の公式 v0.1.2 正典シリーズでは、NuGet package
+family と合わせて Python wrapper package も更新する前提です。

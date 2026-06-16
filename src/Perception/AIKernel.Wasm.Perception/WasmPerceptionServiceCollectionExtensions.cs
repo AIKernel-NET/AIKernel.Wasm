@@ -24,6 +24,9 @@ public static class WasmPerceptionServiceCollectionExtensions
         services.TryAddSingleton<IFramePerceptionProvider>(provider => provider.GetRequiredService<WasmFramePerceptionProvider>());
         services.TryAddSingleton<WasmAuditoryPerceptionProvider>();
         services.TryAddSingleton<IWasmAuditoryPerceptionProvider>(provider => provider.GetRequiredService<WasmAuditoryPerceptionProvider>());
+        services.TryAddSingleton<WasmResidentPerceptionAlgorithmLibrary>();
+        services.TryAddSingleton<IWasmResidentPerceptionAlgorithmLibrary>(
+            provider => provider.GetRequiredService<WasmResidentPerceptionAlgorithmLibrary>());
         services.TryAddSingleton<WasmObservationProvider>();
         services.TryAddSingleton<IObservationProvider>(provider => provider.GetRequiredService<WasmObservationProvider>());
 
