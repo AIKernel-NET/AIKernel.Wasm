@@ -30,9 +30,8 @@ Monolith は 0.1.x 系の安定化後に、sandboxed runtime layer をより広�
 - `AIKernel.Wasm.Input`
 - `AIKernel.Wasm.WebGpuComputeProvider`
 
-AIKernel.Wasm 0.1.1.1 は AIKernel.Core / AIKernel.Control /
-AIKernel.Providers 0.1.1.1 と同じ開発方針に従います。この line は NuGet-only
-であり、local development package には `0.1.1.1-dev{build-number}` を使います。
+AIKernel.Wasm 0.1.2 は AIKernel.Core / AIKernel.Control /
+AIKernel.Providers 0.1.2 と同じ開発方針に従います。この line は NuGet package と同期 Python wrapper を公開し、local development package には `0.1.2-dev{build-number}` を使います。
 PyPI package は作成・公開しません。
 
 ## クイックスタート
@@ -42,11 +41,11 @@ path は Windows / Linux で検証できます。実 browser WebGPU validation �
 manual check として扱います。
 
 ```bash
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Audio --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Display --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Input --version 0.1.1.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2
+dotnet add package AIKernel.Wasm.Display --version 0.1.2
+dotnet add package AIKernel.Wasm.Input --version 0.1.2
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
 ```
 
 process、memory、stdin、file system、event、audio、screenshot、save-state、
@@ -56,8 +55,8 @@ browser audio boundary、frame surface、virtual input boundary が必要な場�
 WebGPU compute boundary が必要な host だけ `AIKernel.Wasm.WebGpuComputeProvider`
 を追加します。
 
-`python/` の Python 関連資料は、この update line では reference-only です。
-0.1.1.1 では PyPI package として build / install / publish しません。
+`python/` の Python 関連資料は、この update line の同期 wrapper 資料です。
+0.1.2 release flow で同期 Python wrapper として検証・公開します。
 
 ## Documentation
 
@@ -151,7 +150,7 @@ WebGPU が利用できない場合、Provider は
 
 ## Python Wrapper
 
-`python/` には reference-only の `aikernel-wasm` Python wrapper 資料を配置して
+`python/` には同期された `aikernel-wasm` Python wrapper 資料を配置して
 います。pythonnet 経由の薄い managed wrapper として、public な WASM runtime
 Provider と WebGPU compute Provider を公開する方法を示します。
 
@@ -162,8 +161,8 @@ Provider と WebGPU compute Provider を公開する方法を示します。
 - `WasmFramebufferProvider`, `WasmFrameSourceProvider`, `WasmInputProvider`
 - `WebGpuComputeProvider`, `WebGpuComputeInvoker`, `WebGpuComputeCapability`
 
-この wrapper は WASM runtime semantics を Python 側で再実装しません。0.1.1.1
-development line では PyPI package として build / install / publish しません。
+この wrapper は WASM runtime semantics を Python 側で再実装しません。0.1.2
+development line では同期 Python wrapper として検証・公開します。
 
 ## Control Integration
 

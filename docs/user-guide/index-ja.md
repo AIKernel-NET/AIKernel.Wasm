@@ -271,7 +271,7 @@ Console.WriteLine(string.Join(", ", descriptor.ProvidedOperations));
 ## Python Wrapper Materials
 
 Python wrapper material は managed wrapper の reference です。Python 側で WASM
-execution や WebGPU logic を再実装せず、0.1.1.1 development line では PyPI
+execution や WebGPU logic を再実装せず、0.1.2 development line では PyPI
 package として配布しません。次の公式 v0.1.2 正典シリーズでは、NuGet と合わせて
 更新済み PyPI package family を公開する前提です。
 

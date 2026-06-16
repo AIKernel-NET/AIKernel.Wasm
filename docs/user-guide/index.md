@@ -272,8 +272,7 @@ Expected capability:
 ## Python Wrapper Materials
 
 The Python wrapper material is a managed-wrapper reference. It does not execute
-WASM or WebGPU logic in Python, and it is not packaged for PyPI in the 0.1.1.1
-development line. The next official v0.1.2 canonical series is expected to
+WASM or WebGPU logic in Python; the synchronized wrapper is packaged through the 0.1.2 release flow. The next official v0.1.2 canonical series is expected to
 publish the refreshed PyPI package family together with NuGet.
 
 ## Common Failure Modes

@@ -2,7 +2,7 @@
 
 `AIKernel.Wasm.Perception`、`AIKernel.Wasm.Spatial`、`AIKernel.Wasm.Hud`、`AIKernel.Wasm.Models` は、perception と model dispatch のための browser/WASM 所有 execution surface を提供します。
 
-これらのパッケージは v0.1.1.1 では実装側 surface として扱います。次回の正典 Interface 更新で auditory perception、spatial cognition、resident model execution の契約を AIKernel.NET に昇格・統合しやすい形にしています。
+これらのパッケージは v0.1.2 正典 package line の実装側 surface です。将来の正典更新で auditory perception、spatial cognition、resident model execution の契約を AIKernel.NET に昇格・統合しやすい形を維持します。
 
 ## 境界
 
