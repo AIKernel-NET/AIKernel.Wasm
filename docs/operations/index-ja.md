@@ -31,9 +31,9 @@ NuGet package metadata の確認項目:
 - README inclusion
 - release notes
 
-0.1.1.1 validation line では Python wrapper 関連資料は reference-only です。PyPI
-package として build / install / publish しません。次の公式 v0.1.2 正典シリーズに
-向けて NuGet + PyPI package の同期更新を準備します。
+v0.1.2 integration では、`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を
+検証します。publication task が明示的に要求するまで、stable `0.1.2` artifact は
+作成しません。
 
 ## Documentation
 

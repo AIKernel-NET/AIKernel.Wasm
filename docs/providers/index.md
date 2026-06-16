@@ -106,9 +106,10 @@ It owns:
 The provider exposes `webgpu.compute` with `compute.dispatch` and
 `compute.vector_add`.
 
-## Python Reference
+## Python Wrapper
 
-The `aikernel-wasm` materials are reference-only for the 0.1.1.1 line. They
-show how wrappers and descriptors may be exposed without re-implementing
-provider logic, but they are not built, installed, or published as PyPI
-packages in this line.
+The `aikernel-wasm` package is part of the 0.1.2 Python wrapper family. It
+exposes wrappers and descriptors without re-implementing WASM, WebGPU,
+WebAudio, or perception logic in Python. Stable wheels are created only after
+the 0.1.2 publication task opens; local validation uses
+`0.1.2.dev<build-number>`.

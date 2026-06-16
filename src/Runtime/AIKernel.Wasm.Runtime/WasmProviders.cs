@@ -25,22 +25,22 @@ public sealed class WasmProcess : IProcess
     /// <summary>[EN] Process name. [JA] process 名です。</summary>
     public string Name { get; }
 
-    /// <summary>EN: Documentation for public API. JA: Id を実行します。</summary>
+    /// <summary>[EN] Documents this public package API member. [JA] Id を実行します。</summary>
     /// <inheritdoc />
     public ProcessId Id { get; } = new(Guid.NewGuid());
 
-    /// <summary>EN: Documentation for public API. JA: State を取得します。</summary>
+    /// <summary>[EN] Documents this public package API member. [JA] State を取得します。</summary>
     /// <inheritdoc />
     public ProcessState State { get; private set; } = ProcessState.Starting;
 
-    /// <summary>EN: Documentation for public API. JA: StartAsync を実行します。</summary>
+    /// <summary>[EN] Documents this public package API member. [JA] StartAsync を実行します。</summary>
     /// <inheritdoc />
     public Task StartAsync()
     {
         return RequireSuccessAsync(TryStartAsync());
     }
 
-    /// <summary>EN: Documentation for public API. JA: StopAsync を実行します。</summary>
+    /// <summary>[EN] Documents this public package API member. [JA] StopAsync を実行します。</summary>
     /// <inheritdoc />
     public Task StopAsync()
     {

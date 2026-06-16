@@ -31,9 +31,9 @@ Check NuGet package metadata:
 - README inclusion
 - release notes
 
-For the 0.1.1.1 validation line, Python wrapper materials are reference-only.
-Do not build, install, or publish a PyPI package. Prepare synchronized NuGet +
-PyPI package updates for the next official v0.1.2 canonical series.
+For v0.1.2 integration, validate the `aikernel-wasm` wheel with
+`0.1.2.dev{buildNumber}`. Do not create stable `0.1.2` artifacts until the
+publication task explicitly requests them.
 
 ## Documentation
 

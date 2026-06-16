@@ -8,9 +8,9 @@ surface を期待通り公開していることを確認します。
 ## Prerequisites
 
 - .NET 10 SDK
-- AIKernel.NET contract package `0.1.1.1`
-- AIKernel.Core local package `0.1.1.1-dev1`
-- AIKernel.Providers local package `0.1.1.1-dev2`
+- AIKernel.NET contract package `0.1.2-dev{buildNumber}`
+- AIKernel.Core local package `0.1.2-dev{buildNumber}`
+- AIKernel.Providers local package `0.1.2-dev{buildNumber}`
 
 default check では実 browser WebGPU validation は不要です。automated test は
 deterministic CPU fallback を使うため、物理 GPU が無い Windows / Linux でも実行
@@ -64,7 +64,6 @@ package line は次の通りです。
 - NuGet: `AIKernel.Wasm.Input`
 - NuGet: `AIKernel.Wasm.WebGpuComputeProvider`
 
-Version 0.1.1.1 は現在の NuGet-only development line です。Python wrapper
-関連資料は reference-only とし、この line では PyPI package として build /
-install / publish しません。次の公式 v0.1.2 正典シリーズでは、NuGet package
-family と合わせて Python wrapper package も更新する前提です。
+Version 0.1.2 は現在の canonical integration line です。stable publication が開始される
+までは、local validation に `0.1.2-dev{buildNumber}` の NuGet package と
+`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を使います。

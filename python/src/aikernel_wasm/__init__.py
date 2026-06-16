@@ -5,6 +5,14 @@ Python wrapper for AIKernel.Wasm runtime and WebGPU providers.
 AIKernel.Wasm runtime と WebGPU Provider の Python wrapper です。
 """
 
+from .api_catalog import (
+    ManagedMemberDescriptor,
+    ManagedTypeDescriptor,
+    find_managed_type,
+    managed_api_catalog,
+    managed_api_summary,
+    managed_type_names,
+)
 from .native import load_wasm_runtime, require_wasm_assemblies, wasm_assemblies
 from .runtime import (
     WasmAudioProvider,
@@ -31,6 +39,12 @@ from .webgpu import (
 )
 
 __all__ = [
+    "ManagedMemberDescriptor",
+    "ManagedTypeDescriptor",
+    "find_managed_type",
+    "managed_api_catalog",
+    "managed_api_summary",
+    "managed_type_names",
     "CapabilityContract",
     "WasmAudioProvider",
     "WasmEventProvider",

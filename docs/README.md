@@ -16,9 +16,10 @@ with kernel runtime, providers, control, and tools after the 0.1.x line stabiliz
 
 ## Cross-Repository Alignment
 
-Shared repository boundaries, 0.1.1.1 local NuGet versioning, the
-NuGet-only / no-PyPI rule for this validation line, and the v0.1.2
-NuGet + PyPI release assumption are defined by
+Shared repository boundaries, v0.1.2 development versioning, dependency order,
+PyPI Trusted Publishing, and Python wrapper scope are defined by
+[Package Release Alignment v0.1.2](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/package-release-alignment-v0.1.2.md).
+The historical v0.1.1.1 validation rules remain available in
 [AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1.md).
 When a change crosses repositories, start with the
 [Cross-Repository Developer Guide v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/cross-repository-developer-guide-v0.1.1.1.md).
@@ -68,8 +69,9 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.1.1 is the current NuGet-only development line. Use
-`0.1.1.1-dev{build-number}` for local package references. It provides:
+Version 0.1.2 is the current canonical integration line. Use
+`0.1.2-dev{build-number}` for local NuGet package references and
+`0.1.2.dev{build-number}` for local `aikernel-wasm` wheel validation. It provides:
 
 - `AIKernel.Wasm.Runtime`
 - `AIKernel.Wasm.Audio`
@@ -83,10 +85,8 @@ Version 0.1.1.1 is the current NuGet-only development line. Use
 - WebGPU compute with deterministic CPU fallback through
   `AIKernel.Providers.Standard`
 
-Python wrapper materials are reference-only in this validation line. Do not
-build, install, or publish a PyPI package for 0.1.1.1. Prepare refreshed
-Python wrapper packages for the next official v0.1.2 canonical series together
-with the NuGet packages.
+Stable package artifacts are created later in dependency order. Do not create
+stable `0.1.2` packages until the publication task explicitly requests them.
 
 AIKernel.Wasm depends on AIKernel Core contracts and Providers.Standard fallback
 drivers, but it does not move browser/WASM-specific implementation concerns

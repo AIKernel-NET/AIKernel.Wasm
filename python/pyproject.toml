@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aikernel-wasm"
-version = "0.1.1"
-description = "Python wrapper for AIKernel.Wasm 0.1.1 runtime and WebGPU provider assemblies."
+version = "0.1.2"
+description = "Python wrapper for AIKernel.Wasm 0.1.2 runtime and WebGPU provider assemblies."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"

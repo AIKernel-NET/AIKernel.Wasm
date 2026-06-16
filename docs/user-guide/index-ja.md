@@ -36,20 +36,18 @@ validation は別の operator check です。
 NuGet package:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Audio --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Display --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Input --version 0.1.1.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2
+dotnet add package AIKernel.Wasm.Display --version 0.1.2
+dotnet add package AIKernel.Wasm.Input --version 0.1.2
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
 ```
 
 local development package では、shared local NuGet source の
-`0.1.1.1-dev{build-number}` を使います。現在の baseline は AIKernel.Core
-`0.1.1.1-dev1` と AIKernel.Providers `0.1.1.1-dev2` を参照します。
+`0.1.2-dev{build-number}` を使います。
 
-Python wrapper 関連資料は 0.1.1.1 では reference-only です。この line では
-PyPI package として build / install / publish しません。次の公式 v0.1.2 正典シリーズで
-NuGet と PyPI の package family を同期公開できるように準備します。
+Python validation では、stable publication が明示的に開始されるまで
+`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を使います。
 
 ## Create a Runtime Context
 

@@ -10,6 +10,8 @@ from aikernel_wasm import (
     WasmScreenshotProvider,
     WasmStdinProvider,
     WasmTimeProvider,
+    managed_api_summary,
+    managed_type_names,
     WebGpuComputeCapability,
     WebGpuComputeInvoker,
     WebGpuComputeProvider,
@@ -60,3 +62,14 @@ def test_webgpu_capability_defaults_match_public_contract():
 
     assert capability.provider_id == "webgpu.compute"
     assert capability.adapter_profile == "wasm-webgpu"
+
+
+def test_managed_api_catalog_covers_wasm_runtime_and_perception():
+    names = set(managed_type_names())
+    summary = managed_api_summary()
+
+    assert "AIKernel.Wasm.Runtime.WasmRuntime" in names
+    assert "AIKernel.Wasm.Perception.WasmResidentPerceptionAlgorithmLibrary" in names
+    assert "AIKernel.Wasm.Spatial.WasmSpatialCognitionProvider" in names
+    assert summary["AIKernel.Wasm.Runtime"] > 0
+    assert summary["AIKernel.Wasm.Perception"] > 0

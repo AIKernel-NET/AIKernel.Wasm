@@ -4,8 +4,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <StablePackageVersion>0.1.1.1</StablePackageVersion>
-    <LocalPackageVersionPrefix>0.1.1.1</LocalPackageVersionPrefix>
+    <StablePackageVersion>0.1.2</StablePackageVersion>
+    <LocalPackageVersionPrefix>0.1.2</LocalPackageVersionPrefix>
     <LocalPackageBuildNumber Condition="'$(LocalPackageBuildNumber)' == ''">0</LocalPackageBuildNumber>
     <UseLocalPackageVersion Condition="'$(UseLocalPackageVersion)' == ''">false</UseLocalPackageVersion>
     <PackageVersion Condition="'$(UseLocalPackageVersion)' == 'true'">$(LocalPackageVersionPrefix)-dev$(LocalPackageBuildNumber)</PackageVersion>
@@ -14,9 +14,9 @@
     <AssemblyVersion>$(StablePackageVersion)</AssemblyVersion>
     <FileVersion>$(StablePackageVersion)</FileVersion>
     <InformationalVersion>$(PackageVersion)</InformationalVersion>
-    <AIKernelPackageVersion>[0.1.1.1]</AIKernelPackageVersion>
-    <AIKernelCorePackageVersion>0.1.1.1-dev1</AIKernelCorePackageVersion>
-    <AIKernelProvidersPackageVersion>[0.1.1.1-dev2]</AIKernelProvidersPackageVersion>
+    <AIKernelPackageVersion>0.1.2</AIKernelPackageVersion>
+    <AIKernelCorePackageVersion>0.1.2</AIKernelCorePackageVersion>
+    <AIKernelProvidersPackageVersion>0.1.2</AIKernelProvidersPackageVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <Authors>Takuya Sogawa</Authors>
@@ -27,9 +27,10 @@
     <Copyright>Copyright © 2026 Takuya Sogawa of AIKernel-NET</Copyright>
     <PackageTags>aikernel;wasm;webgpu;browser;runtime;process;memory;stdin;filesystem;event;audio;screenshot;savestate;time</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Description>AIKernel.Wasm runtime isolation package family v0.1.1.1 for browser/WASM runtime services and WebGPU compute boundaries. This package line is NuGet-only.</Description>
+    <PackageIcon>aikernel-logo128x128.png</PackageIcon>
+    <Description>AIKernel.Wasm runtime isolation package family v0.1.2 for browser/WASM runtime services, WebGPU compute boundaries, perception surfaces, and synchronized Python wrapper support.</Description>
     <PackageReleaseNotes>
-      AIKernel.Wasm v0.1.1.1 - Development line aligned with AIKernel.NET contract packages v0.1.1.1, local AIKernel.Core package family v0.1.1.1-dev{build-number}, and local AIKernel.Providers package family v0.1.1.1-dev{build-number}. This line is NuGet-only and uses 0.1.1.1-dev{build-number} for local development package outputs.
+      AIKernel.Wasm v0.1.2 - Release build aligned with AIKernel.NET contract packages v0.1.2, AIKernel.Core v0.1.2, AIKernel.Providers v0.1.2, synchronized Python wrapper package aikernel-wasm v0.1.2, and local development package outputs using 0.1.2-dev{build-number}.
     </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -37,5 +38,6 @@
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
     <None Include="$(MSBuildThisFileDirectory)README-ja.md" Pack="true" PackagePath="\" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)assets\aikernel-logo128x128.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

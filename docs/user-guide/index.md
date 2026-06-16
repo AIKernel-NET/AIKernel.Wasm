@@ -36,21 +36,18 @@ validation is a separate operator check.
 NuGet packages:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Audio --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Display --version 0.1.1.1
-dotnet add package AIKernel.Wasm.Input --version 0.1.1.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2
+dotnet add package AIKernel.Wasm.Display --version 0.1.2
+dotnet add package AIKernel.Wasm.Input --version 0.1.2
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
 ```
 
-For local development packages, use `0.1.1.1-dev{build-number}` from the shared
-local NuGet source. The current baseline references AIKernel.Core
-`0.1.1.1-dev1` and AIKernel.Providers `0.1.1.1-dev2`.
+For local development packages, use `0.1.2-dev{build-number}` from the shared
+local NuGet source.
 
-Python wrapper materials are reference-only for 0.1.1.1. Do not build, install,
-or publish a PyPI package for this line. Prepare them for the next official
-v0.1.2 canonical series, where synchronized NuGet and PyPI package families are
-expected.
+Python validation uses `0.1.2.dev{buildNumber}` `aikernel-wasm` wheels until
+stable publication is explicitly opened.
 
 ## Create a Runtime Context
 

@@ -400,7 +400,13 @@ public sealed class WasmResidentPerceptionAlgorithmLibrary : IWasmResidentPercep
     {
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// [EN] Creates a WebGPU-described HSV threshold mask with CPU fallback execution.
+    /// [JA] CPU fallback 実行を持つ WebGPU 記述の HSV threshold mask を作成します。
+    /// </summary>
+    /// <param name="request">[EN] WASM HSV threshold input. [JA] WASM HSV threshold の入力です。</param>
+    /// <param name="cancellationToken">[EN] Cancellation token. [JA] キャンセル通知を監視する token です。</param>
+    /// <returns>[EN] WASM HSV threshold result. [JA] WASM HSV threshold の結果を返します。</returns>
     public ValueTask<WasmHsvThresholdMaskResult> CreateHsvThresholdMaskAsync(
         WasmHsvThresholdMaskRequest request,
         CancellationToken cancellationToken)
@@ -419,7 +425,13 @@ public sealed class WasmResidentPerceptionAlgorithmLibrary : IWasmResidentPercep
         return ValueTask.FromResult(result with { Kernel = Descriptor("hsv-threshold-mask", "resident_perception_hsv_threshold", request.Buffer.Width, request.Buffer.Height, "rgb:u8", "mask:u8") });
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// [EN] Downsamples a resident scalar buffer using max pooling.
+    /// [JA] max pooling により resident scalar buffer を downsample します。
+    /// </summary>
+    /// <param name="request">[EN] WASM max-pooling input. [JA] WASM max-pooling の入力です。</param>
+    /// <param name="cancellationToken">[EN] Cancellation token. [JA] キャンセル通知を監視する token です。</param>
+    /// <returns>[EN] WASM scalar buffer result. [JA] WASM scalar buffer の結果を返します。</returns>
     public ValueTask<WasmScalarBufferResult> MaxPoolAsync(
         WasmMaxPoolingRequest request,
         CancellationToken cancellationToken)
@@ -435,7 +447,13 @@ public sealed class WasmResidentPerceptionAlgorithmLibrary : IWasmResidentPercep
         return ValueTask.FromResult(result with { Kernel = Descriptor("max-pooling-downsample", "resident_perception_max_pool", request.OutputWidth, request.OutputHeight, "input:f32", "output:f32") });
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// [EN] Applies morphology to a resident scalar buffer.
+    /// [JA] resident scalar buffer に morphology を適用します。
+    /// </summary>
+    /// <param name="request">[EN] WASM morphology input. [JA] WASM morphology の入力です。</param>
+    /// <param name="cancellationToken">[EN] Cancellation token. [JA] キャンセル通知を監視する token です。</param>
+    /// <returns>[EN] WASM scalar buffer result. [JA] WASM scalar buffer の結果を返します。</returns>
     public ValueTask<WasmScalarBufferResult> ApplyMorphologyAsync(
         WasmMorphologyRequest request,
         CancellationToken cancellationToken)
@@ -451,7 +469,13 @@ public sealed class WasmResidentPerceptionAlgorithmLibrary : IWasmResidentPercep
         return ValueTask.FromResult(result with { Kernel = Descriptor("morphology", "resident_perception_morphology", request.Buffer.Width, request.Buffer.Height, "mask:f32", "output:f32") });
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// [EN] Estimates resident dense optical flow with a WebGPU kernel descriptor and CPU fallback.
+    /// [JA] WebGPU kernel descriptor と CPU fallback により resident dense optical flow を推定します。
+    /// </summary>
+    /// <param name="request">[EN] WASM dense optical-flow input. [JA] WASM dense optical-flow の入力です。</param>
+    /// <param name="cancellationToken">[EN] Cancellation token. [JA] キャンセル通知を監視する token です。</param>
+    /// <returns>[EN] WASM dense optical-flow result. [JA] WASM dense optical-flow の結果を返します。</returns>
     public ValueTask<WasmDenseOpticalFlowResult> EstimateDenseOpticalFlowAsync(
         WasmDenseOpticalFlowRequest request,
         CancellationToken cancellationToken)
@@ -467,7 +491,13 @@ public sealed class WasmResidentPerceptionAlgorithmLibrary : IWasmResidentPercep
         return ValueTask.FromResult(result with { Kernel = Descriptor("dense-optical-flow", "resident_perception_dense_flow", request.Current.Width, request.Current.Height, "previous:f32,current:f32", "flow:vec2f") });
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// [EN] Computes an audio spectrum for a resident PCM buffer.
+    /// [JA] resident PCM buffer の audio spectrum を計算します。
+    /// </summary>
+    /// <param name="request">[EN] WASM audio spectrum input. [JA] WASM audio spectrum の入力です。</param>
+    /// <param name="cancellationToken">[EN] Cancellation token. [JA] キャンセル通知を監視する token です。</param>
+    /// <returns>[EN] WASM audio spectrum result. [JA] WASM audio spectrum の結果を返します。</returns>
     public ValueTask<WasmAudioSpectrumResult> ComputeAudioSpectrumAsync(
         WasmAudioSpectrumRequest request,
         CancellationToken cancellationToken)

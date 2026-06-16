@@ -104,8 +104,9 @@ virtual surface listing を実装します。
 Provider は `compute.dispatch` と `compute.vector_add` を持つ `webgpu.compute` を
 公開します。
 
-## Python Reference
+## Python Wrapper
 
-`aikernel-wasm` 関連資料は 0.1.1.1 line では reference-only です。Provider logic
-を再実装せずに wrapper / descriptor を公開する方法を示しますが、この line では
-PyPI package として build / install / publish しません。
+`aikernel-wasm` package は 0.1.2 Python wrapper family の一部です。Python 側で
+WASM、WebGPU、WebAudio、perception logic を再実装せずに、wrapper / descriptor を
+公開します。安定版 wheel は 0.1.2 公開タスク開始後に作成し、local validation では
+`0.1.2.dev<build-number>` を使います。

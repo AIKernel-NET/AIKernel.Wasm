@@ -2,15 +2,14 @@
 
 [日本語](index-ja.md)
 
-`aikernel-wasm` is reference-only material for exposing the public
-AIKernel.Wasm C# surface to Python through a thin pythonnet wrapper.
+`aikernel-wasm` exposes the public AIKernel.Wasm C# surface to Python through a
+thin pythonnet wrapper.
 
 ## Package Policy
 
-The 0.1.1.1 validation line is NuGet-only. Do not build, install, or publish
-`aikernel-wasm` as a PyPI package for this line. Prepare the wrapper for the
-next official v0.1.2 canonical series, where synchronized NuGet and PyPI
-package families are expected.
+Use `0.1.2.dev{buildNumber}` wheels for local validation. Stable `0.1.2`
+publication uses the shared Trusted Publishing flow and starts only when the
+release task explicitly opens publication.
 
 ## Import Surface
 
@@ -36,8 +35,7 @@ from aikernel_wasm import (
 
 ## Managed Assembly Resolution
 
-For the next official v0.1.2 Python release line, assemblies should be resolved
-in this order:
+Assemblies are resolved in this order:
 
 1. bundled files under `aikernel_wasm/native`
 2. repository Release build output during local development
@@ -49,13 +47,14 @@ If a required assembly is missing, the wrapper fails closed with a clear
 
 ## Contract Coverage
 
-The reference material covers:
+The package covers:
 
 - runtime provider descriptors
 - runtime provider construction wrappers
 - WebGPU capability descriptor creation
 - WebGPU provider and invoker construction wrappers
 - assembly discovery and pythonnet runtime loading
+- generated managed API catalog helpers
 
 The wrapper does not re-implement WASM execution, WebGPU dispatch, or Core
 provider semantics.

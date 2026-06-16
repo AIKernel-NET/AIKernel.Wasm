@@ -16,10 +16,12 @@ control、tools と統合する標準 reference distribution として位置づ�
 
 ## リポジトリ横断整合
 
-共有の repository boundary、0.1.1.1 local NuGet versioning、この検証ラインでの
-NuGet-only / no-PyPI rule、v0.1.2 の NuGet + PyPI release assumption は
+共有の repository boundary、v0.1.2 development versioning、依存関係順、
+PyPI Trusted Publishing、Python wrapper scope は
+[Package Release Alignment v0.1.2](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/package-release-alignment-v0.1.2-ja.md)
+で定義します。履歴としての v0.1.1.1 validation rule は
 [AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1-ja.md)
-で定義します。
+に残します。
 複数 repository をまたぐ変更を行う場合は、まず
 [リポジトリ横断開発者ガイド v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/cross-repository-developer-guide-v0.1.1.1-ja.md)
 を読んでください。
@@ -69,8 +71,9 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.1.1 は現在の NuGet-only development line です。local package
-reference には `0.1.1.1-dev{build-number}` を使います。次を提供します。
+Version 0.1.2 は現在の canonical integration line です。local NuGet package reference
+には `0.1.2-dev{build-number}`、local `aikernel-wasm` wheel validation には
+`0.1.2.dev{build-number}` を使います。次を提供します。
 
 - `AIKernel.Wasm.Runtime`
 - `AIKernel.Wasm.Audio`
@@ -84,9 +87,8 @@ reference には `0.1.1.1-dev{build-number}` を使います。次を提供し�
 - `AIKernel.Providers.Standard` 経由の deterministic CPU fallback 付き
   WebGPU compute
 
-Python wrapper 関連資料は、この validation line では reference-only です。0.1.1.1
-では PyPI package として build / install / publish しません。次の公式 v0.1.2
-正典シリーズでは、NuGet package と合わせて Python wrapper package も更新する前提です。
+stable package artifact は依存関係順に後で作成します。publication task が明示的に要求する
+まで、stable `0.1.2` package は作成しません。
 
 AIKernel.Wasm は AIKernel Core contract と Providers.Standard fallback driver に
 依存しますが、browser / WASM 固有の実装責務を Core へ戻しません。

@@ -1,8 +1,9 @@
 # aikernel-wasm
 
 AIKernel.Wasm runtime と WebGPU Provider の public surface を公開するための
-reference-only Python wrapper 資料です。0.1.1.1 update line は NuGet-only です。
-この directory を PyPI package として build / install / publish しません。
+Python wrapper 資料です。0.1.2 正典系列から、この directory は
+`aikernel-wasm` として PyPI package 化され、managed C# assembly の薄い wrapper
+として公開されます。
 
 ```python
 from aikernel_wasm import (
@@ -33,6 +34,11 @@ process_provider = WasmProcessProvider.create()
 - `WebGpuComputeInvoker`
 - `WebGpuComputeCapabilityContracts`
 
-将来の Python release では、managed assembly を `aikernel_wasm/native` に同梱するか、
-NuGet/local package cache から解決します。追加の assembly 探索 root は
-`AIKERNEL_WASM_ASSEMBLY_PATH` で指定できます。
+managed assembly は `aikernel_wasm/native` に同梱するか、NuGet/local package cache
+から解決します。追加の assembly 探索 root は `AIKERNEL_WASM_ASSEMBLY_PATH` で指定できます。
+
+## Managed API Catalog
+
+v0.1.2 package では generated managed API catalog を公開します。
+`managed_api_catalog()`、`managed_api_summary()`、`managed_type_names()`、
+`find_managed_type(full_name)` で確認できます。
