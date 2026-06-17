@@ -58,3 +58,16 @@ package が網羅する範囲:
 
 Wrapper は WASM execution、WebGPU dispatch、Core provider semantics を
 再実装しません。
+## Trusted Publisher 設定
+
+aikernel-wasm project の PyPI Trusted Publisher は、この repository が発行する GitHub OIDC claims と一致している必要があります。
+
+| Field | Value |
+| --- | --- |
+| PyPI project | aikernel-wasm |
+| Owner | AIKernel-NET |
+| Repository | AIKernel.Wasm |
+| Workflow | publish-pypi.yml |
+| Environment | pypi |
+
+PyPI が `invalid-publisher` を返す場合、workflow を token credential 方式へ戻してはいけません。PyPI project 側の Trusted Publisher entry を上記の値に合わせて修正し、失敗した publish job を rerun します。
