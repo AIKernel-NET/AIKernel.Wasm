@@ -8,6 +8,7 @@ JA: browser-neutral な frame / WebAudio signal extraction を提供する AIKer
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AIKernel.Common" Version="[$(AIKernelCorePackageVersion)]" />
     <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
     <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
     <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />

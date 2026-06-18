@@ -3,7 +3,7 @@
   "manifestVersion": "1.0",
   "providerId": "wasm.spatial-cognition",
   "name": "WASM Spatial Cognition Provider",
-  "version": "0.1.1.1",
+  "version": "0.1.2.1",
   "assemblyName": "AIKernel.Wasm.Spatial",
   "packageId": "AIKernel.Wasm.Spatial",
   "providerType": "AIKernel.Wasm.Spatial.WasmSpatialCognitionProvider",

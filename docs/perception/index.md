@@ -32,6 +32,9 @@ These packages are implementation-side surfaces for the v0.1.2 canonical package
   descriptors plus CPU fallbacks for resident perception algorithms. It does not
   depend on `AIKernel.Providers.Perception` at compile time and does not expose
   JSInterop names in public API.
+- `WasmSyntheticSensorProvider` builds Phainesis phenomena and Nous meaning
+  vectors from resident buffers. Scenario layers should consume these neutral
+  signals instead of re-implementing detector logic in JavaScript.
 
 ## Local Surface Candidates
 
@@ -42,6 +45,8 @@ These packages are implementation-side surfaces for the v0.1.2 canonical package
 - `WasmHudSignalProvider`
 - `WasmOverlayAnnotationProvider`
 - `WasmResidentPerceptionAlgorithmLibrary`
+- `WasmSyntheticSensorProvider`
+- `WasmSyntheticSensorKernelPlanner`
 
 ## Resident Perception Algorithms
 
@@ -60,6 +65,47 @@ Implemented surfaces:
 
 These algorithms are preprocessing functions only. They do not run Gate, CTG,
 Council, intent, action, or scenario-specific detection.
+
+## Synthetic Sensors
+
+`WasmSyntheticSensorProvider` is the runtime-side bridge from resident
+preprocessing to the Sensor OS. It consumes current/previous scalar buffers,
+navigable masks, threat masks, and normalized scalar hints, then emits:
+
+- Phainesis phenomena such as `gap`, `corridorFlow`, `wallFlow`, `stuck`,
+  `threatField`, and `confidenceFusion`
+- Nous vectors such as `gapVector`, `corridorVector`, `wallFlowVector`,
+  `stuckVector`, `threatVector`, and `confidenceVector`
+
+The provider also implements `IWasmSyntheticSensorPipeline`. Use
+`TryAnalyzeAsync` when composing perception work through `AIKernel.Common`
+`Result<T>` / LINQ query syntax. `AnalyzeAsync` remains the DTO-envelope
+compatibility method for callers that expect `WasmSyntheticSensorSnapshot`
+directly.
+
+The provider is still scenario-neutral. Doom-specific names such as doors,
+rooms, weapons, or map landmarks must remain outside this package. Browser or
+scenario JavaScript should act as a thin adapter that forwards resident buffers
+and consumes the returned neutral phenomena/vectors.
+
+The synthetic sensor snapshot also carries a fused WebGPU kernel descriptor.
+Descriptor planning is owned by `IWasmSyntheticSensorKernelPlanner` /
+`WasmSyntheticSensorKernelPlanner` so future synthetic sensor providers can use
+the same resident buffer layout, binding order, and zero-copy metadata instead
+of duplicating WebGPU planning logic.
+
+The shared fused pass shape is:
+
+- `currentFrame`, `previousFrame`, `navigableMask`, `threatMask`, and
+  `sensorScalars` are explicit resident inputs with binding indices.
+- `phenomena` and `vectors` are explicit storage outputs.
+- Workgroups default to `16x16x1`, and metadata marks the pass as
+  `fusedPass=true` and `zeroCopyPreferred=true`.
+
+This is intentional. Hosts should keep framebuffer, mask, flow, and sensor
+scalar data resident where possible, then dispatch one fused low-layer pass for
+Phainesis/Nous extraction instead of bouncing intermediate buffers through
+JavaScript or CPU memory.
 
 ## Sensor OS Alignment
 

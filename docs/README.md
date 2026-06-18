@@ -69,8 +69,9 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.2 is the current canonical integration line. Use
-`0.1.2-dev{build-number}` for local NuGet package references and
+Version 0.1.2 remains the canonical integration line. AIKernel.Wasm publishes
+the NuGet-only patch line `0.1.2.1` for this repository. Use
+`0.1.2.1-dev{build-number}` for local NuGet package references and
 `0.1.2.dev{build-number}` for local `aikernel-wasm` wheel validation. It provides:
 
 - `AIKernel.Wasm.Runtime`
@@ -85,8 +86,9 @@ Version 0.1.2 is the current canonical integration line. Use
 - WebGPU compute with deterministic CPU fallback through
   `AIKernel.Providers.Standard`
 
-Stable package artifacts are created later in dependency order. Do not create
-stable `0.1.2` packages until the publication task explicitly requests them.
+Stable NuGet package artifacts for AIKernel.Wasm are created as `0.1.2.1`.
+The Python wrapper remains on the synchronized `0.1.2` line unless a separate
+PyPI patch task explicitly requests it.
 
 AIKernel.Wasm depends on AIKernel Core contracts and Providers.Standard fallback
 drivers, but it does not move browser/WASM-specific implementation concerns

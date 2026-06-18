@@ -30,8 +30,8 @@ Monolith は 0.1.x 系の安定化後に、sandboxed runtime layer をより広�
 - `AIKernel.Wasm.Input`
 - `AIKernel.Wasm.WebGpuComputeProvider`
 
-AIKernel.Wasm 0.1.2 は AIKernel.Core / AIKernel.Control /
-AIKernel.Providers 0.1.2 と同じ開発方針に従います。この line は NuGet package と同期 Python wrapper を公開し、local development package には `0.1.2-dev{build-number}` を使います。
+AIKernel.Wasm 0.1.2.1 は AIKernel.Wasm 0.1.2 runtime family の NuGet patch line です。AIKernel.Core / AIKernel.Control /
+AIKernel.Providers 0.1.2 と同じ開発方針に従います。この line は NuGet package と同期 Python wrapper を公開し、local development package には `0.1.2.1-dev{build-number}` を使います。
 PyPI package は作成・公開しません。
 
 ## クイックスタート
@@ -41,11 +41,11 @@ path は Windows / Linux で検証できます。実 browser WebGPU validation �
 manual check として扱います。
 
 ```bash
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2
-dotnet add package AIKernel.Wasm.Display --version 0.1.2
-dotnet add package AIKernel.Wasm.Input --version 0.1.2
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
 ```
 
 process、memory、stdin、file system、event、audio、screenshot、save-state、

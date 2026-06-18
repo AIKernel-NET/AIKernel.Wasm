@@ -71,8 +71,9 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.2 は現在の canonical integration line です。local NuGet package reference
-には `0.1.2-dev{build-number}`、local `aikernel-wasm` wheel validation には
+Version 0.1.2 は現在の canonical integration line のままです。AIKernel.Wasm は
+この repository の NuGet 限定 patch line として `0.1.2.1` を公開します。local NuGet package reference
+には `0.1.2.1-dev{build-number}`、local `aikernel-wasm` wheel validation には
 `0.1.2.dev{build-number}` を使います。次を提供します。
 
 - `AIKernel.Wasm.Runtime`
@@ -87,8 +88,9 @@ Version 0.1.2 は現在の canonical integration line です。local NuGet packa
 - `AIKernel.Providers.Standard` 経由の deterministic CPU fallback 付き
   WebGPU compute
 
-stable package artifact は依存関係順に後で作成します。publication task が明示的に要求する
-まで、stable `0.1.2` package は作成しません。
+AIKernel.Wasm の stable NuGet package artifact は `0.1.2.1` として作成します。
+Python wrapper は、別途 PyPI patch task が明示されない限り、同期済み `0.1.2`
+line のまま維持します。
 
 AIKernel.Wasm は AIKernel Core contract と Providers.Standard fallback driver に
 依存しますが、browser / WASM 固有の実装責務を Core へ戻しません。

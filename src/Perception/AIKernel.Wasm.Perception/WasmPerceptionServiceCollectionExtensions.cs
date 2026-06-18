@@ -27,6 +27,14 @@ public static class WasmPerceptionServiceCollectionExtensions
         services.TryAddSingleton<WasmResidentPerceptionAlgorithmLibrary>();
         services.TryAddSingleton<IWasmResidentPerceptionAlgorithmLibrary>(
             provider => provider.GetRequiredService<WasmResidentPerceptionAlgorithmLibrary>());
+        services.TryAddSingleton<WasmSyntheticSensorKernelPlanner>();
+        services.TryAddSingleton<IWasmSyntheticSensorKernelPlanner>(
+            provider => provider.GetRequiredService<WasmSyntheticSensorKernelPlanner>());
+        services.TryAddSingleton<WasmSyntheticSensorProvider>();
+        services.TryAddSingleton<IWasmSyntheticSensorProvider>(
+            provider => provider.GetRequiredService<WasmSyntheticSensorProvider>());
+        services.TryAddSingleton<IWasmSyntheticSensorPipeline>(
+            provider => provider.GetRequiredService<WasmSyntheticSensorProvider>());
         services.TryAddSingleton<WasmObservationProvider>();
         services.TryAddSingleton<IObservationProvider>(provider => provider.GetRequiredService<WasmObservationProvider>());
 

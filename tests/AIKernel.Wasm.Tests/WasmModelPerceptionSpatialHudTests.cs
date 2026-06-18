@@ -1,5 +1,6 @@
 namespace AIKernel.Wasm.Tests;
 
+using AIKernel.Common.Results;
 using AIKernel.Dtos.Frame;
 using AIKernel.Dtos.Perception;
 using AIKernel.Dtos.Providers;
@@ -296,6 +297,139 @@ public sealed class WasmModelPerceptionSpatialHudTests
         Assert.True(spectrum.Succeeded);
         Assert.Equal("audio-fft-spectrum", spectrum.Kernel.AlgorithmName);
         Assert.NotEmpty(spectrum.Magnitudes);
+    }
+
+    /// <summary>
+    /// [EN] Verifies WASM synthetic sensors emit Phainesis phenomena and Nous vectors without scenario semantics.
+    /// [JA] WASM 合成 sensor が scenario semantics なしで Phainesis 現象と Nous ベクトルを出力することを検証します。
+    /// </summary>
+    [Fact]
+    public async Task WasmSyntheticSensorProvider_ResidentBuffers_ReturnsPhenomenaAndVectors()
+    {
+        var provider = new WasmSyntheticSensorProvider();
+
+        var result = await provider.AnalyzeAsync(
+            new WasmSyntheticSensorRequest
+            {
+                RequestId = "synthetic",
+                PreviousFrame = new WasmScalarBuffer
+                {
+                    Width = 3,
+                    Height = 3,
+                    Values = [0, 0, 0, 0, 1, 0, 0, 0, 0]
+                },
+                CurrentFrame = new WasmScalarBuffer
+                {
+                    Width = 3,
+                    Height = 3,
+                    Values = [0, 0, 0, 0, 0, 1, 0, 0, 0]
+                },
+                NavigableMask = new WasmScalarBuffer
+                {
+                    Width = 3,
+                    Height = 3,
+                    Values = [0, 0, 1, 0, 0.5, 1, 0, 0, 0.8]
+                },
+                ThreatMask = new WasmScalarBuffer
+                {
+                    Width = 3,
+                    Height = 3,
+                    Values = [0, 0, 0, 0, 0, 0.9, 0, 0, 0]
+                },
+                SensorScalars = new Dictionary<string, double>(StringComparer.Ordinal)
+                {
+                    ["motionStallScore"] = 0.62,
+                    ["headingConfidence"] = 0.7,
+                    ["visualReliability"] = 0.6
+                }
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal("synthetic", result.SnapshotId);
+        Assert.Contains(result.Phenomena, phenomenon => phenomenon.Name == "gap" && phenomenon.Axis == "Logos" && phenomenon.Active);
+        Assert.Contains(result.Phenomena, phenomenon => phenomenon.Name == "corridorFlow" && phenomenon.Axis == "Logos");
+        Assert.Contains(result.Phenomena, phenomenon => phenomenon.Name == "threatField" && phenomenon.Axis == "Pathos" && phenomenon.Active);
+        Assert.Contains(result.Phenomena, phenomenon => phenomenon.Name == "stuck" && phenomenon.Axis == "Logos" && phenomenon.Active);
+        Assert.Contains(result.Phenomena, phenomenon => phenomenon.Name == "confidenceFusion" && phenomenon.Axis == "Meta");
+        Assert.Contains(result.Vectors, vector => vector.Name == "gapVector" && vector.Axis == "Logos" && vector.X > 0);
+        Assert.Contains(result.Vectors, vector => vector.Name == "threatVector" && vector.Axis == "Pathos" && vector.X < 0);
+        Assert.Contains(result.Vectors, vector => vector.Name == "confidenceVector" && vector.Axis == "Meta");
+        Assert.Equal("dense-optical-flow", result.FlowKernel.AlgorithmName);
+        Assert.Equal("synthetic-sensor-fusion", result.SyntheticKernel.AlgorithmName);
+        Assert.Equal("resident_perception_synthetic_sensor_fusion", result.SyntheticKernel.ShaderName);
+        Assert.Equal(16, result.SyntheticKernel.WorkgroupSizeX);
+        Assert.Contains(result.SyntheticKernel.Inputs, input => input.Binding == 2 && input.Name == "navigableMask" && input.Resident);
+        Assert.Contains(result.SyntheticKernel.Outputs, output => output.Binding == 6 && output.Access == "read_write");
+        Assert.Equal("true", result.SyntheticKernel.Metadata["fusedPass"]);
+    }
+
+    /// <summary>
+    /// [EN] Verifies synthetic sensor kernel planning is reusable and deterministic.
+    /// [JA] 合成 sensor kernel planning が再利用可能で deterministic であることを検証します。
+    /// </summary>
+    [Fact]
+    public void WasmSyntheticSensorKernelPlanner_Request_ReturnsReusableResidentDescriptor()
+    {
+        var planner = new WasmSyntheticSensorKernelPlanner();
+
+        var descriptor = planner.CreateKernelDescriptor(
+            new WasmSyntheticSensorRequest
+            {
+                CurrentFrame = new WasmScalarBuffer
+                {
+                    Width = 17,
+                    Height = 9,
+                    Values = Enumerable.Repeat(0.0, 17 * 9).ToArray()
+                },
+                NavigableMask = new WasmScalarBuffer
+                {
+                    Width = 17,
+                    Height = 9,
+                    Values = Enumerable.Repeat(0.0, 17 * 9).ToArray()
+                },
+                SensorScalars = new Dictionary<string, double>(StringComparer.Ordinal)
+                {
+                    ["headingConfidence"] = 0.8
+                }
+            },
+            phenomenonCount: 6,
+            vectorCount: 6);
+
+        Assert.Equal("synthetic-sensor-fusion", descriptor.AlgorithmName);
+        Assert.Equal(2, descriptor.DispatchSizeX);
+        Assert.Equal(1, descriptor.DispatchSizeY);
+        Assert.Contains(descriptor.Inputs, input => input.Binding == 4 && input.Usage == "uniform");
+        Assert.Contains(descriptor.Outputs, output => output.Binding == 5 && output.ByteLength == 6 * 8 * sizeof(float));
+        Assert.Equal("true", descriptor.Metadata["zeroCopyPreferred"]);
+    }
+
+    /// <summary>
+    /// [EN] Verifies synthetic sensor analysis composes through monadic LINQ.
+    /// [JA] 合成 sensor analysis が monad LINQ で合成できることを検証します。
+    /// </summary>
+    [Fact]
+    public async Task WasmSyntheticSensorPipeline_TryAnalyzeAsync_ComposesWithLinq()
+    {
+        IWasmSyntheticSensorPipeline pipeline = new WasmSyntheticSensorProvider();
+
+        var result =
+            await (from snapshot in pipeline.TryAnalyzeAsync(
+                    new WasmSyntheticSensorRequest
+                    {
+                        RequestId = "pipeline",
+                        NavigableMask = new WasmScalarBuffer
+                        {
+                            Width = 3,
+                            Height = 3,
+                            Values = [0, 0, 1, 0, 0.5, 1, 0, 0, 0.8]
+                        }
+                    },
+                    TestContext.Current.CancellationToken)
+                   select snapshot.SyntheticKernel.AlgorithmName);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("synthetic-sensor-fusion", result.Value);
     }
 
     /// <summary>
