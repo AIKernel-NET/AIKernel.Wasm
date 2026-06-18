@@ -31,9 +31,11 @@ Check NuGet package metadata:
 - README inclusion
 - release notes
 
-For v0.1.2 integration, validate the `aikernel-wasm` wheel with
-`0.1.2.dev{buildNumber}`. Do not create stable `0.1.2` artifacts until the
-publication task explicitly requests them.
+For the v0.1.2.1 NuGet patch, publish AIKernel.Wasm package artifacts as
+`0.1.2.1` while keeping AIKernel.NET, AIKernel.Core, and AIKernel.Providers
+dependencies on `0.1.2`. Validate the `aikernel-wasm` wheel with
+`0.1.2.dev{buildNumber}` unless a separate PyPI patch task explicitly requests
+a Python wrapper update.
 
 ## Documentation
 

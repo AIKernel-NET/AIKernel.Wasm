@@ -32,9 +32,10 @@ line stabilizes.
 - `AIKernel.Wasm.Input`
 - `AIKernel.Wasm.WebGpuComputeProvider`
 
-AIKernel.Wasm 0.1.2 follows the same development policy as AIKernel.Core,
+AIKernel.Wasm 0.1.2.1 is the NuGet patch line for the AIKernel.Wasm 0.1.2
+runtime family. It follows the same development policy as AIKernel.Core,
 AIKernel.Control, and AIKernel.Providers 0.1.2. The line publishes NuGet packages and synchronized Python wrappers, and uses
-`0.1.2-dev{build-number}` for local development packages, and does not create
+`0.1.2.1-dev{build-number}` for local development packages, and does not create
 or publish a PyPI package.
 
 ## Quick Start
@@ -44,11 +45,11 @@ paths work on Windows and Linux; real browser WebGPU validation remains a
 separate manual check.
 
 ```bash
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2
-dotnet add package AIKernel.Wasm.Display --version 0.1.2
-dotnet add package AIKernel.Wasm.Input --version 0.1.2
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
 ```
 
 Use `AIKernel.Wasm.Runtime` for process, memory, stdin, file system, event,

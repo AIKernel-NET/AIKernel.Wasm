@@ -36,15 +36,15 @@ validation は別の operator check です。
 NuGet package:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2
-dotnet add package AIKernel.Wasm.Display --version 0.1.2
-dotnet add package AIKernel.Wasm.Input --version 0.1.2
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
 ```
 
 local development package では、shared local NuGet source の
-`0.1.2-dev{build-number}` を使います。
+`0.1.2.1-dev{build-number}` を使います。
 
 Python validation では、stable publication が明示的に開始されるまで
 `0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を使います。

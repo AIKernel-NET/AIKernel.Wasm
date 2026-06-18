@@ -31,9 +31,10 @@ NuGet package metadata の確認項目:
 - README inclusion
 - release notes
 
-v0.1.2 integration では、`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を
-検証します。publication task が明示的に要求するまで、stable `0.1.2` artifact は
-作成しません。
+v0.1.2.1 NuGet patch では、AIKernel.Wasm package artifact を `0.1.2.1`
+として公開します。AIKernel.NET、AIKernel.Core、AIKernel.Providers への依存は
+`0.1.2` のまま維持します。Python wrapper は、別途 PyPI patch task が明示されない限り
+`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel で検証します。
 
 ## Documentation
 

@@ -8,9 +8,9 @@ runtime and WebGPU package surfaces.
 ## Prerequisites
 
 - .NET 10 SDK
-- AIKernel.NET contract packages `0.1.2-dev{buildNumber}`
-- AIKernel.Core local package `0.1.2-dev{buildNumber}`
-- AIKernel.Providers local package `0.1.2-dev{buildNumber}`
+- AIKernel.NET contract packages `0.1.2`
+- AIKernel.Core package `0.1.2`
+- AIKernel.Providers package `0.1.2`
 
 Real browser WebGPU validation is not required for the default checks. The
 automated tests use deterministic CPU fallback so they can run on Windows and
@@ -65,6 +65,9 @@ The package line is:
 - NuGet: `AIKernel.Wasm.Input`
 - NuGet: `AIKernel.Wasm.WebGpuComputeProvider`
 
-Version 0.1.2 is the current canonical integration line. Use
-`0.1.2-dev{buildNumber}` NuGet packages and `0.1.2.dev{buildNumber}`
-`aikernel-wasm` wheels for local validation until stable publication is opened.
+Version 0.1.2 is the current canonical integration line. AIKernel.Wasm uses
+the NuGet patch line `0.1.2.1` while depending on AIKernel.NET,
+AIKernel.Core, and AIKernel.Providers `0.1.2`. Use
+`0.1.2.1-dev{buildNumber}` NuGet packages for local Wasm validation and
+`0.1.2.dev{buildNumber}` `aikernel-wasm` wheels unless a separate PyPI patch
+task is opened.

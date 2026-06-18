@@ -114,17 +114,29 @@ public sealed record WasmResidentKernelDescriptor
 /// </summary>
 public sealed record WasmResidentBufferLayout
 {
+    /// <summary>[EN] Gets the WebGPU bind-group binding index. [JA] WebGPU bind-group binding index を取得します。</summary>
+    public int Binding { get; init; }
+
     /// <summary>[EN] Gets the buffer name. [JA] buffer 名を取得します。</summary>
     public string Name { get; init; } = string.Empty;
 
     /// <summary>[EN] Gets the element type. [JA] element type を取得します。</summary>
     public string ElementType { get; init; } = "f32";
 
+    /// <summary>[EN] Gets the WebGPU usage hint such as storage, uniform, or readback. [JA] storage / uniform / readback などの WebGPU usage hint を取得します。</summary>
+    public string Usage { get; init; } = "storage";
+
+    /// <summary>[EN] Gets the shader access hint such as read or read_write. [JA] read / read_write などの shader access hint を取得します。</summary>
+    public string Access { get; init; } = "read";
+
     /// <summary>[EN] Gets the shape string. [JA] shape string を取得します。</summary>
     public string Shape { get; init; } = string.Empty;
 
     /// <summary>[EN] Gets the stride string. [JA] stride string を取得します。</summary>
     public string? Stride { get; init; }
+
+    /// <summary>[EN] Gets the expected byte length when known. [JA] 既知の場合に expected byte length を取得します。</summary>
+    public int? ByteLength { get; init; }
 
     /// <summary>[EN] Gets whether this buffer can remain resident in VRAM. [JA] この buffer が VRAM resident のままでよいかを取得します。</summary>
     public bool Resident { get; init; } = true;
@@ -541,9 +553,12 @@ public sealed class WasmResidentPerceptionAlgorithmLibrary : IWasmResidentPercep
     private static WasmResidentBufferLayout Layout(string name, string shape)
         => new()
         {
+            Binding = string.Equals(name, "output", StringComparison.Ordinal) ? 1 : 0,
             Name = name,
             Shape = shape,
             ElementType = shape.Contains("u8", StringComparison.Ordinal) ? "u8" : "f32",
+            Usage = string.Equals(name, "output", StringComparison.Ordinal) ? "storage" : "storage",
+            Access = string.Equals(name, "output", StringComparison.Ordinal) ? "read_write" : "read",
             Resident = true
         };
 

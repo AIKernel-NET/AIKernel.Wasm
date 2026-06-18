@@ -36,14 +36,14 @@ validation is a separate operator check.
 NuGet packages:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2
-dotnet add package AIKernel.Wasm.Display --version 0.1.2
-dotnet add package AIKernel.Wasm.Input --version 0.1.2
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
 ```
 
-For local development packages, use `0.1.2-dev{build-number}` from the shared
+For local development packages, use `0.1.2.1-dev{build-number}` from the shared
 local NuGet source.
 
 Python validation uses `0.1.2.dev{buildNumber}` `aikernel-wasm` wheels until

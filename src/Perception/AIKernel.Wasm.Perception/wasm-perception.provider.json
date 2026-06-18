@@ -3,12 +3,13 @@
   "manifestVersion": "1.0",
   "providerId": "wasm.perception",
   "name": "WASM Perception Providers",
-  "version": "0.1.1.1",
+  "version": "0.1.2.1",
   "assemblyName": "AIKernel.Wasm.Perception",
   "packageId": "AIKernel.Wasm.Perception",
   "capabilities": [
     "wasm.perception.frame",
     "wasm.perception.auditory",
+    "wasm.perception.synthetic-sensors",
     "wasm.observation"
   ],
   "priority": 40,
