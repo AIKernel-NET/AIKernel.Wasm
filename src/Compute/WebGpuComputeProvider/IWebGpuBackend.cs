@@ -1,4 +1,4 @@
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 using AIKernel.Abstractions.Compute;
 using System.Runtime.InteropServices;
@@ -30,25 +30,53 @@ public interface IWebGpuBackend
 
 internal sealed class NullWebGpuBackend : IWebGpuBackend
 {
+    /// <summary>
+    /// EN: Executes Instance.
+    /// [EN] Documents this public package API member. [JA] Instance を実行します。
+    /// </summary>
     public static readonly NullWebGpuBackend Instance = new();
 
     private NullWebGpuBackend()
     {
     }
+    /// <summary>
+    /// EN: Gets IsAvailable.
+    /// [EN] Documents this public package API member. [JA] IsAvailable を取得します。
+    /// </summary>
 
     public bool IsAvailable => false;
+    /// <summary>
+    /// EN: Executes InitializeAsync.
+    /// [EN] Documents this public package API member. [JA] InitializeAsync を実行します。
+    /// </summary>
 
     public Task InitializeAsync(CancellationToken cancellationToken = default)
         => Task.CompletedTask;
+    /// <summary>
+    /// EN: Executes CreateBufferAsync.
+    /// [EN] Documents this public package API member. [JA] CreateBufferAsync を実行します。
+    /// </summary>
 
     public Task<object?> CreateBufferAsync(int size)
         => Task.FromResult<object?>(null);
+    /// <summary>
+    /// EN: Executes WriteBufferAsync.
+    /// [EN] Documents this public package API member. [JA] WriteBufferAsync を実行します。
+    /// </summary>
 
     public Task WriteBufferAsync(ComputeBuffer buffer, ReadOnlyMemory<byte> data)
         => Task.CompletedTask;
+    /// <summary>
+    /// EN: Executes ReadBufferAsync.
+    /// [EN] Documents this public package API member. [JA] ReadBufferAsync を実行します。
+    /// </summary>
 
     public Task ReadBufferAsync(ComputeBuffer buffer, Memory<byte> destination)
         => Task.CompletedTask;
+    /// <summary>
+    /// EN: Executes ExecuteKernelAsync.
+    /// [EN] Documents this public package API member. [JA] ExecuteKernelAsync を実行します。
+    /// </summary>
 
     public Task ExecuteKernelAsync(ComputeKernel kernel, IReadOnlyList<ComputeBuffer> buffers)
         => throw new NotSupportedException("A WebGPU backend binding is not available.");
@@ -58,7 +86,7 @@ internal sealed class NullWebGpuBackend : IWebGpuBackend
 /// [EN] Native WebGPU backend adapter for host-side bindings.
 /// [JA] host-side binding 向けの native WebGPU backend adapter です。
 /// </summary>
-public sealed class WebGpuNativeBackend : IWebGpuBackend
+public class WebGpuNativeBackend : IWebGpuBackend
 {
     /// <summary>[EN] Returns whether the native backend is available. [JA] native backend が利用可能かどうかを返します。</summary>
     public bool IsAvailable { get; private set; }
@@ -92,7 +120,7 @@ public sealed class WebGpuNativeBackend : IWebGpuBackend
 /// [EN] Browser/WASM WebGPU backend adapter for JavaScript interop.
 /// [JA] JavaScript interop 向けの browser/WASM WebGPU backend adapter です。
 /// </summary>
-public sealed class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend
+public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend
 {
     private readonly IWebGpuJsInterop? _jsInterop = jsInterop;
     private readonly Dictionary<ComputeBuffer, byte[]> _buffers = new();
@@ -217,7 +245,7 @@ public interface IWebGpuJsInterop
 /// [EN] In-memory handle representing a WASM WebGPU buffer.
 /// [JA] WASM WebGPU buffer を表す in-memory handle です。
 /// </summary>
-public sealed class WebGpuWasmBuffer
+public class WebGpuWasmBuffer
 {
     /// <summary>
     /// [EN] Initializes a WASM WebGPU buffer handle.

@@ -18,6 +18,8 @@ AIKernel.Wasm は browser または WASM execution に固有の実装詳細を�
 - WASM module loading と runtime context state
 - deterministic linear memory と save-state handling
 - WASM process 向け stdin、file、event、audio、screenshot、time service
+- browser audio、framebuffer、frame-source、分解済み virtual input の
+  boundary package
 - browser / WebGPU backend integration
 - Core `IProcess` / `IProcessHost` への process lifecycle mapping
 
@@ -68,6 +70,12 @@ AIKernel.Wasm/
   src/
     Runtime/
       AIKernel.Wasm.Runtime/
+    Audio/
+      AIKernel.Wasm.Audio/
+    Display/
+      AIKernel.Wasm.Display/
+    Input/
+      AIKernel.Wasm.Input/
     Compute/
       WebGpuComputeProvider/
   python/

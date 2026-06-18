@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.Perception</Title>
+    <PackageId>AIKernel.Wasm.Perception</PackageId>
+    <Description>EN: AIKernel WASM perception package for browser-neutral frame and WebAudio signal extraction.
+
+JA: browser-neutral な frame / WebAudio signal extraction を提供する AIKernel WASM perception package です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Audio\AIKernel.Wasm.Audio\AIKernel.Wasm.Audio.csproj" />
+    <ProjectReference Include="..\..\Display\AIKernel.Wasm.Display\AIKernel.Wasm.Display.csproj" />
+    <ProjectReference Include="..\..\Runtime\AIKernel.Wasm.Runtime\AIKernel.Wasm.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wasm-perception.provider.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="providers\" />
+  </ItemGroup>
+</Project>

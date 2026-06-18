@@ -4,7 +4,7 @@
 
 この guide は、AIKernel.Wasm を application や operator workflow から利用する
 developer 向けです。内部 architecture ではなく、public runtime、process、
-WebGPU、Python surface の使い方に焦点を当てます。
+WebGPU surface の使い方に焦点を当てます。
 
 Wasm は AIOS SDK の sandboxed runtime layer です。AIOS distribution に軽量 VM 的な
 process isolation、linear memory、WASI-style file bridge、screenshot / audio
@@ -26,7 +26,7 @@ AIKernel.Wasm により、AIKernel host は次を実行できます。
 - framebuffer / audio buffer の capture
 - memory state の save / restore
 - deterministic CPU fallback 付き WebGPU compute
-- Python から同じ public surface を inspect
+- C# から deterministic runtime / WebGPU surface を inspect
 
 default automated path は browser GPU なしで動作します。Browser WebGPU E2E
 validation は別の operator check です。
@@ -36,19 +36,18 @@ validation は別の operator check です。
 NuGet package:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2
+dotnet add package AIKernel.Wasm.Display --version 0.1.2
+dotnet add package AIKernel.Wasm.Input --version 0.1.2
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
 ```
 
-Python package:
+local development package では、shared local NuGet source の
+`0.1.2-dev{build-number}` を使います。
 
-```powershell
-py -m pip install aikernel-wasm
-```
-
-local development では repository build output を使うか、
-`AIKERNEL_WASM_ASSEMBLY_PATH` を設定し、Python wrapper が managed assembly を
-見つけられるようにします。
+Python validation では、stable publication が明示的に開始されるまで
+`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を使います。
 
 ## Create a Runtime Context
 
@@ -187,27 +186,47 @@ time.Resume();
 
 Time control は deterministic で、test が wall-clock に依存しないようにします。
 
-## Capture Screenshot and Audio Buffers
+## Capture Screenshot, Display, Audio, and Input Surfaces
 
 ```csharp
+using AIKernel.Wasm.Audio;
+using AIKernel.Wasm.Display;
+using AIKernel.Wasm.Input;
 using AIKernel.Wasm.Runtime;
+using AIKernel.Dtos.Frame;
+using AIKernel.Dtos.Input;
+using AIKernel.Dtos.Providers;
 
 var context = new WasmRuntimeContext();
 var screenshot = new WasmScreenshotProvider(context);
 var audio = new WasmAudioProvider(context);
+var frameSource = new WasmFrameSourceProvider(context);
+var input = new WasmInputProvider(context);
 
 byte[] frame = await screenshot.CaptureAsync();
 byte[] audioBytes = audio.LatestAudioBuffer();
+var execution = new ProviderExecutionContext { ExecutionId = "frame-1" };
+FrameSnapshot? snapshot = null;
+await foreach (var captured in frameSource.CaptureAsync(
+    new FrameCaptureRequest { SourceId = "runtime", MaxFrames = 1 },
+    execution,
+    CancellationToken.None))
+{
+    snapshot = captured;
+}
+
+VirtualInputResult sent = await input.SendKeysAsync(new SendKeysRequest { Keys = ["Enter"] }, CancellationToken.None);
 ```
 
-これらの Provider は runtime context に保存された byte を公開します。Browser
-rendering や WebAudio integration は host application の責務です。
+これらの Provider は runtime byte、frame snapshot、decomposed virtual input を
+WASM boundary で公開します。Council vote や Gate decision は生成しません。
+Browser rendering や WebAudio integration は host application の責務です。
 
 ## Run WebGPU Compute with Fallback
 
 ```csharp
 using AIKernel.Abstractions.Compute;
-using AIKernel.Wasm.Comput;
+using AIKernel.Wasm.Compute;
 
 var provider = new WebGpuComputeProvider();
 await provider.InitializeAsync();
@@ -234,7 +253,7 @@ WebGPU backend が利用できない場合、Provider は `CpuComputeProvider` �
 ## Inspect the Capability Descriptor
 
 ```csharp
-using AIKernel.Wasm.Comput;
+using AIKernel.Wasm.Compute;
 
 var provider = new WebGpuComputeProvider();
 var descriptor = provider.ToCapabilityDescriptor();
@@ -249,27 +268,17 @@ Console.WriteLine(string.Join(", ", descriptor.ProvidedOperations));
 - `compute.dispatch`
 - `compute.vector_add`
 
-## Python Usage
+## Python Wrapper Materials
 
-```python
-from aikernel_wasm import WebGpuComputeCapability, wasm_provider_contracts
-
-capability = WebGpuComputeCapability().to_contract()
-print(capability.capability_id)
-print(capability.provided_operations)
-
-for provider in wasm_provider_contracts():
-    print(provider.provider_id, provider.name)
-```
-
-Python wrapper は managed wrapper です。Python 側で WASM execution や WebGPU logic
-を再実装しません。
+Python wrapper material は managed wrapper の reference です。Python 側で WASM
+execution や WebGPU logic を再実装せず、0.1.2 development line では PyPI
+package として配布しません。次の公式 v0.1.2 正典シリーズでは、NuGet と合わせて
+更新済み PyPI package family を公開する前提です。
 
 ## Common Failure Modes
 
 | Symptom | Likely Cause | Action |
 | --- | --- | --- |
-| Python が assembly を見つけられない | package 未 install または build output 不足 | Release build するか `AIKERNEL_WASM_ASSEMBLY_PATH` を設定 |
 | WebGPU が CPU fallback になる | browser/backend binding が利用不可 | CI では fallback を使い、必要なら `IWebGpuJsInterop` を提供 |
 | Memory read が失敗する | offset/length が memory range 外 | access 前に range を検証 |
 | Process が stopped のまま | module 未 load または process 未 start | `WasmProcessOptions` で作成し `StartAsync` を呼ぶ |

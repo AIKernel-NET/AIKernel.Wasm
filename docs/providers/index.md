@@ -50,10 +50,6 @@ WASI-style file surface. It does not perform host file-system writes directly.
 
 `WasmEventProvider` bridges WASM-originated events into AIKernel `IEventBus`.
 
-### WasmAudioProvider
-
-`WasmAudioProvider` stores audio buffer bytes for a browser/WebAudio bridge.
-
 ### WasmScreenshotProvider
 
 `WasmScreenshotProvider` returns framebuffer bytes for capture and diagnostic
@@ -67,6 +63,31 @@ flows.
 
 `WasmTimeProvider` controls deterministic runtime time through pause, resume,
 scale, and tick operations.
+
+## Browser Boundary Providers
+
+### WasmAudioProvider
+
+`WasmAudioProvider` stores runtime audio bytes and keeps optional
+`IWebAudioJsInterop` behind `AIKernel.Wasm.Audio`. Public APIs use neutral
+buffer and timing records rather than platform audio SDK types.
+
+### WasmFramebufferProvider
+
+`WasmFramebufferProvider` exposes the current runtime framebuffer with explicit
+width, height, stride, pixel format, observed timestamp, and content hash
+metadata.
+
+### WasmFrameSourceProvider
+
+`WasmFrameSourceProvider` implements frame capture and virtual surface listing
+for WASM runtime surfaces.
+
+### WasmInputProvider
+
+`WasmInputProvider` accepts decomposed keyboard, pointer, drag, gamepad, and
+input-state requests. It records virtual input packets and publishes runtime
+events, but it does not emit Council votes or Gate decisions.
 
 ## WebGPU Provider
 
@@ -85,7 +106,10 @@ It owns:
 The provider exposes `webgpu.compute` with `compute.dispatch` and
 `compute.vector_add`.
 
-## Python Coverage
+## Python Wrapper
 
-The `aikernel-wasm` Python package exposes wrappers and descriptors for every
-provider in this catalog. It does not re-implement provider logic.
+The `aikernel-wasm` package is part of the 0.1.2 Python wrapper family. It
+exposes wrappers and descriptors without re-implementing WASM, WebGPU,
+WebAudio, or perception logic in Python. Stable wheels are created only after
+the 0.1.2 publication task opens; local validation uses
+`0.1.2.dev<build-number>`.

@@ -4,7 +4,7 @@
 
 This guide is for developers who want to consume AIKernel.Wasm from an
 application or operator workflow. It focuses on the public runtime, process,
-WebGPU, and Python surfaces rather than internal architecture.
+and WebGPU surfaces rather than internal architecture.
 
 Wasm is the AIOS SDK sandboxed runtime layer. Add it when an AIOS distribution
 needs lightweight VM-style process isolation, linear memory, WASI-style file
@@ -26,7 +26,7 @@ AIKernel.Wasm lets an AIKernel host:
 - capture framebuffer and audio buffers
 - save and restore memory state
 - run WebGPU compute with deterministic CPU fallback
-- inspect the same public surface from Python
+- inspect deterministic runtime and WebGPU surfaces from C#
 
 The default automated path works without a browser GPU. Browser WebGPU E2E
 validation is a separate operator check.
@@ -36,18 +36,18 @@ validation is a separate operator check.
 NuGet packages:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2
+dotnet add package AIKernel.Wasm.Display --version 0.1.2
+dotnet add package AIKernel.Wasm.Input --version 0.1.2
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
 ```
 
-Python package:
+For local development packages, use `0.1.2-dev{build-number}` from the shared
+local NuGet source.
 
-```powershell
-py -m pip install aikernel-wasm
-```
-
-During local development, use the repository build output or set
-`AIKERNEL_WASM_ASSEMBLY_PATH` so the Python wrapper can find managed assemblies.
+Python validation uses `0.1.2.dev{buildNumber}` `aikernel-wasm` wheels until
+stable publication is explicitly opened.
 
 ## Create a Runtime Context
 
@@ -186,27 +186,48 @@ time.Resume();
 
 Time control is deterministic and avoids wall-clock dependence in tests.
 
-## Capture Screenshot and Audio Buffers
+## Capture Screenshot, Display, Audio, and Input Surfaces
 
 ```csharp
+using AIKernel.Wasm.Audio;
+using AIKernel.Wasm.Display;
+using AIKernel.Wasm.Input;
 using AIKernel.Wasm.Runtime;
+using AIKernel.Dtos.Frame;
+using AIKernel.Dtos.Input;
+using AIKernel.Dtos.Providers;
 
 var context = new WasmRuntimeContext();
 var screenshot = new WasmScreenshotProvider(context);
 var audio = new WasmAudioProvider(context);
+var frameSource = new WasmFrameSourceProvider(context);
+var input = new WasmInputProvider(context);
 
 byte[] frame = await screenshot.CaptureAsync();
 byte[] audioBytes = audio.LatestAudioBuffer();
+var execution = new ProviderExecutionContext { ExecutionId = "frame-1" };
+FrameSnapshot? snapshot = null;
+await foreach (var captured in frameSource.CaptureAsync(
+    new FrameCaptureRequest { SourceId = "runtime", MaxFrames = 1 },
+    execution,
+    CancellationToken.None))
+{
+    snapshot = captured;
+}
+
+VirtualInputResult sent = await input.SendKeysAsync(new SendKeysRequest { Keys = ["Enter"] }, CancellationToken.None);
 ```
 
-These providers expose bytes stored in the runtime context. Browser rendering or
-WebAudio integration remains the host application's responsibility.
+These providers expose runtime bytes, frame snapshots, and decomposed virtual
+input at the WASM boundary. They do not create Council votes or Gate decisions.
+Browser rendering or WebAudio integration remains the host application's
+responsibility.
 
 ## Run WebGPU Compute with Fallback
 
 ```csharp
 using AIKernel.Abstractions.Compute;
-using AIKernel.Wasm.Comput;
+using AIKernel.Wasm.Compute;
 
 var provider = new WebGpuComputeProvider();
 await provider.InitializeAsync();
@@ -233,7 +254,7 @@ If the WebGPU backend is unavailable, the provider delegates to
 ## Inspect the Capability Descriptor
 
 ```csharp
-using AIKernel.Wasm.Comput;
+using AIKernel.Wasm.Compute;
 
 var provider = new WebGpuComputeProvider();
 var descriptor = provider.ToCapabilityDescriptor();
@@ -248,27 +269,16 @@ Expected capability:
 - `compute.dispatch`
 - `compute.vector_add`
 
-## Python Usage
+## Python Wrapper Materials
 
-```python
-from aikernel_wasm import WebGpuComputeCapability, wasm_provider_contracts
-
-capability = WebGpuComputeCapability().to_contract()
-print(capability.capability_id)
-print(capability.provided_operations)
-
-for provider in wasm_provider_contracts():
-    print(provider.provider_id, provider.name)
-```
-
-The Python wrapper is a managed wrapper. It does not execute WASM or WebGPU
-logic in Python.
+The Python wrapper material is a managed-wrapper reference. It does not execute
+WASM or WebGPU logic in Python; the synchronized wrapper is packaged through the 0.1.2 release flow. The next official v0.1.2 canonical series is expected to
+publish the refreshed PyPI package family together with NuGet.
 
 ## Common Failure Modes
 
 | Symptom | Likely Cause | Action |
 | --- | --- | --- |
-| Python cannot find assemblies | Package not installed or build output missing | Build Release or set `AIKERNEL_WASM_ASSEMBLY_PATH` |
 | WebGPU uses CPU fallback | Browser/backend binding unavailable | Use fallback for CI or provide `IWebGpuJsInterop` |
 | Memory read fails | Offset/length outside memory range | Validate range before access |
 | Process remains stopped | Module not loaded or process not started | Create with `WasmProcessOptions` and call `StartAsync` |

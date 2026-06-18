@@ -1,4 +1,4 @@
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 /// <summary>
 /// [EN] Built-in sample WGSL kernels for WebGPU compute tests and examples.

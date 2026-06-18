@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Title>AIKernel.Wasm.Input</Title>
+    <PackageId>AIKernel.Wasm.Input</PackageId>
+    <Description>EN: AIKernel WASM input package for keyboard, pointer, gamepad, and virtual input injection.
+
+JA: keyboard、pointer、gamepad、virtual input injection を提供する AIKernel WASM input package です。</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
+    <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Runtime\AIKernel.Wasm.Runtime\AIKernel.Wasm.Runtime.csproj" />
+  </ItemGroup>
+</Project>

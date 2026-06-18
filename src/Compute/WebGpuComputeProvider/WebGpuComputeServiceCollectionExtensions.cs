@@ -4,7 +4,7 @@ using AIKernel.Abstractions.Providers;
 using AIKernel.Providers.Standard.Compute;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 /// <summary>
 /// [EN] Dependency-injection extensions for WebGpuComputeProvider registration.

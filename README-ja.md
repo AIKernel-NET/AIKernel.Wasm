@@ -25,8 +25,14 @@ Monolith は 0.1.x 系の安定化後に、sandboxed runtime layer をより広�
 ## Package
 
 - `AIKernel.Wasm.Runtime`
+- `AIKernel.Wasm.Audio`
+- `AIKernel.Wasm.Display`
+- `AIKernel.Wasm.Input`
 - `AIKernel.Wasm.WebGpuComputeProvider`
-- `aikernel-wasm`
+
+AIKernel.Wasm 0.1.2 は AIKernel.Core / AIKernel.Control /
+AIKernel.Providers 0.1.2 と同じ開発方針に従います。この line は NuGet package と同期 Python wrapper を公開し、local development package には `0.1.2-dev{build-number}` を使います。
+PyPI package は作成・公開しません。
 
 ## クイックスタート
 
@@ -35,20 +41,22 @@ path は Windows / Linux で検証できます。実 browser WebGPU validation �
 manual check として扱います。
 
 ```bash
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.1
-```
-
-Python host:
-
-```bash
-pip install aikernel-wasm
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.2
+dotnet add package AIKernel.Wasm.Audio --version 0.1.2
+dotnet add package AIKernel.Wasm.Display --version 0.1.2
+dotnet add package AIKernel.Wasm.Input --version 0.1.2
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2
 ```
 
 process、memory、stdin、file system、event、audio、screenshot、save-state、
 time Provider を使う場合は `AIKernel.Wasm.Runtime` を導入してください。
-WebGPU compute boundary が必要な host だけ
-`AIKernel.Wasm.WebGpuComputeProvider` を追加します。
+browser audio boundary、frame surface、virtual input boundary が必要な場合は
+`AIKernel.Wasm.Audio`、`AIKernel.Wasm.Display`、`AIKernel.Wasm.Input` を追加します。
+WebGPU compute boundary が必要な host だけ `AIKernel.Wasm.WebGpuComputeProvider`
+を追加します。
+
+`python/` の Python 関連資料は、この update line の同期 wrapper 資料です。
+0.1.2 release flow で同期 Python wrapper として検証・公開します。
 
 ## Documentation
 
@@ -58,6 +66,7 @@ WebGPU compute boundary が必要な host だけ
 - [Provider Catalog](docs/providers/index-ja.md)
 - [Runtime Providers](docs/runtime/index-ja.md)
 - [WebGPU Compute](docs/webgpu/index-ja.md)
+- [Concept Elevation Notes / 概念昇格ノート](docs/development/concept-elevation-ja.md)
 - [Manifests and Metadata](docs/manifests/index-ja.md)
 - [Python Wrapper](docs/python/index-ja.md)
 - [Testing](docs/testing/index-ja.md)
@@ -103,6 +112,17 @@ save-state snapshot、制御可能な deterministic clock を保持します。
 現在の runtime model は deterministic で、Windows / Linux のどちらでも test 可能です。
 browser 固有の host binding は Core contract を変更せずに境界へ差し込めます。
 
+## Browser Boundary Package
+
+`AIKernel.Wasm.Audio`、`AIKernel.Wasm.Display`、`AIKernel.Wasm.Input` は、
+browser-facing runtime surface を base runtime package から分離します。
+
+- `WasmAudioProvider` は WebAudio interop を audio boundary の背後に閉じます。
+- `WasmFramebufferProvider` と `WasmFrameSourceProvider` は frame index、hash、
+  timestamp、dimension、pixel format metadata 付きの frame snapshot を公開します。
+- `WasmInputProvider` は Gate / Council decision を生成せず、keyboard、pointer、
+  drag、state request に分解された virtual input を受け取ります。
+
 ## WebGPU Compute
 
 `WebGpuComputeProvider` は `src/Compute/WebGpuComputeProvider` 配下にあり、
@@ -130,19 +150,19 @@ WebGPU が利用できない場合、Provider は
 
 ## Python Wrapper
 
-`python/` には `aikernel-wasm` Python package を配置しています。pythonnet
-経由の薄い managed wrapper として、public な WASM runtime Provider と WebGPU
-compute Provider を公開します。
+`python/` には同期された `aikernel-wasm` Python wrapper 資料を配置して
+います。pythonnet 経由の薄い managed wrapper として、public な WASM runtime
+Provider と WebGPU compute Provider を公開する方法を示します。
 
 - `WasmRuntime`, `WasmRuntimeContext`
 - `WasmProcessProvider`, `WasmMemoryProvider`, `WasmStdinProvider`
 - `WasmFileSystemProvider`, `WasmEventProvider`, `WasmAudioProvider`
 - `WasmScreenshotProvider`, `WasmSaveStateProvider`, `WasmTimeProvider`
+- `WasmFramebufferProvider`, `WasmFrameSourceProvider`, `WasmInputProvider`
 - `WebGpuComputeProvider`, `WebGpuComputeInvoker`, `WebGpuComputeCapability`
 
-この wrapper は WASM runtime semantics を Python 側で再実装しません。
-`aikernel_wasm/native` の同梱 assembly または local NuGet package から assembly
-を解決し、追加 root は `AIKERNEL_WASM_ASSEMBLY_PATH` で指定できます。
+この wrapper は WASM runtime semantics を Python 側で再実装しません。0.1.2
+development line では同期 Python wrapper として検証・公開します。
 
 ## Control Integration
 

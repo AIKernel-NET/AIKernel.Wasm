@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "manifestVersion": "1.0",
+  "providerId": "wasm.hud",
+  "name": "WASM HUD DTO Providers",
+  "version": "0.1.1.1",
+  "assemblyName": "AIKernel.Wasm.Hud",
+  "packageId": "AIKernel.Wasm.Hud",
+  "capabilities": [
+    "wasm.hud.signal",
+    "wasm.overlay.annotation"
+  ],
+  "priority": 60,
+  "tags": [
+    "wasm",
+    "hud",
+    "overlay",
+    "dto"
+  ],
+  "metadata": {
+    "boundary": "wasm",
+    "renders": "false"
+  }
+}

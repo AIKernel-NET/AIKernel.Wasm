@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0",
+  "manifestVersion": "1.0",
+  "providerId": "wasm.webgpu.model",
+  "name": "WASM WebGPU Resident Model Provider",
+  "version": "0.1.1.1",
+  "assemblyName": "AIKernel.Wasm.Models",
+  "packageId": "AIKernel.Wasm.Models",
+  "providerType": "AIKernel.Wasm.Models.WebGpuResidentModelProvider",
+  "capabilities": [
+    "wasm.model.execution",
+    "wasm.webgpu.dispatch"
+  ],
+  "priority": 30,
+  "tags": [
+    "wasm",
+    "webgpu",
+    "resident-model",
+    "descriptor-driven"
+  ],
+  "metadata": {
+    "boundary": "wasm",
+    "modelBinding": "descriptor-driven",
+    "zeroCopy": "optional"
+  }
+}

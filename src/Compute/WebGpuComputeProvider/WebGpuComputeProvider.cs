@@ -8,13 +8,13 @@ using AIKernel.Dtos.Core;
 using AIKernel.Dtos.Routing;
 using AIKernel.Providers.Standard.Compute;
 
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 /// <summary>
 /// [EN] Official AIKernel compute provider for WebGPU with deterministic CPU fallback.
 /// [JA] deterministic CPU fallback を備えた WebGPU 向け AIKernel 公式 compute Provider です。
 /// </summary>
-public sealed class WebGpuComputeProvider(
+public class WebGpuComputeProvider(
     WebGpuComputeSettings settings,
     IWebGpuBackend? backend = null,
     IComputeProvider? cpuFallback = null,

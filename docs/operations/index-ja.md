@@ -9,16 +9,14 @@ AIKernel.Wasm package 公開前にこの checklist を使用します。
 ```powershell
 dotnet build AIKernel.Wasm.slnx -c Release -p:WarningsAsErrors=1591
 dotnet test AIKernel.Wasm.slnx -c Release --no-build
-py -m compileall python/src
-py -c "import sys, pytest; sys.path[:0]=['python/src']; raise SystemExit(pytest.main(['python/tests']))"
 ```
 
 成功条件:
 
 - public C# member の XML documentation warning がない
 - runtime test がすべて通る
+- audio、display、input、concept-elevation boundary test がすべて通る
 - WebGPU provider test がすべて通る
-- Python wrapper import が compile され、test が通る
 
 ## Package Metadata
 
@@ -33,14 +31,9 @@ NuGet package metadata の確認項目:
 - README inclusion
 - release notes
 
-Python package metadata の確認項目:
-
-- package name: `aikernel-wasm`
-- version
-- license
-- project URLs
-- README
-- typed package marker: `py.typed`
+v0.1.2 integration では、`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を
+検証します。publication task が明示的に要求するまで、stable `0.1.2` artifact は
+作成しません。
 
 ## Documentation
 
@@ -50,8 +43,10 @@ Python package metadata の確認項目:
 - docs index 英日
 - architecture guide
 - runtime provider guide
+- audio、display、input 向け browser boundary provider guide
 - WebGPU guide
-- Python wrapper guide
+- concept elevation notes
+- Python wrapper reference guide
 - testing guide
 - licensing guide
 - manifest / metadata guide
@@ -64,7 +59,7 @@ browser、driver、adapter、platform state に依存するため、別途 E2E v
 
 ## Safety Checks
 
-release 前に docs / Python source を scan します。
+release 前に docs / reference Python source を scan します。
 
 - stale capability ID
 - temporary / incomplete wording

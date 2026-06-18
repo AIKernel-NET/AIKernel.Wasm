@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "manifestVersion": "1.0",
+  "providerId": "wasm.perception",
+  "name": "WASM Perception Providers",
+  "version": "0.1.1.1",
+  "assemblyName": "AIKernel.Wasm.Perception",
+  "packageId": "AIKernel.Wasm.Perception",
+  "capabilities": [
+    "wasm.perception.frame",
+    "wasm.perception.auditory",
+    "wasm.observation"
+  ],
+  "priority": 40,
+  "tags": [
+    "wasm",
+    "perception",
+    "frame",
+    "webaudio"
+  ],
+  "metadata": {
+    "boundary": "wasm",
+    "scenarioSpecific": "false"
+  }
+}

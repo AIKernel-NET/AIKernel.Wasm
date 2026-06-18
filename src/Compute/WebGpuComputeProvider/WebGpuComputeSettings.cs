@@ -1,12 +1,12 @@
 using AIKernel.Common.Results;
 
-namespace AIKernel.Wasm.Comput;
+namespace AIKernel.Wasm.Compute;
 
 /// <summary>
 /// [EN] Settings for the WebGPU compute provider boundary.
 /// [JA] WebGPU compute Provider 境界の設定です。
 /// </summary>
-public sealed record WebGpuComputeSettings
+public record WebGpuComputeSettings
 {
     /// <summary>[EN] Provider id. [JA] Provider id です。</summary>
     public string ProviderId { get; init; } = "webgpu.compute";

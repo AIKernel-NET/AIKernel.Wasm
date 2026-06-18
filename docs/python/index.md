@@ -5,14 +5,11 @@
 `aikernel-wasm` exposes the public AIKernel.Wasm C# surface to Python through a
 thin pythonnet wrapper.
 
-## Package
+## Package Policy
 
-```bash
-pip install aikernel-wasm
-```
-
-During local development, run tests with the package source on `PYTHONPATH` or
-install the package in editable mode.
+Use `0.1.2.dev{buildNumber}` wheels for local validation. Stable `0.1.2`
+publication uses the shared Trusted Publishing flow and starts only when the
+release task explicitly opens publication.
 
 ## Import Surface
 
@@ -50,13 +47,27 @@ If a required assembly is missing, the wrapper fails closed with a clear
 
 ## Contract Coverage
 
-Python covers:
+The package covers:
 
 - runtime provider descriptors
 - runtime provider construction wrappers
 - WebGPU capability descriptor creation
 - WebGPU provider and invoker construction wrappers
 - assembly discovery and pythonnet runtime loading
+- generated managed API catalog helpers
 
 The wrapper does not re-implement WASM execution, WebGPU dispatch, or Core
 provider semantics.
+## Trusted Publisher Configuration
+
+The PyPI Trusted Publisher for the aikernel-wasm project must match the GitHub OIDC claims emitted by this repository:
+
+| Field | Value |
+| --- | --- |
+| PyPI project | aikernel-wasm |
+| Owner | AIKernel-NET |
+| Repository | AIKernel.Wasm |
+| Workflow | publish-pypi.yml |
+| Environment | pypi |
+
+If PyPI reports `invalid-publisher`, do not change the workflow to token credentials. Fix the PyPI project Trusted Publisher entry so it matches the table above, then rerun the failed publish job.
