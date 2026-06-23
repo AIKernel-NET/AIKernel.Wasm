@@ -18,7 +18,7 @@ Success criteria:
 - all runtime tests pass
 - all audio, display, input, and concept-elevation boundary tests pass
 - all WebGPU provider tests pass
-- WebGPU rev3 package smoke confirms the browser bridge, WGSL shaders, buffer
+- WebGPU canonical package smoke confirms the browser bridge, WGSL shaders, buffer
   layouts, provider manifest, and vector-add sample are present in the package
 
 ## Package Metadata

@@ -159,17 +159,17 @@ When WebGPU is unavailable, the provider delegates CPU fallback execution to
 `AIKernel.Providers.Standard.Compute.CpuComputeProvider`. Kernel execution
 publishes `GpuKernelExecuted` when an `IEventBus` is supplied.
 
-The v0.1.3 WebGPU provider also packages the canonical rev3 browser bridge and
+The v0.1.3 WebGPU provider also packages the canonical browser bridge and
 GPU-resident assets:
 
-- `runtime/browser/webgpu-rev3-envelope-bridge.js`
-- `shaders/hud/hud-composite.rev3.wgsl`
-- `shaders/aisthesis/aisthesis.rev3.wgsl`
-- `shaders/spatial/spatial-reasoning.rev3.wgsl`
-- `buffers/layouts/gpu-layouts.rev3.json`
+- `runtime/browser/webgpu-envelope-bridge.js`
+- `shaders/hud/hud-composite.wgsl`
+- `shaders/aisthesis/aisthesis.wgsl`
+- `shaders/spatial/spatial-reasoning.wgsl`
+- `buffers/layouts/gpu-layouts.json`
 
 Use `scripts/verify-webgpu-package.ps1` to pack
-`AIKernel.Wasm.WebGpuComputeProvider` and assert that the rev3 bridge, WGSL
+`AIKernel.Wasm.WebGpuComputeProvider` and assert that the canonical bridge, WGSL
 shaders, buffer layouts, provider manifest, and vector-add sample are included
 in the NuGet package.
 

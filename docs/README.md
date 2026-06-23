@@ -17,8 +17,8 @@ with kernel runtime, providers, control, and tools after the 0.1.x line stabiliz
 ## Cross-Repository Alignment
 
 Shared repository boundaries, v0.1.3 development versioning, dependency order,
-GPU rev3 provider metadata, and Python wrapper scope follow the canonical
-AIKernel GPU rev3 integration plan. Until the shared v0.1.3 alignment document
+GPU canonical provider metadata, and Python wrapper scope follow the canonical
+AIKernel GPU canonical integration plan. Until the shared v0.1.3 alignment document
 is published, keep Wasm package and wrapper versions synchronized with
 AIKernel.Core, AIKernel.Control, AIKernel.Providers, Dawn, and Cuda13.
 The historical v0.1.1.1 validation rules remain available in

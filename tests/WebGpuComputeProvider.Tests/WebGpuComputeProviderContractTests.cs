@@ -20,7 +20,7 @@ public sealed class WebGpuComputeProviderContractTests
             [GpuProviderMetadataKeys.AdapterProfile] = "webgpu-browser",
             [GpuProviderMetadataKeys.Backend] = "browser-webgpu",
             [GpuProviderMetadataKeys.Fallback] = "webgpu-or-cpu",
-            [GpuProviderMetadataKeys.Version] = "0.1.0"
+            [GpuProviderMetadataKeys.Version] = "0.1.3"
         };
 
         var contract = WebGpuComputeCapabilityContracts.ToContract(
@@ -179,19 +179,19 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal(GpuBackend.CpuFallback, context.Backend);
         Assert.Equal(GpuReadbackPolicy.RequiredFallback, context.Diagnostics.SensorPath.Readback);
         Assert.Equal("cpu-fallback", context.Diagnostics.HudPath.FallbackReason);
-        Assert.Equal("sensor", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PathRole]);
-        Assert.Equal("sensor", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassId]);
-        Assert.Equal("false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3AuthoritativeReady]);
-        Assert.Equal("csharp-deterministic", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3ExecutionMode]);
+        Assert.Equal("sensor", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPathRole]);
+        Assert.Equal("sensor", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassId]);
+        Assert.Equal("false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalAuthoritativeReady]);
+        Assert.Equal("csharp-deterministic", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalExecutionMode]);
         Assert.Equal("cpu-fallback", context.Diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.GpuBypass]);
         Assert.Equal("not-active", context.Diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.NativeJsBridge]);
         Assert.Equal("cpu-readback-buffer", context.Diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.ZeroCopyBufferHandling]);
-        Assert.Equal("true", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionBlocked]);
-        Assert.Equal("false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionCandidateReady]);
-        Assert.Equal(GpuRev3PromotionGates.NotEvaluated, context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionReason]);
-        Assert.Contains("ReadyForBuiltIn=false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassReadiness]);
-        Assert.True(GpuCanonicalValidation.ValidateRev3ExecutionLayerMetadata(context.Diagnostics.SensorPath.Metadata).IsValid);
-        Assert.False(GpuCanonicalValidation.EvaluateRev3PromotionReadiness(
+        Assert.Equal("true", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionBlocked]);
+        Assert.Equal("false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionCandidateReady]);
+        Assert.Equal(GpuPromotionGates.NotEvaluated, context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionReason]);
+        Assert.Contains("ReadyForBuiltIn=false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassReadiness]);
+        Assert.True(GpuCanonicalValidation.ValidateExecutionLayerMetadata(context.Diagnostics.SensorPath.Metadata).IsValid);
+        Assert.False(GpuCanonicalValidation.EvaluatePromotionReadiness(
             context.Diagnostics.SensorPath.Metadata).IsAuthoritativeReady);
     }
 
@@ -213,16 +213,16 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.True(context.Diagnostics.SensorPath.ZeroCopy);
         Assert.Equal(GpuReadbackPolicy.None, context.Diagnostics.SensorPath.Readback);
         Assert.Equal("raw-texture-binding", context.Diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.GpuBypass]);
-        Assert.Equal("rev3-envelope-bridge", context.Diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.NativeJsBridge]);
+        Assert.Equal("canonical-envelope-bridge", context.Diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.NativeJsBridge]);
         Assert.Equal("raw-framebuffer-texture", context.Diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.ZeroCopyBufferHandling]);
-        Assert.Equal("0", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3FrameIndex]);
-        Assert.Equal("0", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3SampleTicks]);
-        Assert.Equal("true", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionBlocked]);
-        Assert.Equal("false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionCandidateReady]);
-        Assert.Equal(GpuRev3PromotionGates.NotEvaluated, context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionReason]);
-        Assert.Contains("BuiltInExecutor=true", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassReadiness]);
-        Assert.True(GpuCanonicalValidation.ValidateRev3ExecutionLayerMetadata(context.Diagnostics.SensorPath.Metadata).IsValid);
-        Assert.False(GpuCanonicalValidation.EvaluateRev3PromotionReadiness(
+        Assert.Equal("0", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalFrameIndex]);
+        Assert.Equal("0", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalSampleTicks]);
+        Assert.Equal("true", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionBlocked]);
+        Assert.Equal("false", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionCandidateReady]);
+        Assert.Equal(GpuPromotionGates.NotEvaluated, context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionReason]);
+        Assert.Contains("BuiltInExecutor=true", context.Diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassReadiness]);
+        Assert.True(GpuCanonicalValidation.ValidateExecutionLayerMetadata(context.Diagnostics.SensorPath.Metadata).IsValid);
+        Assert.False(GpuCanonicalValidation.EvaluatePromotionReadiness(
             context.Diagnostics.SensorPath.Metadata).IsAuthoritativeReady);
         Assert.True(validation.IsValid);
     }
@@ -264,15 +264,15 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal(GpuReadbackPolicy.None, diagnostics.SensorPath.Readback);
         Assert.Equal(320 * 200, diagnostics.SensorPath.MemoryEstimate);
         Assert.Equal(320 * 200 * 4, diagnostics.HudPath.MemoryEstimate);
-        Assert.Equal("sensor", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PathRole]);
-        Assert.Equal("sensor", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassId]);
-        Assert.Equal("1", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3FrameIndex]);
-        Assert.Equal("100", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3SampleTicks]);
-        Assert.Equal("csharp-deterministic", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3ExecutionMode]);
+        Assert.Equal("sensor", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPathRole]);
+        Assert.Equal("sensor", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassId]);
+        Assert.Equal("1", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalFrameIndex]);
+        Assert.Equal("100", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalSampleTicks]);
+        Assert.Equal("csharp-deterministic", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalExecutionMode]);
         Assert.Equal("raw-texture-binding", diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.GpuBypass]);
         Assert.Equal("frame-token-index-sample-ticks", diagnostics.SensorPath.Metadata[GpuProviderMetadataKeys.DeterministicFrameSampling]);
-        Assert.Contains("Passes.{Aisthesis,SpatialReasoning,HudComposite}", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassReadiness]);
-        Assert.Equal("hud", diagnostics.HudPath.Metadata[GpuDiagnosticsMetadataKeys.Rev3PathRole]);
+        Assert.Contains("Passes.{Aisthesis,SpatialReasoning,HudComposite}", diagnostics.SensorPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassReadiness]);
+        Assert.Equal("hud", diagnostics.HudPath.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPathRole]);
     }
 
     [Fact]
@@ -360,9 +360,9 @@ public sealed class WebGpuComputeProviderContractTests
     }
 
     [Fact]
-    public async Task CanonicalGpuPasses_WhenRev3InteropAvailable_DispatchThroughJsBoundary()
+    public async Task CanonicalGpuPasses_WhenCanonicalInteropAvailable_DispatchThroughJsBoundary()
     {
-        var interop = new FakeWebGpuRev3JsInterop();
+        var interop = new FakeWebGpuCanonicalJsInterop();
         var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider(
             new WebGpuComputeSettings { ForceCpuFallback = false },
             new WebGpuWasmBackend(interop));
@@ -409,14 +409,14 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal(GpuFrameTargetKind.HudCompositeOffscreen, hud.Kind);
         Assert.Equal("js-aisthesis", aisthesis.Diagnostics.PassId);
         Assert.Equal("js-spatial", spatial.Diagnostics.PassId);
-        Assert.Equal("js-aisthesis", aisthesis.Diagnostics.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassId]);
-        Assert.Equal("sensor", aisthesis.Diagnostics.Metadata[GpuDiagnosticsMetadataKeys.Rev3PathRole]);
-        Assert.Equal("js-spatial", spatial.Diagnostics.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassId]);
+        Assert.Equal("js-aisthesis", aisthesis.Diagnostics.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassId]);
+        Assert.Equal("sensor", aisthesis.Diagnostics.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPathRole]);
+        Assert.Equal("js-spatial", spatial.Diagnostics.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassId]);
         Assert.False(provider.UsingCpuFallback);
     }
 
     [Fact]
-    public void Rev3InteropEnvelope_ProjectsCanonicalInputsIntoStableBridgeShape()
+    public void CanonicalInteropEnvelope_ProjectsCanonicalInputsIntoStableBridgeShape()
     {
         var raw = RawTarget("raw");
         var hud = raw with
@@ -431,7 +431,7 @@ public sealed class WebGpuComputeProviderContractTests
             .Cast<IReadOnlyList<float>>()
             .ToArray();
 
-        var aisthesis = WebGpuRev3InteropEnvelope.ForAisthesis(new GpuAisthesisInput
+        var aisthesis = WebGpuInteropEnvelope.ForAisthesis(new GpuAisthesisInput
         {
             Frame = frame,
             RawFramebuffer = raw,
@@ -441,13 +441,13 @@ public sealed class WebGpuComputeProviderContractTests
                 ["edge-detect"] = true
             }
         });
-        var spatial = WebGpuRev3InteropEnvelope.ForSpatialReasoning(new GpuSpatialReasoningInput
+        var spatial = WebGpuInteropEnvelope.ForSpatialReasoning(new GpuSpatialReasoningInput
         {
             Frame = frame,
             AisMatrices = matrices,
             StateVector = [0.25f, 0.75f]
         });
-        var hudEnvelope = WebGpuRev3InteropEnvelope.ForHudComposite(new GpuHudInput
+        var hudEnvelope = WebGpuInteropEnvelope.ForHudComposite(new GpuHudInput
         {
             Frame = frame,
             HudPanelRects = Enumerable.Range(0, GpuCanonicalLayouts.HudPanelRect.Stride).Select(static value => (float)value).ToArray(),
@@ -475,18 +475,18 @@ public sealed class WebGpuComputeProviderContractTests
             ]
         });
 
-        Assert.Equal("aikernel.gpu.rev3.dispatch", aisthesis.Schema);
+        Assert.Equal("aikernel.gpu.dispatch", aisthesis.Schema);
         Assert.Equal(GpuOperationNames.GpuAisthesisRawFrame, aisthesis.PassId);
-        Assert.Equal(WebGpuRev3PassKind.Aisthesis, aisthesis.PassKind);
+        Assert.Equal(WebGpuPassKind.Aisthesis, aisthesis.PassKind);
         Assert.Equal(["edge-detect", "red-panel-detect"], aisthesis.FeatureFlags.Keys.ToArray());
         Assert.Equal("raw-framebuffer", aisthesis.Tags[GpuProviderMetadataKeys.RawCaptureSource]);
-        Assert.Equal(GpuOperationNames.GpuAisthesisRawFrame, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassId]);
-        Assert.Equal(GpuRev3ExecutionModes.BrowserWebGpuCompute, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.Rev3ExecutionMode]);
-        Assert.Equal(GpuRev3PilotStates.BrowserBuiltinCompute, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.Rev3PilotState]);
-        Assert.Equal(GpuRev3PromotionGates.TraceCandidate, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionGate]);
-        Assert.Equal("true", aisthesis.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionBlocked]);
-        Assert.Equal("false", aisthesis.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionCandidateReady]);
-        Assert.Equal("storage-texture-not-ready", aisthesis.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionReason]);
+        Assert.Equal(GpuOperationNames.GpuAisthesisRawFrame, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassId]);
+        Assert.Equal(GpuExecutionModes.BrowserWebGpuCompute, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.CanonicalExecutionMode]);
+        Assert.Equal(GpuCanonicalPilotStates.BrowserBuiltinCompute, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPilotState]);
+        Assert.Equal(GpuPromotionGates.TraceCandidate, aisthesis.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionGate]);
+        Assert.Equal("true", aisthesis.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionBlocked]);
+        Assert.Equal("false", aisthesis.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionCandidateReady]);
+        Assert.Equal("storage-texture-not-ready", aisthesis.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionReason]);
         Assert.True(aisthesis.Targets.Single().ZeroCopy);
 
         Assert.Equal(GpuOperationNames.GpuSpatialReasoning, spatial.PassId);
@@ -496,7 +496,7 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal(GpuCanonicalLayouts.StateVector.Stride, spatial.Buffers.Last().Values.Count);
         Assert.Equal(0.25f, spatial.Buffers.Last().Values[0]);
         Assert.Equal(0.0f, spatial.Buffers.Last().Values[2]);
-        Assert.Equal(GpuOperationNames.GpuSpatialReasoning, spatial.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassId]);
+        Assert.Equal(GpuOperationNames.GpuSpatialReasoning, spatial.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassId]);
         Assert.Equal("topos,route,threat,zoe", spatial.Metadata[GpuProviderMetadataKeys.AisMatrixOrder]);
 
         Assert.Equal(GpuOperationNames.GpuHudComposite, hudEnvelope.PassId);
@@ -509,33 +509,33 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal((float)GpuEgoRadarMode.Suppressed, hudEnvelope.Scalars["radarMode"]);
         Assert.Equal(["alpha", "zeta"], hudEnvelope.Labels.Select(static label => label.Id).ToArray());
         Assert.Equal("priority pathos", hudEnvelope.Tags["summary"]);
-        Assert.Equal(GpuOperationNames.GpuHudComposite, hudEnvelope.Metadata[GpuDiagnosticsMetadataKeys.Rev3PassId]);
+        Assert.Equal(GpuOperationNames.GpuHudComposite, hudEnvelope.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPassId]);
         Assert.Equal("priority pathos", hudEnvelope.Metadata["summary"]);
-        Assert.True(WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(aisthesis).IsValid);
-        Assert.True(WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(spatial).IsValid);
-        Assert.True(WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(hudEnvelope).IsValid);
+        Assert.True(WebGpuInteropEnvelope.ValidateDispatchEnvelope(aisthesis).IsValid);
+        Assert.True(WebGpuInteropEnvelope.ValidateDispatchEnvelope(spatial).IsValid);
+        Assert.True(WebGpuInteropEnvelope.ValidateDispatchEnvelope(hudEnvelope).IsValid);
     }
 
     [Fact]
-    public void WebGpuRev3InteropEnvelope_RejectsInvalidBridgeEnvelope()
+    public void WebGpuInteropEnvelope_RejectsInvalidBridgeEnvelope()
     {
         var raw = RawTarget("raw");
-        var valid = WebGpuRev3InteropEnvelope.ForAisthesis(new GpuAisthesisInput
+        var valid = WebGpuInteropEnvelope.ForAisthesis(new GpuAisthesisInput
         {
             Frame = FrameToken(raw),
             RawFramebuffer = raw
         });
         var invalid = valid with
         {
-            PassKind = WebGpuRev3PassKind.HudComposite,
+            PassKind = WebGpuPassKind.HudComposite,
             Frame = valid.Frame with { FrameIndex = -1 },
             Metadata = new Dictionary<string, string>(valid.Metadata, StringComparer.Ordinal)
             {
-                [GpuDiagnosticsMetadataKeys.Rev3PromotionGate] = "trace-candidte"
+                [GpuDiagnosticsMetadataKeys.CanonicalPromotionGate] = "trace-candidte"
             },
             Buffers =
             [
-                new WebGpuRev3BufferEnvelope
+                new WebGpuBufferEnvelope
                 {
                     Name = "bad-buffer",
                     LayoutName = "Bad",
@@ -546,25 +546,25 @@ public sealed class WebGpuComputeProviderContractTests
             ]
         };
 
-        var validation = WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(invalid);
+        var validation = WebGpuInteropEnvelope.ValidateDispatchEnvelope(invalid);
 
         Assert.False(validation.IsValid);
-        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_REV3_ENVELOPE_PASS_ID_KIND_MISMATCH");
-        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_REV3_ENVELOPE_FRAME_INDEX_INVALID");
-        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_REV3_ENVELOPE_BUFFER_VALUES_STRIDE_MISMATCH");
-        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_REV3_ENVELOPE_GPU_DIAGNOSTICS_REV3_METADATA_VALUE_UNKNOWN");
+        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_ENVELOPE_PASS_ID_KIND_MISMATCH");
+        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_ENVELOPE_FRAME_INDEX_INVALID");
+        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_ENVELOPE_BUFFER_VALUES_STRIDE_MISMATCH");
+        Assert.Contains(validation.Errors, static issue => issue.Code == "WEBGPU_ENVELOPE_GPU_DIAGNOSTICS_METADATA_VALUE_UNKNOWN");
 
-        var missingMetadataValidation = WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(valid with
+        var missingMetadataValidation = WebGpuInteropEnvelope.ValidateDispatchEnvelope(valid with
         {
             Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
         });
-        Assert.Contains(missingMetadataValidation.Errors, static issue => issue.Code == "WEBGPU_REV3_ENVELOPE_METADATA_REQUIRED");
+        Assert.Contains(missingMetadataValidation.Errors, static issue => issue.Code == "WEBGPU_ENVELOPE_METADATA_REQUIRED");
     }
 
     [Fact]
     public async Task WebGpuWasmBackend_ValidatesEnvelopeBeforeJsHandoff()
     {
-        var interop = new FakeWebGpuRev3EnvelopeJsInterop();
+        var interop = new FakeWebGpuCanonicalEnvelopeJsInterop();
         var backend = new WebGpuWasmBackend(interop);
         await backend.InitializeAsync(TestContext.Current.CancellationToken);
         var raw = RawTarget("raw");
@@ -577,14 +577,14 @@ public sealed class WebGpuComputeProviderContractTests
                 RawFramebuffer = raw
             }, TestContext.Current.CancellationToken));
 
-        Assert.Contains("WEBGPU_REV3_ENVELOPE_FRAME_INDEX_INVALID", exception.Message);
+        Assert.Contains("WEBGPU_ENVELOPE_FRAME_INDEX_INVALID", exception.Message);
         Assert.Null(interop.LastAisthesisEnvelope);
     }
 
     [Fact]
-    public async Task CanonicalGpuPasses_WhenEnvelopeInteropAvailable_DispatchStableRev3Envelopes()
+    public async Task CanonicalGpuPasses_WhenEnvelopeInteropAvailable_DispatchStableCanonicalEnvelopes()
     {
-        var interop = new FakeWebGpuRev3EnvelopeJsInterop();
+        var interop = new FakeWebGpuCanonicalEnvelopeJsInterop();
         var provider = new global::AIKernel.Wasm.Compute.WebGpuComputeProvider(
             new WebGpuComputeSettings { ForceCpuFallback = false },
             new WebGpuWasmBackend(interop));
@@ -623,16 +623,16 @@ public sealed class WebGpuComputeProviderContractTests
 
         Assert.Equal(GpuOperationNames.GpuAisthesisRawFrame, interop.LastAisthesisEnvelope?.PassId);
         Assert.Equal("raw", interop.LastAisthesisEnvelope?.Targets.Single().Role);
-        Assert.Equal(GpuRev3ExecutionModes.BrowserWebGpuCompute, interop.LastAisthesisEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.Rev3ExecutionMode]);
-        Assert.Equal("storage-texture-not-ready", interop.LastAisthesisEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionReason]);
+        Assert.Equal(GpuExecutionModes.BrowserWebGpuCompute, interop.LastAisthesisEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.CanonicalExecutionMode]);
+        Assert.Equal("storage-texture-not-ready", interop.LastAisthesisEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionReason]);
         Assert.Equal(GpuOperationNames.GpuSpatialReasoning, interop.LastSpatialEnvelope?.PassId);
         Assert.Equal("ais-matrix:topos", interop.LastSpatialEnvelope?.Buffers[0].Name);
-        Assert.Equal(GpuRev3PromotionGates.TraceCandidate, interop.LastSpatialEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionGate]);
+        Assert.Equal(GpuPromotionGates.TraceCandidate, interop.LastSpatialEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionGate]);
         Assert.Equal("state-vector", interop.LastSpatialEnvelope?.Buffers.Last().Name);
         Assert.Equal(GpuOperationNames.GpuHudComposite, interop.LastHudEnvelope?.PassId);
         Assert.Equal(90.0f, interop.LastHudEnvelope?.Scalars["compassHeadingDegrees"]);
         Assert.Equal(0.75f, interop.LastHudEnvelope?.Scalars["kinesisY"]);
-        Assert.Equal(GpuRev3PromotionGates.TraceCandidate, interop.LastHudEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.Rev3PromotionGate]);
+        Assert.Equal(GpuPromotionGates.TraceCandidate, interop.LastHudEnvelope?.Metadata[GpuDiagnosticsMetadataKeys.CanonicalPromotionGate]);
         Assert.False(provider.UsingCpuFallback);
     }
 
@@ -688,12 +688,12 @@ public sealed class WebGpuComputeProviderContractTests
 
         Assert.False(result.Succeeded);
         Assert.Equal("WEBGPU_OPERATION_NOT_SUPPORTED", result.ErrorCode);
-        Assert.Equal("true", result.Metadata[GpuProviderMetadataKeys.Rev3]);
+        Assert.Equal("true", result.Metadata[GpuProviderMetadataKeys.Canonical]);
         Assert.Equal(GpuBackend.WebGpu.ToString(), result.Metadata[GpuProviderMetadataKeys.GpuBackend]);
         Assert.Equal("raw-texture-binding", result.Metadata[GpuProviderMetadataKeys.GpuBypass]);
-        Assert.Equal("rev3-envelope-bridge", result.Metadata[GpuProviderMetadataKeys.NativeJsBridge]);
-        Assert.True(GpuCanonicalValidation.ValidateRev3BrowserBridgeMetadata(result.Metadata).IsValid);
-        Assert.True(GpuCanonicalValidation.ValidateRev3ExecutionLayerMetadata(result.Metadata).IsValid);
+        Assert.Equal("canonical-envelope-bridge", result.Metadata[GpuProviderMetadataKeys.NativeJsBridge]);
+        Assert.True(GpuCanonicalValidation.ValidateBrowserBridgeMetadata(result.Metadata).IsValid);
+        Assert.True(GpuCanonicalValidation.ValidateExecutionLayerMetadata(result.Metadata).IsValid);
     }
 
     [Fact]
@@ -725,11 +725,11 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal("browser-webgpu", result.Metadata[GpuProviderMetadataKeys.Backend]);
         Assert.Equal(GpuBackend.WebGpu.ToString(), result.Metadata[GpuProviderMetadataKeys.GpuBackend]);
         Assert.Equal("raw-texture-binding", result.Metadata[GpuProviderMetadataKeys.GpuBypass]);
-        Assert.Equal("rev3-envelope-bridge", result.Metadata[GpuProviderMetadataKeys.NativeJsBridge]);
+        Assert.Equal("canonical-envelope-bridge", result.Metadata[GpuProviderMetadataKeys.NativeJsBridge]);
         Assert.Equal("optional-native-or-js", result.Metadata[GpuProviderMetadataKeys.PassBridge]);
         Assert.Equal("raw-framebuffer-texture", result.Metadata[GpuProviderMetadataKeys.ZeroCopyBufferHandling]);
-        Assert.True(GpuCanonicalValidation.ValidateRev3BrowserBridgeMetadata(result.Metadata).IsValid);
-        Assert.True(GpuCanonicalValidation.ValidateRev3ExecutionLayerMetadata(result.Metadata).IsValid);
+        Assert.True(GpuCanonicalValidation.ValidateBrowserBridgeMetadata(result.Metadata).IsValid);
+        Assert.True(GpuCanonicalValidation.ValidateExecutionLayerMetadata(result.Metadata).IsValid);
     }
 
     [Fact]
@@ -753,34 +753,34 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Contains("\"rawCaptureSource\": \"raw-framebuffer\"", json);
         Assert.Contains("\"passBridge\": \"optional-native-or-js\"", json);
         Assert.Contains("\"gpuBypass\": \"raw-texture-binding\"", json);
-        Assert.Contains("\"nativeJsBridge\": \"rev3-envelope-bridge\"", json);
+        Assert.Contains("\"nativeJsBridge\": \"canonical-envelope-bridge\"", json);
         Assert.Contains("\"aotCompilerHooks\": \"planned-gpu-native-execution\"", json);
         Assert.Contains("\"deterministicFrameSampling\": \"frame-token-index-sample-ticks\"", json);
         Assert.Contains("\"zeroCopyBufferHandling\": \"raw-framebuffer-texture\"", json);
         Assert.Contains("\"aisMatrixOrder\": \"topos,route,threat,zoe\"", json);
-        Assert.Contains($"\"rev3EnvelopeBridge\": \"{WebGpuRev3BrowserBridgeAssets.RuntimeAssetPath}\"", json);
-        Assert.Contains($"\"rev3EnvelopeSchema\": \"{WebGpuRev3BrowserBridgeAssets.Schema}\"", json);
-        Assert.Contains($"\"rev3EnvelopeBridgeFactory\": \"{WebGpuRev3BrowserBridgeAssets.BridgeFactory}\"", json);
-        Assert.Contains($"\"rev3EnvelopeBridgeExecutorFactory\": \"{WebGpuRev3BrowserBridgeAssets.BrowserExecutorFactory}\"", json);
-        Assert.Contains($"\"rev3EnvelopeBridgeGlobal\": \"{WebGpuRev3BrowserBridgeAssets.GlobalObject}\"", json);
-        Assert.Contains($"\"rev3BrowserPassReadiness\": \"{WebGpuRev3BrowserBridgeAssets.PassReadinessShape}\"", json);
+        Assert.Contains($"\"envelopeBridge\": \"{WebGpuBrowserBridgeAssets.RuntimeAssetPath}\"", json);
+        Assert.Contains($"\"envelopeSchema\": \"{WebGpuBrowserBridgeAssets.Schema}\"", json);
+        Assert.Contains($"\"envelopeBridgeFactory\": \"{WebGpuBrowserBridgeAssets.BridgeFactory}\"", json);
+        Assert.Contains($"\"envelopeBridgeExecutorFactory\": \"{WebGpuBrowserBridgeAssets.BrowserExecutorFactory}\"", json);
+        Assert.Contains($"\"envelopeBridgeGlobal\": \"{WebGpuBrowserBridgeAssets.GlobalObject}\"", json);
+        Assert.Contains($"\"browserPassReadiness\": \"{WebGpuBrowserBridgeAssets.PassReadinessShape}\"", json);
     }
 
     [Fact]
-    public void ProviderPackage_IncludesBrowserRev3EnvelopeBridge()
+    public void ProviderPackage_IncludesBrowserCanonicalEnvelopeBridge()
     {
         var path = Path.Combine(
             AppContext.BaseDirectory,
             "Runtime",
             "Browser",
-            Path.GetFileName(WebGpuRev3BrowserBridgeAssets.RuntimeAssetPath));
+            Path.GetFileName(WebGpuBrowserBridgeAssets.RuntimeAssetPath));
 
         Assert.True(File.Exists(path));
 
         var js = File.ReadAllText(path);
-        Assert.Contains(WebGpuRev3BrowserBridgeAssets.BridgeFactory, js);
-        Assert.Contains(WebGpuRev3BrowserBridgeAssets.BrowserExecutorFactory, js);
-        Assert.Contains(WebGpuRev3BrowserBridgeAssets.NullExecutorFactory, js);
+        Assert.Contains(WebGpuBrowserBridgeAssets.BridgeFactory, js);
+        Assert.Contains(WebGpuBrowserBridgeAssets.BrowserExecutorFactory, js);
+        Assert.Contains(WebGpuBrowserBridgeAssets.NullExecutorFactory, js);
         Assert.Contains("dispatchAisthesisEnvelope", js);
         Assert.Contains("dispatchSpatialReasoningEnvelope", js);
         Assert.Contains("dispatchHudCompositeEnvelope", js);
@@ -793,10 +793,10 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Contains("executeHudCompositeComputePass", js);
         Assert.Contains("createComputePipeline", js);
         Assert.Contains("createFeatureMaskTexture", js);
-        Assert.Contains("rev3_feature_mask_storage_texture", js);
+        Assert.Contains("feature_mask_storage_texture", js);
         Assert.Contains("hud-texture-view-unavailable", js);
         Assert.Contains("readFloatBuffer", js);
-        Assert.Contains("__aikernelRev3LostObserved", js);
+        Assert.Contains("__aikernelCanonicalLostObserved", js);
         Assert.Contains("onDeviceLost", js);
         Assert.Contains("raw-texture-not-bound", js);
         Assert.Contains("raw-texture-view-unavailable", js);
@@ -808,11 +808,11 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Contains("PipelineCached", js);
         Assert.Contains("ReadyForBuiltIn", js);
         Assert.Contains("InjectedExecutor", js);
-        Assert.Contains("rev3_execution_mode", js);
-        Assert.Contains("rev3_promotion_blocked", js);
-        Assert.Contains("rev3_promotion_candidate_ready", js);
-        Assert.Contains("rev3_promotion_diagnostic_stable", js);
-        Assert.Contains("rev3_promotion_reason", js);
+        Assert.Contains("execution_mode", js);
+        Assert.Contains("promotion_blocked", js);
+        Assert.Contains("promotion_candidate_ready", js);
+        Assert.Contains("promotion_diagnostic_stable", js);
+        Assert.Contains("promotion_reason", js);
         Assert.Contains("valueOf(envelope, \"Metadata\", \"metadata\")", js);
         Assert.Contains("metadataOf", js);
         Assert.Contains("browser-builtin-compute", js);
@@ -820,35 +820,35 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Contains("trace-candidate", js);
         Assert.Contains("authoritative-not-ready", js);
         Assert.Contains("storage-texture-not-ready", js);
-        Assert.Contains(WebGpuRev3BrowserBridgeAssets.Schema, js);
-        Assert.Contains(WebGpuRev3BrowserBridgeAssets.GlobalObject, js);
+        Assert.Contains(WebGpuBrowserBridgeAssets.Schema, js);
+        Assert.Contains(WebGpuBrowserBridgeAssets.GlobalObject, js);
     }
 
     [Fact]
-    public void ProviderPackage_BrowserRev3EnvelopeBridgeMirrorsCanonicalDiagnosticsValueCatalogs()
+    public void ProviderPackage_BrowserCanonicalEnvelopeBridgeMirrorsCanonicalDiagnosticsValueCatalogs()
     {
         var path = Path.Combine(
             AppContext.BaseDirectory,
             "Runtime",
             "Browser",
-            Path.GetFileName(WebGpuRev3BrowserBridgeAssets.RuntimeAssetPath));
+            Path.GetFileName(WebGpuBrowserBridgeAssets.RuntimeAssetPath));
 
         Assert.True(File.Exists(path));
 
         var js = File.ReadAllText(path);
-        Assert.Contains("REV3_VALUES", js);
-        Assert.Contains(GpuRev3ExecutionModes.BrowserWebGpuCompute, js);
-        Assert.Contains(GpuRev3ExecutionModes.DeterministicFallback, js);
-        Assert.Contains(GpuRev3PathRoles.Game, js);
-        Assert.Contains(GpuRev3PathRoles.Bonsai, js);
-        Assert.Contains(GpuRev3PathRoles.Hud, js);
-        Assert.Contains(GpuRev3PathRoles.Sensor, js);
-        Assert.Contains(GpuRev3PilotStates.BrowserBuiltinCompute, js);
-        Assert.Contains(GpuRev3PilotStates.BrowserDeterministicFallback, js);
-        Assert.Contains(GpuRev3PilotStates.NotEvaluated, js);
-        Assert.Contains(GpuRev3PromotionGates.TraceCandidate, js);
-        Assert.Contains(GpuRev3PromotionGates.Fallback, js);
-        Assert.Contains(GpuRev3PromotionGates.NotEvaluated, js);
+        Assert.Contains("GPU_VALUES", js);
+        Assert.Contains(GpuExecutionModes.BrowserWebGpuCompute, js);
+        Assert.Contains(GpuExecutionModes.DeterministicFallback, js);
+        Assert.Contains(GpuPathRoles.Game, js);
+        Assert.Contains(GpuPathRoles.Bonsai, js);
+        Assert.Contains(GpuPathRoles.Hud, js);
+        Assert.Contains(GpuPathRoles.Sensor, js);
+        Assert.Contains(GpuCanonicalPilotStates.BrowserBuiltinCompute, js);
+        Assert.Contains(GpuCanonicalPilotStates.BrowserDeterministicFallback, js);
+        Assert.Contains(GpuCanonicalPilotStates.NotEvaluated, js);
+        Assert.Contains(GpuPromotionGates.TraceCandidate, js);
+        Assert.Contains(GpuPromotionGates.Fallback, js);
+        Assert.Contains(GpuPromotionGates.NotEvaluated, js);
     }
 
     [Fact]
@@ -858,7 +858,7 @@ public sealed class WebGpuComputeProviderContractTests
             AppContext.BaseDirectory,
             "Shaders",
             "Hud",
-            "hud-composite.rev3.wgsl");
+            "hud-composite.wgsl");
 
         Assert.True(File.Exists(path));
 
@@ -876,7 +876,7 @@ public sealed class WebGpuComputeProviderContractTests
             AppContext.BaseDirectory,
             "Shaders",
             "Aisthesis",
-            "aisthesis.rev3.wgsl");
+            "aisthesis.wgsl");
 
         Assert.True(File.Exists(path));
 
@@ -888,32 +888,32 @@ public sealed class WebGpuComputeProviderContractTests
     }
 
     [Fact]
-    public void BrowserBridgeAssets_DefineStableRev3RuntimeBoundary()
+    public void BrowserBridgeAssets_DefineStableCanonicalRuntimeBoundary()
     {
-        var metadata = WebGpuRev3BrowserBridgeAssets.ToMetadata();
-        var validation = GpuCanonicalValidation.ValidateRev3BrowserBridgeMetadata(metadata);
+        var metadata = WebGpuBrowserBridgeAssets.ToMetadata();
+        var validation = GpuCanonicalValidation.ValidateBrowserBridgeMetadata(metadata);
 
-        Assert.Equal("aikernel.gpu.rev3.dispatch", WebGpuRev3BrowserBridgeAssets.Schema);
-        Assert.Equal("0.1.3", WebGpuRev3BrowserBridgeAssets.Version);
-        Assert.Equal("runtime/browser/webgpu-rev3-envelope-bridge.js", WebGpuRev3BrowserBridgeAssets.RuntimeAssetPath);
-        Assert.Equal("AIKernelWebGpuRev3", WebGpuRev3BrowserBridgeAssets.GlobalObject);
-        Assert.Equal("createWebGpuRev3EnvelopeBridge", WebGpuRev3BrowserBridgeAssets.BridgeFactory);
-        Assert.Equal("createWebGpuRev3BrowserExecutor", WebGpuRev3BrowserBridgeAssets.BrowserExecutorFactory);
-        Assert.Equal(GpuProviderMetadataKeys.Rev3BrowserPassReadiness, WebGpuRev3BrowserBridgeAssets.PassReadinessMetadataKey);
-        Assert.Equal(GpuProviderMetadataKeys.Rev3EnvelopeBridge, WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeMetadataKey);
-        Assert.Equal(GpuProviderMetadataKeys.Rev3EnvelopeBridgeExecutorFactory, WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey);
-        Assert.Equal(GpuProviderMetadataKeys.Rev3EnvelopeBridgeFactory, WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey);
-        Assert.Equal(GpuProviderMetadataKeys.Rev3EnvelopeBridgeGlobal, WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey);
-        Assert.Equal(GpuProviderMetadataKeys.Rev3EnvelopeSchema, WebGpuRev3BrowserBridgeAssets.EnvelopeSchemaMetadataKey);
-        Assert.Contains("ReadyForBuiltIn", WebGpuRev3BrowserBridgeAssets.PassReadinessShape);
+        Assert.Equal("aikernel.gpu.dispatch", WebGpuBrowserBridgeAssets.Schema);
+        Assert.Equal("0.1.3", WebGpuBrowserBridgeAssets.Version);
+        Assert.Equal("runtime/browser/webgpu-envelope-bridge.js", WebGpuBrowserBridgeAssets.RuntimeAssetPath);
+        Assert.Equal("AIKernelWebGpu", WebGpuBrowserBridgeAssets.GlobalObject);
+        Assert.Equal("createWebGpuEnvelopeBridge", WebGpuBrowserBridgeAssets.BridgeFactory);
+        Assert.Equal("createWebGpuBrowserExecutor", WebGpuBrowserBridgeAssets.BrowserExecutorFactory);
+        Assert.Equal(GpuProviderMetadataKeys.CanonicalBrowserPassReadiness, WebGpuBrowserBridgeAssets.PassReadinessMetadataKey);
+        Assert.Equal(GpuProviderMetadataKeys.CanonicalEnvelopeBridge, WebGpuBrowserBridgeAssets.EnvelopeBridgeMetadataKey);
+        Assert.Equal(GpuProviderMetadataKeys.CanonicalEnvelopeBridgeExecutorFactory, WebGpuBrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey);
+        Assert.Equal(GpuProviderMetadataKeys.CanonicalEnvelopeBridgeFactory, WebGpuBrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey);
+        Assert.Equal(GpuProviderMetadataKeys.CanonicalEnvelopeBridgeGlobal, WebGpuBrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey);
+        Assert.Equal(GpuProviderMetadataKeys.CanonicalEnvelopeSchema, WebGpuBrowserBridgeAssets.EnvelopeSchemaMetadataKey);
+        Assert.Contains("ReadyForBuiltIn", WebGpuBrowserBridgeAssets.PassReadinessShape);
         Assert.Equal(
             [
-                WebGpuRev3BrowserBridgeAssets.PassReadinessMetadataKey,
-                WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeMetadataKey,
-                WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey,
-                WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey,
-                WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey,
-                WebGpuRev3BrowserBridgeAssets.EnvelopeSchemaMetadataKey
+                WebGpuBrowserBridgeAssets.PassReadinessMetadataKey,
+                WebGpuBrowserBridgeAssets.EnvelopeBridgeMetadataKey,
+                WebGpuBrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey,
+                WebGpuBrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey,
+                WebGpuBrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey,
+                WebGpuBrowserBridgeAssets.EnvelopeSchemaMetadataKey
             ],
             metadata.Keys.ToArray());
         Assert.True(validation.IsValid);
@@ -923,45 +923,45 @@ public sealed class WebGpuComputeProviderContractTests
     public void CompatibilityNamespace_ExposesBrowserBridgeAssets()
     {
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.RuntimeAssetPath,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.RuntimeAssetPath);
+            WebGpuBrowserBridgeAssets.RuntimeAssetPath,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.RuntimeAssetPath);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.BridgeFactory,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.BridgeFactory);
+            WebGpuBrowserBridgeAssets.BridgeFactory,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.BridgeFactory);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.BrowserExecutorFactory,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.BrowserExecutorFactory);
+            WebGpuBrowserBridgeAssets.BrowserExecutorFactory,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.BrowserExecutorFactory);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.GlobalObject,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.GlobalObject);
+            WebGpuBrowserBridgeAssets.GlobalObject,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.GlobalObject);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.PassReadinessMetadataKey,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.PassReadinessMetadataKey);
+            WebGpuBrowserBridgeAssets.PassReadinessMetadataKey,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.PassReadinessMetadataKey);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeMetadataKey,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeMetadataKey);
+            WebGpuBrowserBridgeAssets.EnvelopeBridgeMetadataKey,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.EnvelopeBridgeMetadataKey);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey);
+            WebGpuBrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.EnvelopeBridgeExecutorFactoryMetadataKey);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey);
+            WebGpuBrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.EnvelopeBridgeFactoryMetadataKey);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey);
+            WebGpuBrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.EnvelopeBridgeGlobalMetadataKey);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.EnvelopeSchemaMetadataKey,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.EnvelopeSchemaMetadataKey);
+            WebGpuBrowserBridgeAssets.EnvelopeSchemaMetadataKey,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.EnvelopeSchemaMetadataKey);
         Assert.Equal(
-            WebGpuRev3BrowserBridgeAssets.PassReadinessShape,
-            global::AIKernel.Wasm.Comput.WebGpuRev3BrowserBridgeAssets.PassReadinessShape);
+            WebGpuBrowserBridgeAssets.PassReadinessShape,
+            global::AIKernel.Wasm.Comput.WebGpuBrowserBridgeAssets.PassReadinessShape);
     }
 
     [Fact]
-    public void CompatibilityNamespace_ExposesRev3EnvelopeProjectionAndValidation()
+    public void CompatibilityNamespace_ExposesCanonicalEnvelopeProjectionAndValidation()
     {
         var raw = RawTarget("raw");
-        var envelope = global::AIKernel.Wasm.Comput.WebGpuRev3InteropEnvelope.ForAisthesis(new GpuAisthesisInput
+        var envelope = global::AIKernel.Wasm.Comput.WebGpuInteropEnvelope.ForAisthesis(new GpuAisthesisInput
         {
             Frame = FrameToken(raw),
             RawFramebuffer = raw,
@@ -970,25 +970,25 @@ public sealed class WebGpuComputeProviderContractTests
                 ["edge-detect"] = true
             }
         });
-        var validation = global::AIKernel.Wasm.Comput.WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(envelope);
+        var validation = global::AIKernel.Wasm.Comput.WebGpuInteropEnvelope.ValidateDispatchEnvelope(envelope);
 
         Assert.Equal(GpuOperationNames.GpuAisthesisRawFrame, envelope.PassId);
         Assert.True(validation.IsValid);
     }
 
     [Fact]
-    public void Rev3LayoutRegistry_MatchesCanonicalGpuLayouts()
+    public void CanonicalLayoutRegistry_MatchesCanonicalGpuLayouts()
     {
         var path = Path.Combine(
             AppContext.BaseDirectory,
             "Buffers",
             "Layouts",
-            "gpu-layouts.rev3.json");
+            "gpu-layouts.json");
 
         Assert.True(File.Exists(path));
 
         using var document = JsonDocument.Parse(File.ReadAllText(path));
-        Assert.Equal("aikernel.gpu.layouts.rev3", document.RootElement.GetProperty("schema").GetString());
+        Assert.Equal("aikernel.gpu.layouts.canonical", document.RootElement.GetProperty("schema").GetString());
         Assert.Equal("0.1.3", document.RootElement.GetProperty("version").GetString());
         var layouts = document.RootElement
             .GetProperty("layouts")
@@ -1020,7 +1020,14 @@ public sealed class WebGpuComputeProviderContractTests
                 GpuProviderMetadataKeys.AisMatrixOrder,
                 GpuProviderMetadataKeys.AotCompilerHooks,
                 GpuProviderMetadataKeys.Backend,
+                GpuProviderMetadataKeys.CanonicalBrowserPassReadiness,
+                GpuProviderMetadataKeys.Canonical,
                 GpuProviderMetadataKeys.DeterministicFrameSampling,
+                GpuProviderMetadataKeys.CanonicalEnvelopeBridge,
+                GpuProviderMetadataKeys.CanonicalEnvelopeBridgeExecutorFactory,
+                GpuProviderMetadataKeys.CanonicalEnvelopeBridgeFactory,
+                GpuProviderMetadataKeys.CanonicalEnvelopeBridgeGlobal,
+                GpuProviderMetadataKeys.CanonicalEnvelopeSchema,
                 GpuProviderMetadataKeys.Fallback,
                 GpuProviderMetadataKeys.GpuBackend,
                 GpuProviderMetadataKeys.GpuBypass,
@@ -1030,21 +1037,14 @@ public sealed class WebGpuComputeProviderContractTests
                 GpuProviderMetadataKeys.ProviderFamily,
                 GpuProviderMetadataKeys.ProviderRole,
                 GpuProviderMetadataKeys.RawCaptureSource,
-                GpuProviderMetadataKeys.Rev3,
-                GpuProviderMetadataKeys.Rev3BrowserPassReadiness,
-                GpuProviderMetadataKeys.Rev3EnvelopeBridge,
-                GpuProviderMetadataKeys.Rev3EnvelopeBridgeExecutorFactory,
-                GpuProviderMetadataKeys.Rev3EnvelopeBridgeFactory,
-                GpuProviderMetadataKeys.Rev3EnvelopeBridgeGlobal,
-                GpuProviderMetadataKeys.Rev3EnvelopeSchema,
                 GpuProviderMetadataKeys.Version,
                 GpuProviderMetadataKeys.ZeroCopyBufferHandling
             ],
             settings.ToMetadata().Keys.ToArray());
-        Assert.True(GpuCanonicalValidation.ValidateRev3BrowserBridgeMetadata(settings.ToMetadata()).IsValid);
-        Assert.True(GpuCanonicalValidation.ValidateRev3ExecutionLayerMetadata(settings.ToMetadata()).IsValid);
-        Assert.Equal(WebGpuRev3BrowserBridgeAssets.RuntimeAssetPath, settings.ToMetadata()[WebGpuRev3BrowserBridgeAssets.EnvelopeBridgeMetadataKey]);
-        Assert.Equal(WebGpuRev3BrowserBridgeAssets.PassReadinessShape, settings.ToMetadata()[WebGpuRev3BrowserBridgeAssets.PassReadinessMetadataKey]);
+        Assert.True(GpuCanonicalValidation.ValidateBrowserBridgeMetadata(settings.ToMetadata()).IsValid);
+        Assert.True(GpuCanonicalValidation.ValidateExecutionLayerMetadata(settings.ToMetadata()).IsValid);
+        Assert.Equal(WebGpuBrowserBridgeAssets.RuntimeAssetPath, settings.ToMetadata()[WebGpuBrowserBridgeAssets.EnvelopeBridgeMetadataKey]);
+        Assert.Equal(WebGpuBrowserBridgeAssets.PassReadinessShape, settings.ToMetadata()[WebGpuBrowserBridgeAssets.PassReadinessMetadataKey]);
     }
 
     [Fact]
@@ -1090,7 +1090,7 @@ public sealed class WebGpuComputeProviderContractTests
             => buffer ?? throw new ArgumentNullException(nameof(buffer));
     }
 
-    private sealed class FakeWebGpuRev3JsInterop : IWebGpuRev3JsInterop
+    private sealed class FakeWebGpuCanonicalJsInterop : IWebGpuPassBridgeJsInterop
     {
         private readonly FakeWebGpuJsInterop _compute = new();
 
@@ -1176,15 +1176,15 @@ public sealed class WebGpuComputeProviderContractTests
         }
     }
 
-    private sealed class FakeWebGpuRev3EnvelopeJsInterop : IWebGpuRev3EnvelopeJsInterop
+    private sealed class FakeWebGpuCanonicalEnvelopeJsInterop : IWebGpuEnvelopeJsInterop
     {
         private readonly FakeWebGpuJsInterop _compute = new();
 
-        public WebGpuRev3DispatchEnvelope? LastAisthesisEnvelope { get; private set; }
+        public WebGpuDispatchEnvelope? LastAisthesisEnvelope { get; private set; }
 
-        public WebGpuRev3DispatchEnvelope? LastSpatialEnvelope { get; private set; }
+        public WebGpuDispatchEnvelope? LastSpatialEnvelope { get; private set; }
 
-        public WebGpuRev3DispatchEnvelope? LastHudEnvelope { get; private set; }
+        public WebGpuDispatchEnvelope? LastHudEnvelope { get; private set; }
 
         public bool IsWebGpuSupported() => true;
 
@@ -1198,7 +1198,7 @@ public sealed class WebGpuComputeProviderContractTests
             => _compute.ExecuteKernelAsync(wgsl, buffers, x, y, z);
 
         public Task<GpuAisthesisOutput?> DispatchAisthesisEnvelopeAsync(
-            WebGpuRev3DispatchEnvelope envelope,
+            WebGpuDispatchEnvelope envelope,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -1227,7 +1227,7 @@ public sealed class WebGpuComputeProviderContractTests
         }
 
         public Task<GpuSpatialReasoningOutput?> DispatchSpatialReasoningEnvelopeAsync(
-            WebGpuRev3DispatchEnvelope envelope,
+            WebGpuDispatchEnvelope envelope,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -1247,7 +1247,7 @@ public sealed class WebGpuComputeProviderContractTests
         }
 
         public Task<GpuFrameTarget?> DispatchHudCompositeEnvelopeAsync(
-            WebGpuRev3DispatchEnvelope envelope,
+            WebGpuDispatchEnvelope envelope,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -1264,7 +1264,7 @@ public sealed class WebGpuComputeProviderContractTests
             });
         }
 
-        private static GpuFrameTarget RequireTarget(WebGpuRev3DispatchEnvelope envelope, string role)
+        private static GpuFrameTarget RequireTarget(WebGpuDispatchEnvelope envelope, string role)
         {
             var target = envelope.Targets.Single(item => item.Role == role);
             return new GpuFrameTarget
@@ -1279,7 +1279,7 @@ public sealed class WebGpuComputeProviderContractTests
             };
         }
 
-        private static GpuFrameToken FrameFrom(WebGpuRev3DispatchEnvelope envelope, GpuFrameTarget raw)
+        private static GpuFrameToken FrameFrom(WebGpuDispatchEnvelope envelope, GpuFrameTarget raw)
             => new()
             {
                 FrameId = envelope.Frame.FrameId,

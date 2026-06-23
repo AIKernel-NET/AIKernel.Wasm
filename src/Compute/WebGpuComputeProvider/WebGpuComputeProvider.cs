@@ -283,9 +283,9 @@ public class WebGpuComputeProvider(
         await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
         ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuCanonicalValidation.ValidateAisthesisInput(input));
 
-        if (!_usingCpuFallback && _backend is IWebGpuRev3Backend rev3Backend)
+        if (!_usingCpuFallback && _backend is IWebGpuPassBridgeBackend canonicalBackend)
         {
-            var dispatched = await rev3Backend.DispatchAisthesisAsync(input, cancellationToken).ConfigureAwait(false);
+            var dispatched = await canonicalBackend.DispatchAisthesisAsync(input, cancellationToken).ConfigureAwait(false);
             if (dispatched is not null)
             {
                 return NormalizeAisthesisOutput(dispatched, input);
@@ -337,9 +337,9 @@ public class WebGpuComputeProvider(
         await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
         ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuCanonicalValidation.ValidateSpatialReasoningInput(input));
 
-        if (!_usingCpuFallback && _backend is IWebGpuRev3Backend rev3Backend)
+        if (!_usingCpuFallback && _backend is IWebGpuPassBridgeBackend canonicalBackend)
         {
-            var dispatched = await rev3Backend.DispatchSpatialReasoningAsync(input, cancellationToken).ConfigureAwait(false);
+            var dispatched = await canonicalBackend.DispatchSpatialReasoningAsync(input, cancellationToken).ConfigureAwait(false);
             if (dispatched is not null)
             {
                 return NormalizeSpatialReasoningOutput(dispatched, input);
@@ -384,9 +384,9 @@ public class WebGpuComputeProvider(
         await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
         ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuCanonicalValidation.ValidateHudInput(input));
 
-        if (!_usingCpuFallback && _backend is IWebGpuRev3Backend rev3Backend)
+        if (!_usingCpuFallback && _backend is IWebGpuPassBridgeBackend canonicalBackend)
         {
-            var dispatched = await rev3Backend.DispatchHudCompositeAsync(input, cancellationToken).ConfigureAwait(false);
+            var dispatched = await canonicalBackend.DispatchHudCompositeAsync(input, cancellationToken).ConfigureAwait(false);
             if (dispatched is not null)
             {
                 return NormalizeHudCompositeTarget(dispatched, input);
@@ -478,7 +478,7 @@ public class WebGpuComputeProvider(
             FrameId = frame?.FrameId,
             PassId = passId,
             MemoryEstimate = EstimatePathMemory(frame, passId),
-            Metadata = WebGpuRev3DiagnosticsMetadata.Create(passId, _usingCpuFallback, frame: frame)
+            Metadata = WebGpuDiagnosticsMetadata.Create(passId, _usingCpuFallback, frame: frame)
         };
 
     private AIKernel.Dtos.Gpu.GpuAisthesisOutput NormalizeAisthesisOutput(
@@ -553,7 +553,7 @@ public class WebGpuComputeProvider(
             FrameId = string.IsNullOrWhiteSpace(diagnostics.FrameId) ? frame?.FrameId : diagnostics.FrameId,
             PassId = resolvedPassId,
             MemoryEstimate = diagnostics.MemoryEstimate ?? EstimatePathMemory(frame, passId),
-            Metadata = WebGpuRev3DiagnosticsMetadata.Create(resolvedPassId, _usingCpuFallback, diagnostics.Metadata, frame)
+            Metadata = WebGpuDiagnosticsMetadata.Create(resolvedPassId, _usingCpuFallback, diagnostics.Metadata, frame)
         };
     }
 
@@ -605,7 +605,7 @@ public class WebGpuComputeProvider(
     }
 }
 
-internal static class WebGpuRev3DiagnosticsMetadata
+internal static class WebGpuDiagnosticsMetadata
 {
     public static IReadOnlyDictionary<string, string> Create(
         string passId,
@@ -620,21 +620,21 @@ internal static class WebGpuRev3DiagnosticsMetadata
     {
         var values = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
-            [GpuDiagnosticsMetadataKeys.Rev3AuthoritativeReady] = "false",
-            [GpuDiagnosticsMetadataKeys.Rev3CandidateStreak] = "0",
-            [GpuDiagnosticsMetadataKeys.Rev3DiagnosticReady] = "false",
-            [GpuDiagnosticsMetadataKeys.Rev3DiagnosticStreak] = "0",
-            [GpuDiagnosticsMetadataKeys.Rev3ExecutionMode] = GpuRev3ExecutionModes.CSharpDeterministic,
-            [GpuDiagnosticsMetadataKeys.Rev3FeatureMaskStorageTexture] = "false",
-            [GpuDiagnosticsMetadataKeys.Rev3FrameIndex] =
+            [GpuDiagnosticsMetadataKeys.CanonicalAuthoritativeReady] = "false",
+            [GpuDiagnosticsMetadataKeys.CanonicalCandidateStreak] = "0",
+            [GpuDiagnosticsMetadataKeys.CanonicalDiagnosticReady] = "false",
+            [GpuDiagnosticsMetadataKeys.CanonicalDiagnosticStreak] = "0",
+            [GpuDiagnosticsMetadataKeys.CanonicalExecutionMode] = GpuExecutionModes.CSharpDeterministic,
+            [GpuDiagnosticsMetadataKeys.CanonicalFeatureMaskStorageTexture] = "false",
+            [GpuDiagnosticsMetadataKeys.CanonicalFrameIndex] =
                 (frame?.FrameIndex ?? 0).ToString(CultureInfo.InvariantCulture),
-            [GpuDiagnosticsMetadataKeys.Rev3PassReadiness] = CreatePassReadiness(usingCpuFallback),
-            [GpuDiagnosticsMetadataKeys.Rev3PassId] = passId,
-            [GpuDiagnosticsMetadataKeys.Rev3PathRole] = ResolvePathRole(passId),
-            [GpuDiagnosticsMetadataKeys.Rev3PilotState] = GpuRev3PilotStates.NotEvaluated,
-            [GpuDiagnosticsMetadataKeys.Rev3PromotionGate] = GpuRev3PromotionGates.NotEvaluated,
-            [GpuDiagnosticsMetadataKeys.Rev3RequiredStreak] = "0",
-            [GpuDiagnosticsMetadataKeys.Rev3SampleTicks] =
+            [GpuDiagnosticsMetadataKeys.CanonicalPassReadiness] = CreatePassReadiness(usingCpuFallback),
+            [GpuDiagnosticsMetadataKeys.CanonicalPassId] = passId,
+            [GpuDiagnosticsMetadataKeys.CanonicalPathRole] = ResolvePathRole(passId),
+            [GpuDiagnosticsMetadataKeys.CanonicalPilotState] = GpuCanonicalPilotStates.NotEvaluated,
+            [GpuDiagnosticsMetadataKeys.CanonicalPromotionGate] = GpuPromotionGates.NotEvaluated,
+            [GpuDiagnosticsMetadataKeys.CanonicalRequiredStreak] = "0",
+            [GpuDiagnosticsMetadataKeys.CanonicalSampleTicks] =
                 (frame?.SampleTicks ?? 0).ToString(CultureInfo.InvariantCulture)
         };
 
@@ -660,11 +660,11 @@ internal static class WebGpuRev3DiagnosticsMetadata
 
     private static void AddPromotionReadinessMetadata(SortedDictionary<string, string> values)
     {
-        var readiness = GpuCanonicalValidation.EvaluateRev3PromotionReadiness(values);
-        values[GpuDiagnosticsMetadataKeys.Rev3PromotionBlocked] = Flag(readiness.IsBlocked);
-        values[GpuDiagnosticsMetadataKeys.Rev3PromotionCandidateReady] = Flag(readiness.IsPromotionCandidate);
-        values[GpuDiagnosticsMetadataKeys.Rev3PromotionDiagnosticStable] = Flag(readiness.IsDiagnosticStable);
-        values[GpuDiagnosticsMetadataKeys.Rev3PromotionReason] = readiness.Reason;
+        var readiness = GpuCanonicalValidation.EvaluatePromotionReadiness(values);
+        values[GpuDiagnosticsMetadataKeys.CanonicalPromotionBlocked] = Flag(readiness.IsBlocked);
+        values[GpuDiagnosticsMetadataKeys.CanonicalPromotionCandidateReady] = Flag(readiness.IsPromotionCandidate);
+        values[GpuDiagnosticsMetadataKeys.CanonicalPromotionDiagnosticStable] = Flag(readiness.IsDiagnosticStable);
+        values[GpuDiagnosticsMetadataKeys.CanonicalPromotionReason] = readiness.Reason;
     }
 
     private static string Flag(bool value)
@@ -683,7 +683,7 @@ internal static class WebGpuRev3DiagnosticsMetadata
             : "raw-texture-binding";
         values[GpuProviderMetadataKeys.NativeJsBridge] = usingCpuFallback
             ? "not-active"
-            : "rev3-envelope-bridge";
+            : "canonical-envelope-bridge";
         values[GpuProviderMetadataKeys.PassBridge] = usingCpuFallback
             ? "deterministic-csharp"
             : "optional-native-or-js";
@@ -702,7 +702,7 @@ internal static class WebGpuRev3DiagnosticsMetadata
 
     private static string ResolvePathRole(string passId)
     {
-        return GpuRev3PathRoles.TryResolveFromPassId(passId, out var role)
+        return GpuPathRoles.TryResolveFromPassId(passId, out var role)
             ? role
             : "unknown";
     }
@@ -780,7 +780,7 @@ internal sealed class WebGpuRuntimeContext(
             FrameId = frame?.FrameId,
             PassId = passId,
             MemoryEstimate = EstimatePathMemory(frame, passId),
-            Metadata = WebGpuRev3DiagnosticsMetadata.Create(passId, usingCpuFallback, frame: frame)
+            Metadata = WebGpuDiagnosticsMetadata.Create(passId, usingCpuFallback, frame: frame)
         };
 
     private static long? EstimatePathMemory(

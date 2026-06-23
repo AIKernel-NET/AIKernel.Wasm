@@ -22,6 +22,6 @@
   "metadata": {
     "boundary": "wasm",
     "renders": "false",
-    "rev3StateVector": "true"
+    "canonicalStateVector": "true"
   }
 }

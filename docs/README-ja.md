@@ -17,7 +17,7 @@ control、tools と統合する標準 reference distribution として位置づ�
 ## リポジトリ横断整合
 
 共有の repository boundary、v0.1.3 development versioning、依存関係順、
-GPU rev3 provider metadata、Python wrapper scope は canonical AIKernel GPU rev3
+GPU canonical provider metadata、Python wrapper scope は canonical AIKernel GPU canonical
 integration plan に従います。共有の v0.1.3 alignment document が公開されるまでは、
 Wasm package / wrapper version を AIKernel.Core、AIKernel.Control、
 AIKernel.Providers、Dawn、Cuda13 と同期してください。履歴としての v0.1.1.1 validation rule は

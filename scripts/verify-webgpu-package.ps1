@@ -40,11 +40,11 @@ $zip = [System.IO.Compression.ZipFile]::OpenRead($packagePath.FullName)
 try {
     $requiredEntries = @(
         "providers/webgpu.provider.json",
-        "runtime/browser/webgpu-rev3-envelope-bridge.js",
-        "shaders/hud/hud-composite.rev3.wgsl",
-        "shaders/aisthesis/aisthesis.rev3.wgsl",
-        "shaders/spatial/spatial-reasoning.rev3.wgsl",
-        "buffers/layouts/gpu-layouts.rev3.json",
+        "runtime/browser/webgpu-envelope-bridge.js",
+        "shaders/hud/hud-composite.wgsl",
+        "shaders/aisthesis/aisthesis.wgsl",
+        "shaders/spatial/spatial-reasoning.wgsl",
+        "buffers/layouts/gpu-layouts.json",
         "samples/vector-add.wgsl"
     )
 
@@ -62,4 +62,4 @@ finally {
 }
 
 Write-Host "package: $($packagePath.FullName)"
-Write-Host "AIKernel.Wasm WebGPU rev3 package smoke: ok"
+Write-Host "AIKernel.Wasm WebGPU canonical package smoke: ok"

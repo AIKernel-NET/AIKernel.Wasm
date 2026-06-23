@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
 import {
-  createWebGpuRev3BrowserExecutor,
-  createWebGpuRev3EnvelopeBridge
-} from "../../src/Compute/WebGpuComputeProvider/Runtime/Browser/webgpu-rev3-envelope-bridge.js";
+  createWebGpuBrowserExecutor,
+  createWebGpuEnvelopeBridge
+} from "../../src/Compute/WebGpuComputeProvider/Runtime/Browser/webgpu-envelope-bridge.js";
 
 const PASS_AISTHESIS = 1;
 const PASS_SPATIAL_REASONING = 2;
@@ -16,7 +16,7 @@ const TARGET_HUD_COMPOSITE = 2;
 const BACKEND_WEBGPU = 2;
 
 const envelope = {
-  Schema: "aikernel.gpu.rev3.dispatch",
+  Schema: "aikernel.gpu.dispatch",
   Version: "0.1.3",
   PassId: PASS_ID_AISTHESIS,
   PassKind: PASS_AISTHESIS,
@@ -49,7 +49,7 @@ const envelope = {
 };
 
 async function run() {
-  const builtInExecutor = createWebGpuRev3BrowserExecutor({
+  const builtInExecutor = createWebGpuBrowserExecutor({
     device: createFakeWebGpuDevice(),
     textureRegistry: {
       get(id) {
@@ -66,31 +66,31 @@ async function run() {
   });
 
   const builtIn = await builtInExecutor.dispatchAisthesisEnvelope(envelope);
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_pass_id, PASS_ID_AISTHESIS);
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_frame_index, "42");
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_sample_ticks, "1001");
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_path_role, "sensor");
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_pilot_state, "browser-builtin-compute");
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_execution_mode, "browser-webgpu-compute");
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_diagnostic_ready, "true");
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_promotion_gate, "trace-candidate");
+  assert.equal(builtIn.Diagnostics.Metadata.pass_id, PASS_ID_AISTHESIS);
+  assert.equal(builtIn.Diagnostics.Metadata.frame_index, "42");
+  assert.equal(builtIn.Diagnostics.Metadata.sample_ticks, "1001");
+  assert.equal(builtIn.Diagnostics.Metadata.path_role, "sensor");
+  assert.equal(builtIn.Diagnostics.Metadata.pilot_state, "browser-builtin-compute");
+  assert.equal(builtIn.Diagnostics.Metadata.execution_mode, "browser-webgpu-compute");
+  assert.equal(builtIn.Diagnostics.Metadata.diagnostic_ready, "true");
+  assert.equal(builtIn.Diagnostics.Metadata.promotion_gate, "trace-candidate");
   assert.equal(builtIn.Diagnostics.Metadata.provider_trace, "from-csharp-dto");
-  assert.match(builtIn.Diagnostics.Metadata.rev3_pass_readiness, /Passes\.\{Aisthesis,SpatialReasoning,HudComposite\}/);
-  assert.match(builtIn.Diagnostics.Metadata.rev3_pass_readiness, /ReadyForBuiltIn=true/);
-  assert.equal(builtIn.Diagnostics.Metadata.rev3_feature_mask_storage_texture, "true");
+  assert.match(builtIn.Diagnostics.Metadata.pass_readiness, /Passes\.\{Aisthesis,SpatialReasoning,HudComposite\}/);
+  assert.match(builtIn.Diagnostics.Metadata.pass_readiness, /ReadyForBuiltIn=true/);
+  assert.equal(builtIn.Diagnostics.Metadata.feature_mask_storage_texture, "true");
   assert.equal(builtIn.FeatureVector[0], 7);
   assert.equal(builtIn.FeatureVector.length, 32);
   assert.equal(builtIn.MaskTexture.TargetId, "raw-vm:feature-mask");
   assert.equal(builtIn.MaskTexture.Kind, 4);
 
   const spatial = await builtInExecutor.dispatchSpatialReasoningEnvelope(spatialEnvelope());
-  assert.equal(spatial.Diagnostics.Metadata.rev3_pass_id, PASS_ID_SPATIAL_REASONING);
-  assert.equal(spatial.Diagnostics.Metadata.rev3_frame_index, "42");
-  assert.equal(spatial.Diagnostics.Metadata.rev3_sample_ticks, "1001");
-  assert.equal(spatial.Diagnostics.Metadata.rev3_path_role, "sensor");
-  assert.equal(spatial.Diagnostics.Metadata.rev3_pilot_state, "browser-builtin-compute");
-  assert.equal(spatial.Diagnostics.Metadata.rev3_execution_mode, "browser-webgpu-compute");
-  assert.match(spatial.Diagnostics.Metadata.rev3_pass_readiness, /SpatialReasoning\{ShaderBound=true/);
+  assert.equal(spatial.Diagnostics.Metadata.pass_id, PASS_ID_SPATIAL_REASONING);
+  assert.equal(spatial.Diagnostics.Metadata.frame_index, "42");
+  assert.equal(spatial.Diagnostics.Metadata.sample_ticks, "1001");
+  assert.equal(spatial.Diagnostics.Metadata.path_role, "sensor");
+  assert.equal(spatial.Diagnostics.Metadata.pilot_state, "browser-builtin-compute");
+  assert.equal(spatial.Diagnostics.Metadata.execution_mode, "browser-webgpu-compute");
+  assert.match(spatial.Diagnostics.Metadata.pass_readiness, /SpatialReasoning\{ShaderBound=true/);
   assert.equal(spatial.SpatialVector[0], 17);
   assert.equal(spatial.SpatialVector[4], 0.5);
   assert.equal(spatial.SpatialVector.length, 32);
@@ -113,33 +113,33 @@ async function run() {
   assert.match(builtInDiagnostics.PassReadiness, /Aisthesis\{ShaderBound=true/);
   assert.match(builtInDiagnostics.PassReadiness, /HudComposite\{ShaderBound=true/);
 
-  const fallbackBridge = createWebGpuRev3EnvelopeBridge();
+  const fallbackBridge = createWebGpuEnvelopeBridge();
   const fallback = await fallbackBridge.dispatchAisthesisEnvelope(envelope);
-  assert.equal(fallback.Diagnostics.Metadata.rev3_pass_id, PASS_ID_AISTHESIS);
-  assert.equal(fallback.Diagnostics.Metadata.rev3_frame_index, "42");
-  assert.equal(fallback.Diagnostics.Metadata.rev3_sample_ticks, "1001");
-  assert.equal(fallback.Diagnostics.Metadata.rev3_path_role, "sensor");
-  assert.equal(fallback.Diagnostics.Metadata.rev3_pilot_state, "browser-deterministic-fallback");
-  assert.equal(fallback.Diagnostics.Metadata.rev3_execution_mode, "deterministic-fallback");
-  assert.equal(fallback.Diagnostics.Metadata.rev3_promotion_gate, "fallback");
-  assert.match(fallback.Diagnostics.Metadata.rev3_pass_readiness, /ReadyForBuiltIn=false/);
-  assert.equal(fallback.Diagnostics.Metadata.rev3_feature_mask_storage_texture, "false");
+  assert.equal(fallback.Diagnostics.Metadata.pass_id, PASS_ID_AISTHESIS);
+  assert.equal(fallback.Diagnostics.Metadata.frame_index, "42");
+  assert.equal(fallback.Diagnostics.Metadata.sample_ticks, "1001");
+  assert.equal(fallback.Diagnostics.Metadata.path_role, "sensor");
+  assert.equal(fallback.Diagnostics.Metadata.pilot_state, "browser-deterministic-fallback");
+  assert.equal(fallback.Diagnostics.Metadata.execution_mode, "deterministic-fallback");
+  assert.equal(fallback.Diagnostics.Metadata.promotion_gate, "fallback");
+  assert.match(fallback.Diagnostics.Metadata.pass_readiness, /ReadyForBuiltIn=false/);
+  assert.equal(fallback.Diagnostics.Metadata.feature_mask_storage_texture, "false");
 
-  const invalidMetadataBridge = createWebGpuRev3EnvelopeBridge({ executor: builtInExecutor });
+  const invalidMetadataBridge = createWebGpuEnvelopeBridge({ executor: builtInExecutor });
   const invalidMetadataFallback = await invalidMetadataBridge.dispatchAisthesisEnvelope({
     ...envelope,
     Metadata: {
       ...metadataFor(PASS_ID_AISTHESIS, "sensor"),
-      rev3_promotion_gate: "trace-candidte"
+      promotion_gate: "trace-candidte"
     }
   });
-  assert.equal(invalidMetadataFallback.Diagnostics.FallbackReason, "metadata-invalid:rev3_promotion_gate");
-  assert.equal(invalidMetadataFallback.Diagnostics.Metadata.rev3_metadata_validation_error, "rev3_promotion_gate");
-  assert.equal(invalidMetadataFallback.Diagnostics.Metadata.rev3_promotion_gate, "fallback");
-  assert.equal(invalidMetadataFallback.Diagnostics.Metadata.rev3_execution_mode, "deterministic-fallback");
+  assert.equal(invalidMetadataFallback.Diagnostics.FallbackReason, "metadata-invalid:promotion_gate");
+  assert.equal(invalidMetadataFallback.Diagnostics.Metadata.metadata_validation_error, "promotion_gate");
+  assert.equal(invalidMetadataFallback.Diagnostics.Metadata.promotion_gate, "fallback");
+  assert.equal(invalidMetadataFallback.Diagnostics.Metadata.execution_mode, "deterministic-fallback");
 
   const executorFallbacks = [];
-  const missingShaderExecutor = createWebGpuRev3BrowserExecutor({
+  const missingShaderExecutor = createWebGpuBrowserExecutor({
     device: createFakeWebGpuDevice(),
     textureRegistry: {
       get(id) {
@@ -231,20 +231,20 @@ function hudEnvelope() {
 
 function metadataFor(passId, pathRole) {
   return {
-    rev3_authoritative_ready: "false",
-    rev3_candidate_streak: "1",
-    rev3_diagnostic_ready: "true",
-    rev3_diagnostic_streak: "1",
-    rev3_execution_mode: "browser-webgpu-compute",
-    rev3_feature_mask_storage_texture: "false",
-    rev3_frame_index: "42",
-    rev3_pass_id: passId,
-    rev3_pass_readiness: "Passes.{Aisthesis,SpatialReasoning,HudComposite}:Aisthesis{ShaderBound=false,PipelineCached=false,BuiltInExecutor=false,InjectedExecutor=false,ReadyForBuiltIn=false};SpatialReasoning{ShaderBound=false,PipelineCached=false,BuiltInExecutor=false,InjectedExecutor=false,ReadyForBuiltIn=false};HudComposite{ShaderBound=false,PipelineCached=false,BuiltInExecutor=false,InjectedExecutor=false,ReadyForBuiltIn=false}",
-    rev3_path_role: pathRole,
-    rev3_pilot_state: "browser-builtin-compute",
-    rev3_promotion_gate: "trace-candidate",
-    rev3_required_streak: "1",
-    rev3_sample_ticks: "1001",
+    authoritative_ready: "false",
+    candidate_streak: "1",
+    diagnostic_ready: "true",
+    diagnostic_streak: "1",
+    execution_mode: "browser-webgpu-compute",
+    feature_mask_storage_texture: "false",
+    frame_index: "42",
+    pass_id: passId,
+    pass_readiness: "Passes.{Aisthesis,SpatialReasoning,HudComposite}:Aisthesis{ShaderBound=false,PipelineCached=false,BuiltInExecutor=false,InjectedExecutor=false,ReadyForBuiltIn=false};SpatialReasoning{ShaderBound=false,PipelineCached=false,BuiltInExecutor=false,InjectedExecutor=false,ReadyForBuiltIn=false};HudComposite{ShaderBound=false,PipelineCached=false,BuiltInExecutor=false,InjectedExecutor=false,ReadyForBuiltIn=false}",
+    path_role: pathRole,
+    pilot_state: "browser-builtin-compute",
+    promotion_gate: "trace-candidate",
+    required_streak: "1",
+    sample_ticks: "1001",
     provider_trace: "from-csharp-dto"
   };
 }

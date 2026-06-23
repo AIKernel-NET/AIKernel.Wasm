@@ -23,6 +23,6 @@
     "boundary": "wasm",
     "modelBinding": "descriptor-driven",
     "zeroCopy": "optional",
-    "rev3Capabilities": "supported"
+    "canonicalCapabilities": "supported"
   }
 }

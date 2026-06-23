@@ -30,10 +30,10 @@ public interface IWebGpuBackend
 }
 
 /// <summary>
-/// [EN] Optional rev3 canonical WebGPU pass bridge for HUD, Aisthesis, and Spatial Reasoning.
-/// [JA] HUD、Aisthesis、Spatial Reasoning 用の任意の rev3 canonical WebGPU pass bridge です。
+/// [EN] Optional canonical WebGPU pass bridge for HUD, Aisthesis, and Spatial Reasoning.
+/// [JA] HUD、Aisthesis、Spatial Reasoning 用の任意の canonical WebGPU pass bridge です。
 /// </summary>
-public interface IWebGpuRev3Backend : IWebGpuBackend
+public interface IWebGpuPassBridgeBackend : IWebGpuBackend
 {
     /// <summary>
     /// [EN] Dispatches the canonical GPU Aisthesis pass, or returns null when this backend has no native pass.
@@ -146,7 +146,7 @@ public class WebGpuNativeBackend : IWebGpuBackend
 /// [EN] Browser/WASM WebGPU backend adapter for JavaScript interop.
 /// [JA] JavaScript interop 向けの browser/WASM WebGPU backend adapter です。
 /// </summary>
-public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend, IWebGpuRev3Backend
+public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend, IWebGpuPassBridgeBackend
 {
     private readonly IWebGpuJsInterop? _jsInterop = jsInterop;
     private readonly Dictionary<ComputeBuffer, byte[]> _buffers = new();
@@ -225,21 +225,21 @@ public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBack
     {
         EnsureAvailable();
         cancellationToken.ThrowIfCancellationRequested();
-        if (_jsInterop is IWebGpuRev3EnvelopeJsInterop envelopeInterop)
+        if (_jsInterop is IWebGpuEnvelopeJsInterop envelopeInterop)
         {
-            var envelope = WebGpuRev3InteropEnvelope.ForAisthesis(input);
+            var envelope = WebGpuInteropEnvelope.ForAisthesis(input);
             EnsureValidDispatchEnvelope(envelope);
             return await envelopeInterop
                 .DispatchAisthesisEnvelopeAsync(envelope, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        if (_jsInterop is not IWebGpuRev3JsInterop rev3)
+        if (_jsInterop is not IWebGpuPassBridgeJsInterop canonical)
         {
             return null;
         }
 
-        return await rev3.DispatchAisthesisAsync(input, cancellationToken).ConfigureAwait(false);
+        return await canonical.DispatchAisthesisAsync(input, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -249,21 +249,21 @@ public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBack
     {
         EnsureAvailable();
         cancellationToken.ThrowIfCancellationRequested();
-        if (_jsInterop is IWebGpuRev3EnvelopeJsInterop envelopeInterop)
+        if (_jsInterop is IWebGpuEnvelopeJsInterop envelopeInterop)
         {
-            var envelope = WebGpuRev3InteropEnvelope.ForSpatialReasoning(input);
+            var envelope = WebGpuInteropEnvelope.ForSpatialReasoning(input);
             EnsureValidDispatchEnvelope(envelope);
             return await envelopeInterop
                 .DispatchSpatialReasoningEnvelopeAsync(envelope, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        if (_jsInterop is not IWebGpuRev3JsInterop rev3)
+        if (_jsInterop is not IWebGpuPassBridgeJsInterop canonical)
         {
             return null;
         }
 
-        return await rev3.DispatchSpatialReasoningAsync(input, cancellationToken).ConfigureAwait(false);
+        return await canonical.DispatchSpatialReasoningAsync(input, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -273,21 +273,21 @@ public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBack
     {
         EnsureAvailable();
         cancellationToken.ThrowIfCancellationRequested();
-        if (_jsInterop is IWebGpuRev3EnvelopeJsInterop envelopeInterop)
+        if (_jsInterop is IWebGpuEnvelopeJsInterop envelopeInterop)
         {
-            var envelope = WebGpuRev3InteropEnvelope.ForHudComposite(input);
+            var envelope = WebGpuInteropEnvelope.ForHudComposite(input);
             EnsureValidDispatchEnvelope(envelope);
             return await envelopeInterop
                 .DispatchHudCompositeEnvelopeAsync(envelope, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        if (_jsInterop is not IWebGpuRev3JsInterop rev3)
+        if (_jsInterop is not IWebGpuPassBridgeJsInterop canonical)
         {
             return null;
         }
 
-        return await rev3.DispatchHudCompositeAsync(input, cancellationToken).ConfigureAwait(false);
+        return await canonical.DispatchHudCompositeAsync(input, cancellationToken).ConfigureAwait(false);
     }
 
     private void EnsureAvailable()
@@ -298,9 +298,9 @@ public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBack
         }
     }
 
-    private static void EnsureValidDispatchEnvelope(WebGpuRev3DispatchEnvelope envelope)
+    private static void EnsureValidDispatchEnvelope(WebGpuDispatchEnvelope envelope)
     {
-        var validation = WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(envelope);
+        var validation = WebGpuInteropEnvelope.ValidateDispatchEnvelope(envelope);
         if (validation.IsValid)
         {
             return;
@@ -312,7 +312,7 @@ public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBack
                 string.IsNullOrWhiteSpace(issue.Path)
                     ? $"{issue.Code}: {issue.Message}"
                     : $"{issue.Code}@{issue.Path}: {issue.Message}"));
-        throw new InvalidOperationException($"Invalid WebGPU rev3 dispatch envelope. {summary}");
+        throw new InvalidOperationException($"Invalid WebGPU canonical dispatch envelope. {summary}");
     }
 
     private void ExecuteInMemoryVectorAdd(ComputeKernel kernel, IReadOnlyList<ComputeBuffer> buffers)
@@ -357,10 +357,10 @@ public interface IWebGpuJsInterop
 }
 
 /// <summary>
-/// [EN] Browser JavaScript interop boundary for canonical rev3 GPU passes.
-/// [JA] canonical rev3 GPU pass 用の browser JavaScript interop 境界です。
+/// [EN] Browser JavaScript interop boundary for canonical GPU passes.
+/// [JA] canonical GPU pass 用の browser JavaScript interop 境界です。
 /// </summary>
-public interface IWebGpuRev3JsInterop : IWebGpuJsInterop
+public interface IWebGpuPassBridgeJsInterop : IWebGpuJsInterop
 {
     /// <summary>[EN] Dispatches GPU Aisthesis over a raw framebuffer target. [JA] raw framebuffer target に対して GPU Aisthesis を dispatch します。</summary>
     Task<GpuAisthesisOutput?> DispatchAisthesisAsync(GpuAisthesisInput input, CancellationToken cancellationToken = default);
@@ -373,19 +373,19 @@ public interface IWebGpuRev3JsInterop : IWebGpuJsInterop
 }
 
 /// <summary>
-/// [EN] Browser JavaScript interop boundary that accepts stable rev3 dispatch envelopes.
-/// [JA] 安定した rev3 dispatch envelope を受け取る browser JavaScript interop 境界です。
+/// [EN] Browser JavaScript interop boundary that accepts stable canonical dispatch envelopes.
+/// [JA] 安定した canonical dispatch envelope を受け取る browser JavaScript interop 境界です。
 /// </summary>
-public interface IWebGpuRev3EnvelopeJsInterop : IWebGpuJsInterop
+public interface IWebGpuEnvelopeJsInterop : IWebGpuJsInterop
 {
-    /// <summary>[EN] Dispatches GPU Aisthesis using a JS/Dawn friendly rev3 envelope. [JA] JS/Dawn で扱いやすい rev3 envelope で GPU Aisthesis を dispatch します。</summary>
-    Task<GpuAisthesisOutput?> DispatchAisthesisEnvelopeAsync(WebGpuRev3DispatchEnvelope envelope, CancellationToken cancellationToken = default);
+    /// <summary>[EN] Dispatches GPU Aisthesis using a JS/Dawn friendly canonical envelope. [JA] JS/Dawn で扱いやすい canonical envelope で GPU Aisthesis を dispatch します。</summary>
+    Task<GpuAisthesisOutput?> DispatchAisthesisEnvelopeAsync(WebGpuDispatchEnvelope envelope, CancellationToken cancellationToken = default);
 
-    /// <summary>[EN] Dispatches GPU Spatial Reasoning using a JS/Dawn friendly rev3 envelope. [JA] JS/Dawn で扱いやすい rev3 envelope で GPU Spatial Reasoning を dispatch します。</summary>
-    Task<GpuSpatialReasoningOutput?> DispatchSpatialReasoningEnvelopeAsync(WebGpuRev3DispatchEnvelope envelope, CancellationToken cancellationToken = default);
+    /// <summary>[EN] Dispatches GPU Spatial Reasoning using a JS/Dawn friendly canonical envelope. [JA] JS/Dawn で扱いやすい canonical envelope で GPU Spatial Reasoning を dispatch します。</summary>
+    Task<GpuSpatialReasoningOutput?> DispatchSpatialReasoningEnvelopeAsync(WebGpuDispatchEnvelope envelope, CancellationToken cancellationToken = default);
 
-    /// <summary>[EN] Dispatches GPU HUD composition using a JS/Dawn friendly rev3 envelope. [JA] JS/Dawn で扱いやすい rev3 envelope で GPU HUD composition を dispatch します。</summary>
-    Task<GpuFrameTarget?> DispatchHudCompositeEnvelopeAsync(WebGpuRev3DispatchEnvelope envelope, CancellationToken cancellationToken = default);
+    /// <summary>[EN] Dispatches GPU HUD composition using a JS/Dawn friendly canonical envelope. [JA] JS/Dawn で扱いやすい canonical envelope で GPU HUD composition を dispatch します。</summary>
+    Task<GpuFrameTarget?> DispatchHudCompositeEnvelopeAsync(WebGpuDispatchEnvelope envelope, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

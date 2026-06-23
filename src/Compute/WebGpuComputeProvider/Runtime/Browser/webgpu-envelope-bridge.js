@@ -1,9 +1,9 @@
-// AIKernel.NET canonical GPU rev3 browser envelope bridge.
+// AIKernel.NET canonical GPU canonical browser envelope bridge.
 // This file intentionally keeps policy in C# DTOs and uses JavaScript as a
 // thin WebGPU adapter boundary. Real WebGPU pass executors can attach command
 // encoders without changing the envelope shape.
 
-const SCHEMA = "aikernel.gpu.rev3.dispatch";
+const SCHEMA = "aikernel.gpu.dispatch";
 const BACKEND_WEBGPU = 2;
 const TARGET_RAW_FRAMEBUFFER = 1;
 const TARGET_HUD_COMPOSITE = 2;
@@ -32,28 +32,28 @@ const GPU_TEXTURE_USAGE = globalThis.GPUTextureUsage ?? {
 const GPU_MAP_MODE = globalThis.GPUMapMode ?? {
     READ: 1
 };
-const REV3_METADATA_KEYS = Object.freeze({
-    authoritativeReady: "rev3_authoritative_ready",
-    candidateStreak: "rev3_candidate_streak",
-    diagnosticReady: "rev3_diagnostic_ready",
-    diagnosticStreak: "rev3_diagnostic_streak",
-    featureMaskStorageTexture: "rev3_feature_mask_storage_texture",
-    frameIndex: "rev3_frame_index",
-    metadataValidationError: "rev3_metadata_validation_error",
-    passId: "rev3_pass_id",
-    passReadiness: "rev3_pass_readiness",
-    pathRole: "rev3_path_role",
-    pilotState: "rev3_pilot_state",
-    promotionBlocked: "rev3_promotion_blocked",
-    promotionCandidateReady: "rev3_promotion_candidate_ready",
-    promotionDiagnosticStable: "rev3_promotion_diagnostic_stable",
-    promotionGate: "rev3_promotion_gate",
-    promotionReason: "rev3_promotion_reason",
-    requiredStreak: "rev3_required_streak",
-    sampleTicks: "rev3_sample_ticks"
+const GPU_METADATA_KEYS = Object.freeze({
+    authoritativeReady: "authoritative_ready",
+    candidateStreak: "candidate_streak",
+    diagnosticReady: "diagnostic_ready",
+    diagnosticStreak: "diagnostic_streak",
+    featureMaskStorageTexture: "feature_mask_storage_texture",
+    frameIndex: "frame_index",
+    metadataValidationError: "metadata_validation_error",
+    passId: "pass_id",
+    passReadiness: "pass_readiness",
+    pathRole: "path_role",
+    pilotState: "pilot_state",
+    promotionBlocked: "promotion_blocked",
+    promotionCandidateReady: "promotion_candidate_ready",
+    promotionDiagnosticStable: "promotion_diagnostic_stable",
+    promotionGate: "promotion_gate",
+    promotionReason: "promotion_reason",
+    requiredStreak: "required_streak",
+    sampleTicks: "sample_ticks"
 });
-const REV3_EXECUTION_MODE = "rev3_execution_mode";
-const REV3_VALUES = Object.freeze({
+const GPU_EXECUTION_MODE = "execution_mode";
+const GPU_VALUES = Object.freeze({
     execution: Object.freeze({
         browserWebGpuCompute: "browser-webgpu-compute",
         csharpDeterministic: "csharp-deterministic",
@@ -80,61 +80,61 @@ const REV3_VALUES = Object.freeze({
         runtimeStampRequired: "runtime-stamp-required"
     })
 });
-const REV3_REQUIRED_METADATA_KEYS = Object.freeze([
-    REV3_METADATA_KEYS.authoritativeReady,
-    REV3_METADATA_KEYS.candidateStreak,
-    REV3_METADATA_KEYS.diagnosticReady,
-    REV3_METADATA_KEYS.diagnosticStreak,
-    REV3_METADATA_KEYS.featureMaskStorageTexture,
-    REV3_METADATA_KEYS.frameIndex,
-    REV3_METADATA_KEYS.passId,
-    REV3_METADATA_KEYS.passReadiness,
-    REV3_METADATA_KEYS.pathRole,
-    REV3_METADATA_KEYS.pilotState,
-    REV3_METADATA_KEYS.promotionGate,
-    REV3_METADATA_KEYS.requiredStreak,
-    REV3_METADATA_KEYS.sampleTicks,
-    REV3_EXECUTION_MODE
+const GPU_REQUIRED_METADATA_KEYS = Object.freeze([
+    GPU_METADATA_KEYS.authoritativeReady,
+    GPU_METADATA_KEYS.candidateStreak,
+    GPU_METADATA_KEYS.diagnosticReady,
+    GPU_METADATA_KEYS.diagnosticStreak,
+    GPU_METADATA_KEYS.featureMaskStorageTexture,
+    GPU_METADATA_KEYS.frameIndex,
+    GPU_METADATA_KEYS.passId,
+    GPU_METADATA_KEYS.passReadiness,
+    GPU_METADATA_KEYS.pathRole,
+    GPU_METADATA_KEYS.pilotState,
+    GPU_METADATA_KEYS.promotionGate,
+    GPU_METADATA_KEYS.requiredStreak,
+    GPU_METADATA_KEYS.sampleTicks,
+    GPU_EXECUTION_MODE
 ]);
-const REV3_BOOL_METADATA_KEYS = Object.freeze([
-    REV3_METADATA_KEYS.authoritativeReady,
-    REV3_METADATA_KEYS.diagnosticReady,
-    REV3_METADATA_KEYS.featureMaskStorageTexture
+const GPU_BOOL_METADATA_KEYS = Object.freeze([
+    GPU_METADATA_KEYS.authoritativeReady,
+    GPU_METADATA_KEYS.diagnosticReady,
+    GPU_METADATA_KEYS.featureMaskStorageTexture
 ]);
-const REV3_INTEGER_METADATA_KEYS = Object.freeze([
-    REV3_METADATA_KEYS.candidateStreak,
-    REV3_METADATA_KEYS.diagnosticStreak,
-    REV3_METADATA_KEYS.frameIndex,
-    REV3_METADATA_KEYS.requiredStreak,
-    REV3_METADATA_KEYS.sampleTicks
+const GPU_INTEGER_METADATA_KEYS = Object.freeze([
+    GPU_METADATA_KEYS.candidateStreak,
+    GPU_METADATA_KEYS.diagnosticStreak,
+    GPU_METADATA_KEYS.frameIndex,
+    GPU_METADATA_KEYS.requiredStreak,
+    GPU_METADATA_KEYS.sampleTicks
 ]);
-const REV3_ALLOWED_EXECUTION_MODES = Object.freeze(new Set([
-    REV3_VALUES.execution.browserWebGpuCompute,
-    REV3_VALUES.execution.csharpDeterministic,
-    REV3_VALUES.execution.deterministicFallback,
+const GPU_ALLOWED_EXECUTION_MODES = Object.freeze(new Set([
+    GPU_VALUES.execution.browserWebGpuCompute,
+    GPU_VALUES.execution.csharpDeterministic,
+    GPU_VALUES.execution.deterministicFallback,
     "native-cuda-abi",
     "native-cuda-abi-probe",
     "native-dawn-descriptor",
     "native-dawn-compute"
 ]));
-const REV3_ALLOWED_PATH_ROLES = Object.freeze(new Set(Object.values(REV3_VALUES.pathRole)));
-const REV3_ALLOWED_PILOT_STATES = Object.freeze(new Set([
-    REV3_VALUES.pilotState.browserBuiltinCompute,
-    REV3_VALUES.pilotState.browserDeterministicFallback,
-    REV3_VALUES.pilotState.descriptorReady,
-    REV3_VALUES.pilotState.descriptorNativeCandidate,
-    REV3_VALUES.pilotState.notEvaluated,
+const GPU_ALLOWED_PATH_ROLES = Object.freeze(new Set(Object.values(GPU_VALUES.pathRole)));
+const GPU_ALLOWED_PILOT_STATES = Object.freeze(new Set([
+    GPU_VALUES.pilotState.browserBuiltinCompute,
+    GPU_VALUES.pilotState.browserDeterministicFallback,
+    GPU_VALUES.pilotState.descriptorReady,
+    GPU_VALUES.pilotState.descriptorNativeCandidate,
+    GPU_VALUES.pilotState.notEvaluated,
     "probe-ready",
     "probe-native-candidate",
     "runtime-observed",
     "dto-projected"
 ]));
-const REV3_ALLOWED_PROMOTION_GATES = Object.freeze(new Set([
-    REV3_VALUES.promotionGate.traceCandidate,
-    REV3_VALUES.promotionGate.fallback,
-    REV3_VALUES.promotionGate.notEvaluated,
-    REV3_VALUES.promotionGate.notApplicable,
-    REV3_VALUES.promotionGate.runtimeStampRequired,
+const GPU_ALLOWED_PROMOTION_GATES = Object.freeze(new Set([
+    GPU_VALUES.promotionGate.traceCandidate,
+    GPU_VALUES.promotionGate.fallback,
+    GPU_VALUES.promotionGate.notEvaluated,
+    GPU_VALUES.promotionGate.notApplicable,
+    GPU_VALUES.promotionGate.runtimeStampRequired,
     "native-bridge-required"
 ]));
 const CANONICAL_PASSES = Object.freeze([
@@ -158,13 +158,13 @@ const CANONICAL_PASSES = Object.freeze([
     }
 ]);
 
-export function createWebGpuRev3EnvelopeBridge(options = {}) {
-    const executor = options.executor ?? createNullWebGpuRev3Executor();
+export function createWebGpuEnvelopeBridge(options = {}) {
+    const executor = options.executor ?? createNullWebGpuExecutor();
     let disposed = false;
 
     function ensureActive() {
         if (disposed) {
-            throw new Error("AIKernel WebGPU rev3 envelope bridge has been disposed.");
+            throw new Error("AIKernel WebGPU canonical envelope bridge has been disposed.");
         }
     }
 
@@ -256,7 +256,7 @@ export function createWebGpuRev3EnvelopeBridge(options = {}) {
     };
 }
 
-export function createWebGpuRev3BrowserExecutor(options = {}) {
+export function createWebGpuBrowserExecutor(options = {}) {
     const textureRegistry = options.textureRegistry ?? null;
     const shaderSources = options.shaderSources ?? {};
     const passExecutors = options.passExecutors ?? {};
@@ -308,11 +308,11 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
     }
 
     function observeDeviceLost(targetDevice) {
-        if (!targetDevice?.lost || targetDevice.__aikernelRev3LostObserved) {
+        if (!targetDevice?.lost || targetDevice.__aikernelCanonicalLostObserved) {
             return;
         }
 
-        Object.defineProperty(targetDevice, "__aikernelRev3LostObserved", {
+        Object.defineProperty(targetDevice, "__aikernelCanonicalLostObserved", {
             value: true,
             configurable: false
         });
@@ -329,7 +329,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
 
     function ensureExecutorActive() {
         if (disposed) {
-            throw new Error("AIKernel WebGPU rev3 browser executor has been disposed.");
+            throw new Error("AIKernel WebGPU canonical browser executor has been disposed.");
         }
     }
 
@@ -527,7 +527,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         return buffer?.Values ?? [];
     }
 
-    function createStorageBufferFromValues(values, usage = 0, label = "AIKernel rev3 storage input") {
+    function createStorageBufferFromValues(values, usage = 0, label = "AIKernel canonical storage input") {
         if (!device) {
             return null;
         }
@@ -574,7 +574,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         ]);
     }
 
-    function createOutputBuffer(floatCount, usage = 0, label = "AIKernel rev3 storage output") {
+    function createOutputBuffer(floatCount, usage = 0, label = "AIKernel canonical storage output") {
         if (!device) {
             return null;
         }
@@ -586,7 +586,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         });
     }
 
-    function createFeatureMaskTexture(target, label = "AIKernel rev3 aisthesis feature mask") {
+    function createFeatureMaskTexture(target, label = "AIKernel canonical aisthesis feature mask") {
         if (!device || typeof device.createTexture !== "function") {
             return null;
         }
@@ -610,11 +610,11 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
 
         const byteLength = floatCount * Float32Array.BYTES_PER_ELEMENT;
         const readback = device.createBuffer({
-            label: "AIKernel rev3 readback",
+            label: "AIKernel canonical readback",
             size: Math.max(byteLength, 4),
             usage: GPU_BUFFER_USAGE.COPY_DST | GPU_BUFFER_USAGE.MAP_READ
         });
-        const encoder = device.createCommandEncoder({ label: "AIKernel rev3 readback encoder" });
+        const encoder = device.createCommandEncoder({ label: "AIKernel canonical readback encoder" });
         encoder.copyBufferToBuffer(buffer, 0, readback, 0, byteLength);
         queue.submit([encoder.finish()]);
         await readback.mapAsync(GPU_MAP_MODE.READ, 0, byteLength);
@@ -683,7 +683,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         const outputBuffer = createOutputBuffer(
             VECTOR_STRIDE,
             GPU_BUFFER_USAGE.STORAGE | GPU_BUFFER_USAGE.COPY_SRC | GPU_BUFFER_USAGE.COPY_DST,
-            "AIKernel rev3 aisthesis feature vector");
+            "AIKernel canonical aisthesis feature vector");
         const maskTexture = createFeatureMaskTexture(context.rawTarget);
         const maskView = textureView(maskTexture);
         const pipeline = await createComputePipeline(context.envelope.PassId, context.shaderModule);
@@ -693,7 +693,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         }
 
         const bindGroup = device.createBindGroup({
-            label: "AIKernel rev3 aisthesis bind group",
+            label: "AIKernel canonical aisthesis bind group",
             layout: pipeline.getBindGroupLayout(0),
             entries: [
                 { binding: 0, resource: view },
@@ -701,8 +701,8 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
                 { binding: 2, resource: maskView }
             ]
         });
-        const encoder = device.createCommandEncoder({ label: "AIKernel rev3 aisthesis encoder" });
-        const pass = encoder.beginComputePass({ label: "AIKernel rev3 aisthesis pass" });
+        const encoder = device.createCommandEncoder({ label: "AIKernel canonical aisthesis encoder" });
+        const pass = encoder.beginComputePass({ label: "AIKernel canonical aisthesis pass" });
         pass.setPipeline(pipeline);
         pass.setBindGroup(0, bindGroup);
         pass.dispatchWorkgroups(
@@ -726,8 +726,8 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
                 ZeroCopy: context.rawTarget.ZeroCopy
             },
             Diagnostics: diagnostics(context.envelope, context.rawTarget, Object.assign(computeMetadata(), {
-                [REV3_METADATA_KEYS.featureMaskStorageTexture]: "true",
-                [REV3_METADATA_KEYS.passReadiness]: browserPassReadiness()
+                [GPU_METADATA_KEYS.featureMaskStorageTexture]: "true",
+                [GPU_METADATA_KEYS.passReadiness]: browserPassReadiness()
             }))
         };
     }
@@ -736,11 +736,11 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         const inputBuffer = createStorageBufferFromValues(
             createSpatialInputValues(context.envelope),
             GPU_BUFFER_USAGE.STORAGE | GPU_BUFFER_USAGE.COPY_DST,
-            "AIKernel rev3 spatial input");
+            "AIKernel canonical spatial input");
         const outputBuffer = createOutputBuffer(
             VECTOR_STRIDE,
             GPU_BUFFER_USAGE.STORAGE | GPU_BUFFER_USAGE.COPY_SRC | GPU_BUFFER_USAGE.COPY_DST,
-            "AIKernel rev3 spatial output");
+            "AIKernel canonical spatial output");
         const pipeline = await createComputePipeline(context.envelope.PassId, context.shaderModule);
         if (!inputBuffer || !outputBuffer || !pipeline) {
             onFallback("spatial-command-encoder-unavailable");
@@ -748,15 +748,15 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         }
 
         const bindGroup = device.createBindGroup({
-            label: "AIKernel rev3 spatial bind group",
+            label: "AIKernel canonical spatial bind group",
             layout: pipeline.getBindGroupLayout(0),
             entries: [
                 { binding: 0, resource: { buffer: inputBuffer } },
                 { binding: 1, resource: { buffer: outputBuffer } }
             ]
         });
-        const encoder = device.createCommandEncoder({ label: "AIKernel rev3 spatial encoder" });
-        const pass = encoder.beginComputePass({ label: "AIKernel rev3 spatial pass" });
+        const encoder = device.createCommandEncoder({ label: "AIKernel canonical spatial encoder" });
+        const pass = encoder.beginComputePass({ label: "AIKernel canonical spatial pass" });
         pass.setPipeline(pipeline);
         pass.setBindGroup(0, bindGroup);
         pass.dispatchWorkgroups(1, 1, 1);
@@ -789,7 +789,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         const uniformBuffer = createStorageBufferFromValues(
             createHudUniformValues(context.envelope),
             GPU_BUFFER_USAGE.UNIFORM | GPU_BUFFER_USAGE.COPY_DST,
-            "AIKernel rev3 hud uniform input");
+            "AIKernel canonical hud uniform input");
         const pipeline = await createComputePipeline(context.envelope.PassId, context.shaderModule);
         if (!uniformBuffer || !pipeline) {
             onFallback("hud-command-encoder-unavailable");
@@ -797,15 +797,15 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
         }
 
         const bindGroup = device.createBindGroup({
-            label: "AIKernel rev3 hud composite bind group",
+            label: "AIKernel canonical hud composite bind group",
             layout: pipeline.getBindGroupLayout(0),
             entries: [
                 { binding: 0, resource: { buffer: uniformBuffer } },
                 { binding: 1, resource: hudView }
             ]
         });
-        const encoder = device.createCommandEncoder({ label: "AIKernel rev3 hud composite encoder" });
-        const pass = encoder.beginComputePass({ label: "AIKernel rev3 hud composite pass" });
+        const encoder = device.createCommandEncoder({ label: "AIKernel canonical hud composite encoder" });
+        const pass = encoder.beginComputePass({ label: "AIKernel canonical hud composite pass" });
         pass.setPipeline(pipeline);
         pass.setBindGroup(0, bindGroup);
         pass.dispatchWorkgroups(
@@ -952,7 +952,7 @@ export function createWebGpuRev3BrowserExecutor(options = {}) {
     };
 }
 
-export function createNullWebGpuRev3Executor() {
+export function createNullWebGpuExecutor() {
     return {
         isWebGpuSupported() {
             return typeof navigator !== "undefined" && !!navigator.gpu;
@@ -1068,7 +1068,7 @@ function normalizeEnvelope(input) {
         throw new Error("AIKernel GPU envelope is missing Frame.FrameId.");
     }
 
-    envelope.MetadataValidationError = validateRev3EnvelopeMetadata(envelope.Metadata, envelope);
+    envelope.MetadataValidationError = validateCanonicalEnvelopeMetadata(envelope.Metadata, envelope);
     return envelope;
 }
 
@@ -1142,21 +1142,21 @@ function diagnostics(envelope, raw, metadata = {}, fallbackReason = null) {
         FrameId: envelope.Frame.FrameId,
         PassId: envelope.PassId,
         MemoryEstimate: estimate,
-        Metadata: rev3Metadata(envelope, metadata)
+        Metadata: canonicalMetadata(envelope, metadata)
     };
 }
 
 function computeMetadata(passReadiness = null) {
     return {
-        [REV3_METADATA_KEYS.authoritativeReady]: "false",
-        [REV3_METADATA_KEYS.candidateStreak]: "1",
-        [REV3_METADATA_KEYS.diagnosticReady]: "true",
-        [REV3_METADATA_KEYS.diagnosticStreak]: "1",
-        ...(passReadiness ? { [REV3_METADATA_KEYS.passReadiness]: passReadiness } : {}),
-        [REV3_METADATA_KEYS.pilotState]: REV3_VALUES.pilotState.browserBuiltinCompute,
-        [REV3_METADATA_KEYS.promotionGate]: REV3_VALUES.promotionGate.traceCandidate,
-        [REV3_METADATA_KEYS.requiredStreak]: "1",
-        [REV3_EXECUTION_MODE]: REV3_VALUES.execution.browserWebGpuCompute
+        [GPU_METADATA_KEYS.authoritativeReady]: "false",
+        [GPU_METADATA_KEYS.candidateStreak]: "1",
+        [GPU_METADATA_KEYS.diagnosticReady]: "true",
+        [GPU_METADATA_KEYS.diagnosticStreak]: "1",
+        ...(passReadiness ? { [GPU_METADATA_KEYS.passReadiness]: passReadiness } : {}),
+        [GPU_METADATA_KEYS.pilotState]: GPU_VALUES.pilotState.browserBuiltinCompute,
+        [GPU_METADATA_KEYS.promotionGate]: GPU_VALUES.promotionGate.traceCandidate,
+        [GPU_METADATA_KEYS.requiredStreak]: "1",
+        [GPU_EXECUTION_MODE]: GPU_VALUES.execution.browserWebGpuCompute
     };
 }
 
@@ -1166,84 +1166,84 @@ function fallbackMetadata(fallbackReason = null) {
         ? reason.slice("metadata-invalid:".length)
         : "";
     return {
-        [REV3_METADATA_KEYS.passReadiness]: formatPassReadiness(),
-        [REV3_METADATA_KEYS.pilotState]: REV3_VALUES.pilotState.browserDeterministicFallback,
-        [REV3_METADATA_KEYS.promotionGate]: REV3_VALUES.promotionGate.fallback,
-        [REV3_EXECUTION_MODE]: REV3_VALUES.execution.deterministicFallback,
-        ...(validationError ? { [REV3_METADATA_KEYS.metadataValidationError]: validationError } : {})
+        [GPU_METADATA_KEYS.passReadiness]: formatPassReadiness(),
+        [GPU_METADATA_KEYS.pilotState]: GPU_VALUES.pilotState.browserDeterministicFallback,
+        [GPU_METADATA_KEYS.promotionGate]: GPU_VALUES.promotionGate.fallback,
+        [GPU_EXECUTION_MODE]: GPU_VALUES.execution.deterministicFallback,
+        ...(validationError ? { [GPU_METADATA_KEYS.metadataValidationError]: validationError } : {})
     };
 }
 
-function rev3Metadata(envelope, overrides = {}) {
+function canonicalMetadata(envelope, overrides = {}) {
     const passId = envelope.PassId;
     const envelopeMetadata = metadataOf(valueOf(envelope, "Metadata", "metadata"));
     const metadata = {
-        [REV3_METADATA_KEYS.authoritativeReady]: "false",
-        [REV3_METADATA_KEYS.candidateStreak]: "0",
-        [REV3_METADATA_KEYS.diagnosticReady]: "false",
-        [REV3_METADATA_KEYS.diagnosticStreak]: "0",
-        [REV3_METADATA_KEYS.featureMaskStorageTexture]: "false",
-        [REV3_METADATA_KEYS.frameIndex]: `${Math.max(0, numberOf(envelope.Frame.FrameIndex))}`,
-        [REV3_METADATA_KEYS.passId]: passId,
-        [REV3_METADATA_KEYS.passReadiness]: formatPassReadiness(),
-        [REV3_METADATA_KEYS.pathRole]: resolvePathRole(passId),
-        [REV3_METADATA_KEYS.pilotState]: REV3_VALUES.pilotState.notEvaluated,
-        [REV3_METADATA_KEYS.promotionGate]: REV3_VALUES.promotionGate.notEvaluated,
-        [REV3_METADATA_KEYS.requiredStreak]: "0",
-        [REV3_METADATA_KEYS.sampleTicks]: `${Math.max(0, numberOf(envelope.Frame.SampleTicks))}`,
+        [GPU_METADATA_KEYS.authoritativeReady]: "false",
+        [GPU_METADATA_KEYS.candidateStreak]: "0",
+        [GPU_METADATA_KEYS.diagnosticReady]: "false",
+        [GPU_METADATA_KEYS.diagnosticStreak]: "0",
+        [GPU_METADATA_KEYS.featureMaskStorageTexture]: "false",
+        [GPU_METADATA_KEYS.frameIndex]: `${Math.max(0, numberOf(envelope.Frame.FrameIndex))}`,
+        [GPU_METADATA_KEYS.passId]: passId,
+        [GPU_METADATA_KEYS.passReadiness]: formatPassReadiness(),
+        [GPU_METADATA_KEYS.pathRole]: resolvePathRole(passId),
+        [GPU_METADATA_KEYS.pilotState]: GPU_VALUES.pilotState.notEvaluated,
+        [GPU_METADATA_KEYS.promotionGate]: GPU_VALUES.promotionGate.notEvaluated,
+        [GPU_METADATA_KEYS.requiredStreak]: "0",
+        [GPU_METADATA_KEYS.sampleTicks]: `${Math.max(0, numberOf(envelope.Frame.SampleTicks))}`,
         ...envelopeMetadata,
         ...overrides
     };
     return sortObject(Object.assign(metadata, evaluatePromotionReadiness(metadata)));
 }
 
-function validateRev3EnvelopeMetadata(metadata, envelope) {
+function validateCanonicalEnvelopeMetadata(metadata, envelope) {
     if (!metadata || Object.keys(metadata).length === 0) {
         return "metadata-required";
     }
 
-    for (const key of REV3_REQUIRED_METADATA_KEYS) {
+    for (const key of GPU_REQUIRED_METADATA_KEYS) {
         if (isBlank(metadata[key])) {
             return key;
         }
     }
 
-    if (metadata[REV3_METADATA_KEYS.passId] !== envelope.PassId) {
-        return REV3_METADATA_KEYS.passId;
+    if (metadata[GPU_METADATA_KEYS.passId] !== envelope.PassId) {
+        return GPU_METADATA_KEYS.passId;
     }
 
-    if (!REV3_ALLOWED_PATH_ROLES.has(metadata[REV3_METADATA_KEYS.pathRole])) {
-        return REV3_METADATA_KEYS.pathRole;
+    if (!GPU_ALLOWED_PATH_ROLES.has(metadata[GPU_METADATA_KEYS.pathRole])) {
+        return GPU_METADATA_KEYS.pathRole;
     }
 
-    if (!REV3_ALLOWED_EXECUTION_MODES.has(metadata[REV3_EXECUTION_MODE])) {
-        return REV3_EXECUTION_MODE;
+    if (!GPU_ALLOWED_EXECUTION_MODES.has(metadata[GPU_EXECUTION_MODE])) {
+        return GPU_EXECUTION_MODE;
     }
 
-    if (!REV3_ALLOWED_PILOT_STATES.has(metadata[REV3_METADATA_KEYS.pilotState])) {
-        return REV3_METADATA_KEYS.pilotState;
+    if (!GPU_ALLOWED_PILOT_STATES.has(metadata[GPU_METADATA_KEYS.pilotState])) {
+        return GPU_METADATA_KEYS.pilotState;
     }
 
-    if (!REV3_ALLOWED_PROMOTION_GATES.has(metadata[REV3_METADATA_KEYS.promotionGate])) {
-        return REV3_METADATA_KEYS.promotionGate;
+    if (!GPU_ALLOWED_PROMOTION_GATES.has(metadata[GPU_METADATA_KEYS.promotionGate])) {
+        return GPU_METADATA_KEYS.promotionGate;
     }
 
-    for (const key of REV3_BOOL_METADATA_KEYS) {
+    for (const key of GPU_BOOL_METADATA_KEYS) {
         const value = `${metadata[key]}`.toLowerCase();
         if (value !== "true" && value !== "false") {
             return key;
         }
     }
 
-    for (const key of REV3_INTEGER_METADATA_KEYS) {
+    for (const key of GPU_INTEGER_METADATA_KEYS) {
         const value = Number(metadata[key]);
         if (!Number.isFinite(value) || Math.floor(value) !== value || value < 0) {
             return key;
         }
     }
 
-    if (!metadata[REV3_METADATA_KEYS.passReadiness].startsWith("Passes.{Aisthesis,SpatialReasoning,HudComposite}:")) {
-        return REV3_METADATA_KEYS.passReadiness;
+    if (!metadata[GPU_METADATA_KEYS.passReadiness].startsWith("Passes.{Aisthesis,SpatialReasoning,HudComposite}:")) {
+        return GPU_METADATA_KEYS.passReadiness;
     }
 
     return "";
@@ -1283,13 +1283,13 @@ function isBlank(value) {
 }
 
 function evaluatePromotionReadiness(metadata) {
-    const gate = textOf(metadata[REV3_METADATA_KEYS.promotionGate]) || REV3_VALUES.promotionGate.notEvaluated;
-    const authoritativeReady = boolOf(metadata[REV3_METADATA_KEYS.authoritativeReady]);
-    const diagnosticReady = boolOf(metadata[REV3_METADATA_KEYS.diagnosticReady]);
-    const storageTextureReady = boolOf(metadata[REV3_METADATA_KEYS.featureMaskStorageTexture]);
-    const candidateStreak = Math.max(0, numberOf(metadata[REV3_METADATA_KEYS.candidateStreak]));
-    const diagnosticStreak = Math.max(0, numberOf(metadata[REV3_METADATA_KEYS.diagnosticStreak]));
-    const requiredStreak = Math.max(0, numberOf(metadata[REV3_METADATA_KEYS.requiredStreak]));
+    const gate = textOf(metadata[GPU_METADATA_KEYS.promotionGate]) || GPU_VALUES.promotionGate.notEvaluated;
+    const authoritativeReady = boolOf(metadata[GPU_METADATA_KEYS.authoritativeReady]);
+    const diagnosticReady = boolOf(metadata[GPU_METADATA_KEYS.diagnosticReady]);
+    const storageTextureReady = boolOf(metadata[GPU_METADATA_KEYS.featureMaskStorageTexture]);
+    const candidateStreak = Math.max(0, numberOf(metadata[GPU_METADATA_KEYS.candidateStreak]));
+    const diagnosticStreak = Math.max(0, numberOf(metadata[GPU_METADATA_KEYS.diagnosticStreak]));
+    const requiredStreak = Math.max(0, numberOf(metadata[GPU_METADATA_KEYS.requiredStreak]));
 
     let blocked = true;
     let candidateReady = false;
@@ -1299,7 +1299,7 @@ function evaluatePromotionReadiness(metadata) {
     if (gate === "not-applicable") {
         blocked = false;
         reason = "not-applicable";
-    } else if (gate === REV3_VALUES.promotionGate.traceCandidate && requiredStreak > 0) {
+    } else if (gate === GPU_VALUES.promotionGate.traceCandidate && requiredStreak > 0) {
         diagnosticStable = diagnosticReady && diagnosticStreak >= requiredStreak;
         const candidateStable = candidateStreak >= requiredStreak;
         candidateReady = storageTextureReady && diagnosticStable && candidateStable;
@@ -1315,15 +1315,15 @@ function evaluatePromotionReadiness(metadata) {
         } else {
             reason = "authoritative-not-ready";
         }
-    } else if (gate === REV3_VALUES.promotionGate.traceCandidate) {
+    } else if (gate === GPU_VALUES.promotionGate.traceCandidate) {
         reason = "metadata-invalid";
     }
 
     return {
-        [REV3_METADATA_KEYS.promotionBlocked]: boolText(blocked),
-        [REV3_METADATA_KEYS.promotionCandidateReady]: boolText(candidateReady),
-        [REV3_METADATA_KEYS.promotionDiagnosticStable]: boolText(diagnosticStable),
-        [REV3_METADATA_KEYS.promotionReason]: reason
+        [GPU_METADATA_KEYS.promotionBlocked]: boolText(blocked),
+        [GPU_METADATA_KEYS.promotionCandidateReady]: boolText(candidateReady),
+        [GPU_METADATA_KEYS.promotionDiagnosticStable]: boolText(diagnosticStable),
+        [GPU_METADATA_KEYS.promotionReason]: reason
     };
 }
 
@@ -1356,19 +1356,19 @@ function textOf(value) {
 function resolvePathRole(passId) {
     const normalized = `${passId ?? ""}`.toLowerCase();
     if (normalized.includes("aisthesis") || normalized.includes("spatial") || normalized.includes("sensor")) {
-        return REV3_VALUES.pathRole.sensor;
+        return GPU_VALUES.pathRole.sensor;
     }
 
     if (normalized.includes("hud")) {
-        return REV3_VALUES.pathRole.hud;
+        return GPU_VALUES.pathRole.hud;
     }
 
     if (normalized.includes("bonsai")) {
-        return REV3_VALUES.pathRole.bonsai;
+        return GPU_VALUES.pathRole.bonsai;
     }
 
     if (normalized.includes("game")) {
-        return REV3_VALUES.pathRole.game;
+        return GPU_VALUES.pathRole.game;
     }
 
     return "unknown";
@@ -1440,9 +1440,9 @@ function valueOf(source, pascalName, camelName) {
     return source[camelName];
 }
 
-globalThis.AIKernelWebGpuRev3 = {
-    ...(globalThis.AIKernelWebGpuRev3 ?? {}),
-    createWebGpuRev3EnvelopeBridge,
-    createWebGpuRev3BrowserExecutor,
-    createNullWebGpuRev3Executor
+globalThis.AIKernelWebGpu = {
+    ...(globalThis.AIKernelWebGpu ?? {}),
+    createWebGpuEnvelopeBridge,
+    createWebGpuBrowserExecutor,
+    createNullWebGpuExecutor
 };

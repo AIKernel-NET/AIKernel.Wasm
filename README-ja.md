@@ -153,17 +153,17 @@ WebGPU が利用できない場合、Provider は
 委譲します。`IEventBus` が supplied された場合、kernel execution は
 `GpuKernelExecuted` を publish します。
 
-v0.1.3 の WebGPU Provider は canonical rev3 browser bridge と GPU resident asset
+v0.1.3 の WebGPU Provider は canonical browser bridge と GPU resident asset
 も package に含めます。
 
-- `runtime/browser/webgpu-rev3-envelope-bridge.js`
-- `shaders/hud/hud-composite.rev3.wgsl`
-- `shaders/aisthesis/aisthesis.rev3.wgsl`
-- `shaders/spatial/spatial-reasoning.rev3.wgsl`
-- `buffers/layouts/gpu-layouts.rev3.json`
+- `runtime/browser/webgpu-envelope-bridge.js`
+- `shaders/hud/hud-composite.wgsl`
+- `shaders/aisthesis/aisthesis.wgsl`
+- `shaders/spatial/spatial-reasoning.wgsl`
+- `buffers/layouts/gpu-layouts.json`
 
 `scripts/verify-webgpu-package.ps1` を使うと
-`AIKernel.Wasm.WebGpuComputeProvider` を pack し、rev3 bridge、WGSL shader、
+`AIKernel.Wasm.WebGpuComputeProvider` を pack し、canonical bridge、WGSL shader、
 buffer layout、provider manifest、vector-add sample が NuGet package に含まれていることを検査できます。
 
 ## Python Wrapper

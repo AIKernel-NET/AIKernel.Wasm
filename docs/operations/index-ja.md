@@ -18,7 +18,7 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 - runtime test がすべて通る
 - audio、display、input、concept-elevation boundary test がすべて通る
 - WebGPU provider test がすべて通る
-- WebGPU rev3 package smoke により browser bridge、WGSL shader、buffer layout、
+- WebGPU canonical package smoke により browser bridge、WGSL shader、buffer layout、
   provider manifest、vector-add sample が package に含まれている
 
 ## Package Metadata

@@ -4,10 +4,10 @@ using AIKernel.Dtos.Gpu;
 using AIKernel.Enums;
 
 /// <summary>
-/// [EN] Canonical rev3 pass kind exposed at the browser/native WebGPU boundary.
-/// [JA] browser/native WebGPU 境界で公開する canonical rev3 pass 種別です。
+/// [EN] Canonical pass kind exposed at the browser/native WebGPU boundary.
+/// [JA] browser/native WebGPU 境界で公開する canonical pass 種別です。
 /// </summary>
-public enum WebGpuRev3PassKind
+public enum WebGpuPassKind
 {
     /// <summary>[EN] GPU Aisthesis over a raw framebuffer. [JA] raw framebuffer に対する GPU Aisthesis です。</summary>
     Aisthesis = 1,
@@ -23,7 +23,7 @@ public enum WebGpuRev3PassKind
 /// [EN] Stable frame identity passed to JavaScript or Dawn bridge code.
 /// [JA] JavaScript または Dawn bridge code へ渡す安定した frame identity です。
 /// </summary>
-public sealed record WebGpuRev3FrameEnvelope
+public sealed record WebGpuFrameEnvelope
 {
     /// <summary>[EN] Frame id. [JA] frame id です。</summary>
     public required string FrameId { get; init; }
@@ -39,7 +39,7 @@ public sealed record WebGpuRev3FrameEnvelope
 /// [EN] Stable GPU target descriptor for bridge code.
 /// [JA] bridge code 用の安定した GPU target descriptor です。
 /// </summary>
-public sealed record WebGpuRev3TargetEnvelope
+public sealed record WebGpuTargetEnvelope
 {
     /// <summary>[EN] Target role in the pass, such as raw, hud, or mask. [JA] raw、hud、mask など pass 内の target role です。</summary>
     public required string Role { get; init; }
@@ -70,7 +70,7 @@ public sealed record WebGpuRev3TargetEnvelope
 /// [EN] Flat buffer descriptor passed to WebGPU bridge code.
 /// [JA] WebGPU bridge code へ渡す flat buffer descriptor です。
 /// </summary>
-public sealed record WebGpuRev3BufferEnvelope
+public sealed record WebGpuBufferEnvelope
 {
     /// <summary>[EN] Buffer name inside the pass. [JA] pass 内の buffer 名です。</summary>
     public required string Name { get; init; }
@@ -89,13 +89,13 @@ public sealed record WebGpuRev3BufferEnvelope
 }
 
 /// <summary>
-/// [EN] Stable canonical rev3 dispatch envelope for JS/Dawn bridge implementations.
-/// [JA] JS/Dawn bridge 実装用の安定した canonical rev3 dispatch envelope です。
+/// [EN] Stable canonical dispatch envelope for JS/Dawn bridge implementations.
+/// [JA] JS/Dawn bridge 実装用の安定した canonical dispatch envelope です。
 /// </summary>
-public sealed record WebGpuRev3DispatchEnvelope
+public sealed record WebGpuDispatchEnvelope
 {
     /// <summary>[EN] Envelope schema id. [JA] envelope schema id です。</summary>
-    public string Schema { get; init; } = "aikernel.gpu.rev3.dispatch";
+    public string Schema { get; init; } = "aikernel.gpu.dispatch";
 
     /// <summary>[EN] Canonical schema version. [JA] canonical schema version です。</summary>
     public string Version { get; init; } = "0.1.3";
@@ -104,16 +104,16 @@ public sealed record WebGpuRev3DispatchEnvelope
     public required string PassId { get; init; }
 
     /// <summary>[EN] Pass kind. [JA] pass 種別です。</summary>
-    public WebGpuRev3PassKind PassKind { get; init; }
+    public WebGpuPassKind PassKind { get; init; }
 
     /// <summary>[EN] Frame identity. [JA] frame identity です。</summary>
-    public required WebGpuRev3FrameEnvelope Frame { get; init; }
+    public required WebGpuFrameEnvelope Frame { get; init; }
 
     /// <summary>[EN] Target descriptors used by this pass. [JA] この pass が使用する target descriptor です。</summary>
-    public IReadOnlyList<WebGpuRev3TargetEnvelope> Targets { get; init; } = [];
+    public IReadOnlyList<WebGpuTargetEnvelope> Targets { get; init; } = [];
 
     /// <summary>[EN] Flat buffers used by this pass. [JA] この pass が使用する flat buffer です。</summary>
-    public IReadOnlyList<WebGpuRev3BufferEnvelope> Buffers { get; init; } = [];
+    public IReadOnlyList<WebGpuBufferEnvelope> Buffers { get; init; } = [];
 
     /// <summary>[EN] Feature flags in deterministic key order. [JA] deterministic key order の feature flag です。</summary>
     public IReadOnlyDictionary<string, bool> FeatureFlags { get; init; } = new Dictionary<string, bool>(StringComparer.Ordinal);
@@ -124,7 +124,7 @@ public sealed record WebGpuRev3DispatchEnvelope
     /// <summary>[EN] Text labels retained for the lightweight DOM/text layer. [JA] lightweight DOM/text layer 用に保持する text label です。</summary>
     public IReadOnlyList<GpuHudLabel> Labels { get; init; } = [];
 
-    /// <summary>[EN] Canonical rev3 diagnostics metadata carried with the dispatch. [JA] dispatch と一緒に渡す canonical rev3 diagnostics metadata です。</summary>
+    /// <summary>[EN] Canonical diagnostics metadata carried with the dispatch. [JA] dispatch と一緒に渡す canonical diagnostics metadata です。</summary>
     public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
     /// <summary>[EN] Deterministic metadata tags for diagnostics. [JA] diagnostics 用の deterministic metadata tag です。</summary>
@@ -132,10 +132,10 @@ public sealed record WebGpuRev3DispatchEnvelope
 }
 
 /// <summary>
-/// [EN] Creates JS/Dawn friendly rev3 envelopes from canonical GPU DTOs.
-/// [JA] canonical GPU DTO から JS/Dawn で扱いやすい rev3 envelope を作成します。
+/// [EN] Creates JS/Dawn friendly canonical envelopes from canonical GPU DTOs.
+/// [JA] canonical GPU DTO から JS/Dawn で扱いやすい canonical envelope を作成します。
 /// </summary>
-public static class WebGpuRev3InteropEnvelope
+public static class WebGpuInteropEnvelope
 {
     private static readonly string[] MatrixNames = ["topos", "route", "threat", "zoe"];
 
@@ -143,15 +143,15 @@ public static class WebGpuRev3InteropEnvelope
     /// [EN] Creates an Aisthesis dispatch envelope that preserves the raw-framebuffer capture split.
     /// [JA] raw-framebuffer capture split を保持した Aisthesis dispatch envelope を作成します。
     /// </summary>
-    public static WebGpuRev3DispatchEnvelope ForAisthesis(GpuAisthesisInput input)
+    public static WebGpuDispatchEnvelope ForAisthesis(GpuAisthesisInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
         ThrowIfInvalid(GpuCanonicalValidation.ValidateAisthesisInput(input));
 
-        return new WebGpuRev3DispatchEnvelope
+        return new WebGpuDispatchEnvelope
         {
             PassId = GpuOperationNames.GpuAisthesisRawFrame,
-            PassKind = WebGpuRev3PassKind.Aisthesis,
+            PassKind = WebGpuPassKind.Aisthesis,
             Frame = ToFrame(input.Frame),
             Targets = [ToTarget("raw", input.RawFramebuffer)],
             FeatureFlags = Sort(input.Features),
@@ -175,15 +175,15 @@ public static class WebGpuRev3InteropEnvelope
     /// [EN] Creates a spatial reasoning dispatch envelope with Topos/Route/Threat/Zoe matrices in canonical order.
     /// [JA] Topos/Route/Threat/Zoe 行列を canonical order で持つ spatial reasoning dispatch envelope を作成します。
     /// </summary>
-    public static WebGpuRev3DispatchEnvelope ForSpatialReasoning(GpuSpatialReasoningInput input)
+    public static WebGpuDispatchEnvelope ForSpatialReasoning(GpuSpatialReasoningInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
         ThrowIfInvalid(GpuCanonicalValidation.ValidateSpatialReasoningInput(input));
 
-        var buffers = new List<WebGpuRev3BufferEnvelope>(GpuCanonicalLayouts.AisMatrix.MaxItems + 1);
+        var buffers = new List<WebGpuBufferEnvelope>(GpuCanonicalLayouts.AisMatrix.MaxItems + 1);
         for (var index = 0; index < input.AisMatrices.Count; index++)
         {
-            buffers.Add(new WebGpuRev3BufferEnvelope
+            buffers.Add(new WebGpuBufferEnvelope
             {
                 Name = $"ais-matrix:{MatrixNames[index]}",
                 LayoutName = GpuCanonicalLayouts.AisMatrix.Name,
@@ -193,7 +193,7 @@ public static class WebGpuRev3InteropEnvelope
             });
         }
 
-        buffers.Add(new WebGpuRev3BufferEnvelope
+        buffers.Add(new WebGpuBufferEnvelope
         {
             Name = "state-vector",
             LayoutName = GpuCanonicalLayouts.StateVector.Name,
@@ -202,10 +202,10 @@ public static class WebGpuRev3InteropEnvelope
             Values = Pad(input.StateVector, GpuCanonicalLayouts.StateVector.Stride)
         });
 
-        return new WebGpuRev3DispatchEnvelope
+        return new WebGpuDispatchEnvelope
         {
             PassId = GpuOperationNames.GpuSpatialReasoning,
-            PassKind = WebGpuRev3PassKind.SpatialReasoning,
+            PassKind = WebGpuPassKind.SpatialReasoning,
             Frame = ToFrame(input.Frame),
             Targets = TargetsForFrame(input.Frame),
             Buffers = buffers,
@@ -229,15 +229,15 @@ public static class WebGpuRev3InteropEnvelope
     /// [EN] Creates a HUD composite dispatch envelope with flat panel buffers and final ego-radar scalars.
     /// [JA] flat panel buffer と最終 ego-radar scalar を持つ HUD composite dispatch envelope を作成します。
     /// </summary>
-    public static WebGpuRev3DispatchEnvelope ForHudComposite(GpuHudInput input)
+    public static WebGpuDispatchEnvelope ForHudComposite(GpuHudInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
         ThrowIfInvalid(GpuCanonicalValidation.ValidateHudInput(input));
 
-        return new WebGpuRev3DispatchEnvelope
+        return new WebGpuDispatchEnvelope
         {
             PassId = GpuOperationNames.GpuHudComposite,
-            PassKind = WebGpuRev3PassKind.HudComposite,
+            PassKind = WebGpuPassKind.HudComposite,
             Frame = ToFrame(input.Frame),
             Targets = TargetsForFrame(input.Frame),
             Buffers =
@@ -266,27 +266,27 @@ public static class WebGpuRev3InteropEnvelope
     }
 
     /// <summary>
-    /// [EN] Validates a stable rev3 dispatch envelope before bridge handoff.
-    /// [JA] bridge handoff 前に安定した rev3 dispatch envelope を検証します。
+    /// [EN] Validates a stable canonical dispatch envelope before bridge handoff.
+    /// [JA] bridge handoff 前に安定した canonical dispatch envelope を検証します。
     /// </summary>
-    public static GpuValidationResult ValidateDispatchEnvelope(WebGpuRev3DispatchEnvelope envelope)
+    public static GpuValidationResult ValidateDispatchEnvelope(WebGpuDispatchEnvelope envelope)
     {
         ArgumentNullException.ThrowIfNull(envelope);
 
         var issues = new List<GpuValidationIssue>();
-        if (!string.Equals(envelope.Schema, WebGpuRev3BrowserBridgeAssets.Schema, StringComparison.Ordinal))
+        if (!string.Equals(envelope.Schema, WebGpuBrowserBridgeAssets.Schema, StringComparison.Ordinal))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_SCHEMA_MISMATCH",
-                $"Rev3 dispatch envelope schema must be {WebGpuRev3BrowserBridgeAssets.Schema}.",
+                "WEBGPU_ENVELOPE_SCHEMA_MISMATCH",
+                $"Canonical dispatch envelope schema must be {WebGpuBrowserBridgeAssets.Schema}.",
                 "envelope.schema"));
         }
 
-        if (!string.Equals(envelope.Version, WebGpuRev3BrowserBridgeAssets.Version, StringComparison.Ordinal))
+        if (!string.Equals(envelope.Version, WebGpuBrowserBridgeAssets.Version, StringComparison.Ordinal))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_VERSION_MISMATCH",
-                $"Rev3 dispatch envelope version must be {WebGpuRev3BrowserBridgeAssets.Version}.",
+                "WEBGPU_ENVELOPE_VERSION_MISMATCH",
+                $"Canonical dispatch envelope version must be {WebGpuBrowserBridgeAssets.Version}.",
                 "envelope.version"));
         }
 
@@ -306,13 +306,13 @@ public static class WebGpuRev3InteropEnvelope
     {
         var values = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            [GpuDiagnosticsMetadataKeys.Rev3CandidateStreak] = "1",
-            [GpuDiagnosticsMetadataKeys.Rev3DiagnosticReady] = "true",
-            [GpuDiagnosticsMetadataKeys.Rev3DiagnosticStreak] = "1",
-            [GpuDiagnosticsMetadataKeys.Rev3ExecutionMode] = GpuRev3ExecutionModes.BrowserWebGpuCompute,
-            [GpuDiagnosticsMetadataKeys.Rev3PilotState] = GpuRev3PilotStates.BrowserBuiltinCompute,
-            [GpuDiagnosticsMetadataKeys.Rev3PromotionGate] = GpuRev3PromotionGates.TraceCandidate,
-            [GpuDiagnosticsMetadataKeys.Rev3RequiredStreak] = "1"
+            [GpuDiagnosticsMetadataKeys.CanonicalCandidateStreak] = "1",
+            [GpuDiagnosticsMetadataKeys.CanonicalDiagnosticReady] = "true",
+            [GpuDiagnosticsMetadataKeys.CanonicalDiagnosticStreak] = "1",
+            [GpuDiagnosticsMetadataKeys.CanonicalExecutionMode] = GpuExecutionModes.BrowserWebGpuCompute,
+            [GpuDiagnosticsMetadataKeys.CanonicalPilotState] = GpuCanonicalPilotStates.BrowserBuiltinCompute,
+            [GpuDiagnosticsMetadataKeys.CanonicalPromotionGate] = GpuPromotionGates.TraceCandidate,
+            [GpuDiagnosticsMetadataKeys.CanonicalRequiredStreak] = "1"
         };
 
         if (metadata is not null)
@@ -323,10 +323,10 @@ public static class WebGpuRev3InteropEnvelope
             }
         }
 
-        return WebGpuRev3DiagnosticsMetadata.Create(passId, usingCpuFallback: false, values, frame);
+        return WebGpuDiagnosticsMetadata.Create(passId, usingCpuFallback: false, values, frame);
     }
 
-    private static WebGpuRev3FrameEnvelope ToFrame(GpuFrameToken frame)
+    private static WebGpuFrameEnvelope ToFrame(GpuFrameToken frame)
         => new()
         {
             FrameId = frame.FrameId,
@@ -334,9 +334,9 @@ public static class WebGpuRev3InteropEnvelope
             SampleTicks = frame.SampleTicks
         };
 
-    private static IReadOnlyList<WebGpuRev3TargetEnvelope> TargetsForFrame(GpuFrameToken frame)
+    private static IReadOnlyList<WebGpuTargetEnvelope> TargetsForFrame(GpuFrameToken frame)
     {
-        var targets = new List<WebGpuRev3TargetEnvelope> { ToTarget("raw", frame.RawTarget) };
+        var targets = new List<WebGpuTargetEnvelope> { ToTarget("raw", frame.RawTarget) };
         if (frame.HudTarget is not null)
         {
             targets.Add(ToTarget("hud", frame.HudTarget));
@@ -345,7 +345,7 @@ public static class WebGpuRev3InteropEnvelope
         return targets;
     }
 
-    private static WebGpuRev3TargetEnvelope ToTarget(string role, GpuFrameTarget target)
+    private static WebGpuTargetEnvelope ToTarget(string role, GpuFrameTarget target)
         => new()
         {
             Role = role,
@@ -358,7 +358,7 @@ public static class WebGpuRev3InteropEnvelope
             ZeroCopy = target.ZeroCopy
         };
 
-    private static WebGpuRev3BufferEnvelope ToBuffer(string name, GpuFlatBufferLayout layout, IReadOnlyList<float> values)
+    private static WebGpuBufferEnvelope ToBuffer(string name, GpuFlatBufferLayout layout, IReadOnlyList<float> values)
         => new()
         {
             Name = name,
@@ -390,30 +390,30 @@ public static class WebGpuRev3InteropEnvelope
         });
 
     private static void ValidatePassIdentity(
-        WebGpuRev3DispatchEnvelope envelope,
+        WebGpuDispatchEnvelope envelope,
         ICollection<GpuValidationIssue> issues)
     {
         if (string.IsNullOrWhiteSpace(envelope.PassId))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_PASS_ID_REQUIRED",
-                "Rev3 dispatch envelope pass id is required.",
+                "WEBGPU_ENVELOPE_PASS_ID_REQUIRED",
+                "Canonical dispatch envelope pass id is required.",
                 "envelope.passId"));
             return;
         }
 
         var expectedPassId = envelope.PassKind switch
         {
-            WebGpuRev3PassKind.Aisthesis => GpuOperationNames.GpuAisthesisRawFrame,
-            WebGpuRev3PassKind.SpatialReasoning => GpuOperationNames.GpuSpatialReasoning,
-            WebGpuRev3PassKind.HudComposite => GpuOperationNames.GpuHudComposite,
+            WebGpuPassKind.Aisthesis => GpuOperationNames.GpuAisthesisRawFrame,
+            WebGpuPassKind.SpatialReasoning => GpuOperationNames.GpuSpatialReasoning,
+            WebGpuPassKind.HudComposite => GpuOperationNames.GpuHudComposite,
             _ => ""
         };
         if (string.IsNullOrWhiteSpace(expectedPassId))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_PASS_KIND_INVALID",
-                $"Rev3 dispatch envelope pass kind is invalid: {envelope.PassKind}.",
+                "WEBGPU_ENVELOPE_PASS_KIND_INVALID",
+                $"Canonical dispatch envelope pass kind is invalid: {envelope.PassKind}.",
                 "envelope.passKind"));
             return;
         }
@@ -421,29 +421,29 @@ public static class WebGpuRev3InteropEnvelope
         if (!string.Equals(envelope.PassId, expectedPassId, StringComparison.Ordinal))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_PASS_ID_KIND_MISMATCH",
-                $"Rev3 dispatch envelope pass kind {envelope.PassKind} requires pass id '{expectedPassId}', but received '{envelope.PassId}'.",
+                "WEBGPU_ENVELOPE_PASS_ID_KIND_MISMATCH",
+                $"Canonical dispatch envelope pass kind {envelope.PassKind} requires pass id '{expectedPassId}', but received '{envelope.PassId}'.",
                 "envelope.passId"));
         }
 
-        if (!GpuRev3PathRoles.TryResolveFromPassId(envelope.PassId, out _))
+        if (!GpuPathRoles.TryResolveFromPassId(envelope.PassId, out _))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_PATH_ROLE_UNKNOWN",
-                $"Rev3 dispatch envelope pass id '{envelope.PassId}' does not resolve to a canonical path role.",
+                "WEBGPU_ENVELOPE_PATH_ROLE_UNKNOWN",
+                $"Canonical dispatch envelope pass id '{envelope.PassId}' does not resolve to a canonical path role.",
                 "envelope.passId"));
         }
     }
 
     private static void ValidateFrame(
-        WebGpuRev3DispatchEnvelope envelope,
+        WebGpuDispatchEnvelope envelope,
         ICollection<GpuValidationIssue> issues)
     {
         if (envelope.Frame is null)
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_FRAME_REQUIRED",
-                "Rev3 dispatch envelope frame identity is required.",
+                "WEBGPU_ENVELOPE_FRAME_REQUIRED",
+                "Canonical dispatch envelope frame identity is required.",
                 "envelope.frame"));
             return;
         }
@@ -451,38 +451,38 @@ public static class WebGpuRev3InteropEnvelope
         if (string.IsNullOrWhiteSpace(envelope.Frame.FrameId))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_FRAME_ID_REQUIRED",
-                "Rev3 dispatch envelope frame id is required.",
+                "WEBGPU_ENVELOPE_FRAME_ID_REQUIRED",
+                "Canonical dispatch envelope frame id is required.",
                 "envelope.frame.frameId"));
         }
 
         if (envelope.Frame.FrameIndex < 0)
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_FRAME_INDEX_INVALID",
-                $"Rev3 dispatch envelope frame index must be non-negative, but was {envelope.Frame.FrameIndex}.",
+                "WEBGPU_ENVELOPE_FRAME_INDEX_INVALID",
+                $"Canonical dispatch envelope frame index must be non-negative, but was {envelope.Frame.FrameIndex}.",
                 "envelope.frame.frameIndex"));
         }
 
         if (envelope.Frame.SampleTicks < 0)
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_SAMPLE_TICKS_INVALID",
-                $"Rev3 dispatch envelope sample ticks must be non-negative, but was {envelope.Frame.SampleTicks}.",
+                "WEBGPU_ENVELOPE_SAMPLE_TICKS_INVALID",
+                $"Canonical dispatch envelope sample ticks must be non-negative, but was {envelope.Frame.SampleTicks}.",
                 "envelope.frame.sampleTicks"));
         }
     }
 
     private static void ValidateTargets(
-        WebGpuRev3DispatchEnvelope envelope,
+        WebGpuDispatchEnvelope envelope,
         ICollection<GpuValidationIssue> issues)
     {
         var raw = envelope.Targets.FirstOrDefault(static target => string.Equals(target.Role, "raw", StringComparison.Ordinal));
         if (raw is null)
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_RAW_TARGET_REQUIRED",
-                "Rev3 dispatch envelope must carry a raw target descriptor.",
+                "WEBGPU_ENVELOPE_RAW_TARGET_REQUIRED",
+                "Canonical dispatch envelope must carry a raw target descriptor.",
                 "envelope.targets.raw"));
             return;
         }
@@ -490,30 +490,30 @@ public static class WebGpuRev3InteropEnvelope
         if (raw.Kind != GpuFrameTargetKind.RawFramebuffer)
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_RAW_TARGET_KIND_INVALID",
-                $"Rev3 dispatch envelope raw target must be RawFramebuffer, but was {raw.Kind}.",
+                "WEBGPU_ENVELOPE_RAW_TARGET_KIND_INVALID",
+                $"Canonical dispatch envelope raw target must be RawFramebuffer, but was {raw.Kind}.",
                 "envelope.targets.raw.kind"));
         }
 
         if (raw.Width <= 0 || raw.Height <= 0)
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_RAW_TARGET_SIZE_INVALID",
-                $"Rev3 dispatch envelope raw target size must be positive, but was {raw.Width}x{raw.Height}.",
+                "WEBGPU_ENVELOPE_RAW_TARGET_SIZE_INVALID",
+                $"Canonical dispatch envelope raw target size must be positive, but was {raw.Width}x{raw.Height}.",
                 "envelope.targets.raw.size"));
         }
 
         if (string.IsNullOrWhiteSpace(raw.TargetId))
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_RAW_TARGET_ID_REQUIRED",
-                "Rev3 dispatch envelope raw target id is required.",
+                "WEBGPU_ENVELOPE_RAW_TARGET_ID_REQUIRED",
+                "Canonical dispatch envelope raw target id is required.",
                 "envelope.targets.raw.targetId"));
         }
     }
 
     private static void ValidateBuffers(
-        WebGpuRev3DispatchEnvelope envelope,
+        WebGpuDispatchEnvelope envelope,
         ICollection<GpuValidationIssue> issues)
     {
         foreach (var buffer in envelope.Buffers)
@@ -521,16 +521,16 @@ public static class WebGpuRev3InteropEnvelope
             if (string.IsNullOrWhiteSpace(buffer.Name))
             {
                 issues.Add(Error(
-                    "WEBGPU_REV3_ENVELOPE_BUFFER_NAME_REQUIRED",
-                    "Rev3 dispatch envelope buffer name is required.",
+                    "WEBGPU_ENVELOPE_BUFFER_NAME_REQUIRED",
+                    "Canonical dispatch envelope buffer name is required.",
                     "envelope.buffers.name"));
             }
 
             if (buffer.Stride <= 0)
             {
                 issues.Add(Error(
-                    "WEBGPU_REV3_ENVELOPE_BUFFER_STRIDE_INVALID",
-                    $"Rev3 dispatch envelope buffer '{buffer.Name}' has invalid stride {buffer.Stride}.",
+                    "WEBGPU_ENVELOPE_BUFFER_STRIDE_INVALID",
+                    $"Canonical dispatch envelope buffer '{buffer.Name}' has invalid stride {buffer.Stride}.",
                     $"envelope.buffers.{buffer.Name}.stride"));
                 continue;
             }
@@ -538,32 +538,32 @@ public static class WebGpuRev3InteropEnvelope
             if (buffer.Values.Count % buffer.Stride != 0)
             {
                 issues.Add(Error(
-                    "WEBGPU_REV3_ENVELOPE_BUFFER_VALUES_STRIDE_MISMATCH",
-                    $"Rev3 dispatch envelope buffer '{buffer.Name}' value count {buffer.Values.Count} is not divisible by stride {buffer.Stride}.",
+                    "WEBGPU_ENVELOPE_BUFFER_VALUES_STRIDE_MISMATCH",
+                    $"Canonical dispatch envelope buffer '{buffer.Name}' value count {buffer.Values.Count} is not divisible by stride {buffer.Stride}.",
                     $"envelope.buffers.{buffer.Name}.values"));
             }
         }
     }
 
     private static void ValidateMetadata(
-        WebGpuRev3DispatchEnvelope envelope,
+        WebGpuDispatchEnvelope envelope,
         ICollection<GpuValidationIssue> issues)
     {
         if (envelope.Metadata.Count == 0)
         {
             issues.Add(Error(
-                "WEBGPU_REV3_ENVELOPE_METADATA_REQUIRED",
-                "Rev3 dispatch envelope must carry canonical diagnostics metadata.",
+                "WEBGPU_ENVELOPE_METADATA_REQUIRED",
+                "Canonical dispatch envelope must carry canonical diagnostics metadata.",
                 "envelope.metadata"));
             return;
         }
 
-        var validation = GpuCanonicalValidation.ValidateRev3DiagnosticsMetadata(envelope.Metadata, "envelope");
+        var validation = GpuCanonicalValidation.ValidateDiagnosticsMetadata(envelope.Metadata, "envelope");
         foreach (var issue in validation.Errors)
         {
             issues.Add(issue with
             {
-                Code = $"WEBGPU_REV3_ENVELOPE_{issue.Code}",
+                Code = $"WEBGPU_ENVELOPE_{issue.Code}",
                 Path = issue.Path ?? "envelope.metadata"
             });
         }
@@ -611,7 +611,7 @@ public static class WebGpuRev3InteropEnvelope
         var message = string.Join(
             "; ",
             validation.Errors.Select(static issue => $"{issue.Code}:{issue.Path}"));
-        throw new ArgumentException($"Canonical GPU rev3 envelope validation failed. {message}");
+        throw new ArgumentException($"Canonical GPU canonical envelope validation failed. {message}");
     }
 
     private static GpuValidationIssue Error(string code, string message, string path)

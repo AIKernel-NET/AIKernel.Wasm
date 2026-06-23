@@ -49,12 +49,12 @@ public record WebGpuComputeSettings
                 GpuProviderCapabilities.SupportsNativeValidation |
                 GpuProviderCapabilities.SupportsCpuFallback |
                 GpuProviderCapabilities.SupportsFrameDiagnostics).ToString(),
-            [GpuProviderMetadataKeys.NativeJsBridge] = "rev3-envelope-bridge",
+            [GpuProviderMetadataKeys.NativeJsBridge] = "canonical-envelope-bridge",
             [GpuProviderMetadataKeys.PassBridge] = "optional-native-or-js",
-            [GpuProviderMetadataKeys.ProviderFamily] = "aikernel.gpu.rev3",
+            [GpuProviderMetadataKeys.ProviderFamily] = "aikernel.gpu.canonical",
             [GpuProviderMetadataKeys.ProviderRole] = "webgpu-browser",
             [GpuProviderMetadataKeys.RawCaptureSource] = "raw-framebuffer",
-            [GpuProviderMetadataKeys.Rev3] = "true",
+            [GpuProviderMetadataKeys.Canonical] = "true",
             [GpuProviderMetadataKeys.Version] = Version,
             [GpuProviderMetadataKeys.ZeroCopyBufferHandling] = "raw-framebuffer-texture"
         };
@@ -64,7 +64,7 @@ public record WebGpuComputeSettings
             metadata[GpuProviderMetadataKeys.Backend] = BackendName;
         }
 
-        foreach (var pair in WebGpuRev3BrowserBridgeAssets.ToMetadata())
+        foreach (var pair in WebGpuBrowserBridgeAssets.ToMetadata())
         {
             metadata[pair.Key] = pair.Value;
         }
