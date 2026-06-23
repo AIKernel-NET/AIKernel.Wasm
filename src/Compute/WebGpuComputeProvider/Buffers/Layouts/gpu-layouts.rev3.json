@@ -1,0 +1,51 @@
+{
+  "schema": "aikernel.gpu.layouts.rev3",
+  "version": "0.1.3",
+  "layouts": [
+    {
+      "name": "HudCells",
+      "stride": 1,
+      "maxItems": 81,
+      "channels": ["heat"]
+    },
+    {
+      "name": "HudRect",
+      "stride": 8,
+      "maxItems": 256,
+      "channels": ["x", "y", "w", "h", "r", "g", "b", "a"]
+    },
+    {
+      "name": "HudPanelRect",
+      "stride": 12,
+      "maxItems": 64,
+      "channels": ["x", "y", "w", "h", "r", "g", "b", "a", "border", "radius", "z", "flags"]
+    },
+    {
+      "name": "HudPanelStateVector",
+      "stride": 16,
+      "maxItems": 64,
+      "channels": ["kind", "state", "confidence", "risk", "v0", "v1", "v2", "v3"]
+    },
+    {
+      "name": "StateVector",
+      "stride": 16,
+      "maxItems": 1
+    },
+    {
+      "name": "AisMatrix",
+      "stride": 81,
+      "maxItems": 4,
+      "channels": ["topos", "route", "threat", "zoe"]
+    },
+    {
+      "name": "FeatureVector",
+      "stride": 32,
+      "maxItems": 1
+    },
+    {
+      "name": "SpatialVector",
+      "stride": 32,
+      "maxItems": 1
+    }
+  ]
+}

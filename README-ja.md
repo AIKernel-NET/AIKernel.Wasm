@@ -30,9 +30,9 @@ Monolith は 0.1.x 系の安定化後に、sandboxed runtime layer をより広�
 - `AIKernel.Wasm.Input`
 - `AIKernel.Wasm.WebGpuComputeProvider`
 
-AIKernel.Wasm 0.1.2.1 は AIKernel.Wasm 0.1.2 runtime family の NuGet patch line です。AIKernel.Core / AIKernel.Control /
-AIKernel.Providers 0.1.2 と同じ開発方針に従います。この line は NuGet package と同期 Python wrapper を公開し、local development package には `0.1.2.1-dev{build-number}` を使います。
-PyPI package は作成・公開しません。
+AIKernel.Wasm 0.1.3 は AIKernel.Wasm runtime family の canonical GPU integration line です。AIKernel.Core / AIKernel.Control /
+AIKernel.Providers 0.1.3 と同じ開発方針に従います。この line は NuGet package と同期 Python wrapper を公開し、local development package には `0.1.3-dev{build-number}` を使います。
+Python wrapper は独立した runtime 実装ではなく、metadata / discovery surface として同期します。
 
 ## クイックスタート
 
@@ -41,11 +41,11 @@ path は Windows / Linux で検証できます。実 browser WebGPU validation �
 manual check として扱います。
 
 ```bash
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.3
+dotnet add package AIKernel.Wasm.Audio --version 0.1.3
+dotnet add package AIKernel.Wasm.Display --version 0.1.3
+dotnet add package AIKernel.Wasm.Input --version 0.1.3
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.3
 ```
 
 process、memory、stdin、file system、event、audio、screenshot、save-state、
@@ -56,7 +56,8 @@ WebGPU compute boundary が必要な host だけ `AIKernel.Wasm.WebGpuComputePro
 を追加します。
 
 `python/` の Python 関連資料は、この update line の同期 wrapper 資料です。
-0.1.2 release flow で同期 Python wrapper として検証・公開します。
+0.1.3 の package metadata、provider descriptor、native verification hint を公開し、
+browser/WASM execution は .NET / WebGPU 境界に保持します。
 
 ## Documentation
 
@@ -132,6 +133,10 @@ browser-facing runtime surface を base runtime package から分離します。
 
 - `compute.dispatch`
 - `compute.vector_add`
+- `gpu.hud.composite`
+- `gpu.aisthesis.raw-frame`
+- `gpu.spatial-reasoning`
+- `gpu.zero-copy.raw-texture`
 
 backend binding は以下に分離されています。
 
@@ -148,6 +153,19 @@ WebGPU が利用できない場合、Provider は
 委譲します。`IEventBus` が supplied された場合、kernel execution は
 `GpuKernelExecuted` を publish します。
 
+v0.1.3 の WebGPU Provider は canonical rev3 browser bridge と GPU resident asset
+も package に含めます。
+
+- `runtime/browser/webgpu-rev3-envelope-bridge.js`
+- `shaders/hud/hud-composite.rev3.wgsl`
+- `shaders/aisthesis/aisthesis.rev3.wgsl`
+- `shaders/spatial/spatial-reasoning.rev3.wgsl`
+- `buffers/layouts/gpu-layouts.rev3.json`
+
+`scripts/verify-webgpu-package.ps1` を使うと
+`AIKernel.Wasm.WebGpuComputeProvider` を pack し、rev3 bridge、WGSL shader、
+buffer layout、provider manifest、vector-add sample が NuGet package に含まれていることを検査できます。
+
 ## Python Wrapper
 
 `python/` には同期された `aikernel-wasm` Python wrapper 資料を配置して
@@ -161,8 +179,9 @@ Provider と WebGPU compute Provider を公開する方法を示します。
 - `WasmFramebufferProvider`, `WasmFrameSourceProvider`, `WasmInputProvider`
 - `WebGpuComputeProvider`, `WebGpuComputeInvoker`, `WebGpuComputeCapability`
 
-この wrapper は WASM runtime semantics を Python 側で再実装しません。0.1.2
-development line では同期 Python wrapper として検証・公開します。
+この wrapper は WASM runtime semantics を Python 側で再実装しません。0.1.3
+development line では NuGet package surface と同期し、browser execution は
+WASM/WebGPU boundary に保持します。
 
 ## Control Integration
 

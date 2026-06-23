@@ -20,7 +20,7 @@ The public package metadata should include:
 
 AIKernel.Wasm uses AIKernel contracts, Core runtime packages, and
 Providers.Standard CPU fallback. Browser WebGPU bindings are kept behind the
-`IWebGpuJsInterop` boundary. The v0.1.2 Python wrapper is packaged as
+`IWebGpuJsInterop` boundary. The v0.1.3 Python wrapper is packaged as
 `aikernel-wasm`, remains thin over managed assemblies, and does not carry
 browser implementation code.
 

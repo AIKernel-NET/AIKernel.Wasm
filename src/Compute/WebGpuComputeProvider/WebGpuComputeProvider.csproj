@@ -19,5 +19,10 @@ JA: deterministic CPU fallback を備えた WebGPU compute 向け AIKernel.NET �
   <ItemGroup>
     <None Include="webgpu.provider.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="providers\" />
     <None Include="samples\vector-add.wgsl" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="samples\" />
+    <None Include="Shaders\Hud\hud-composite.rev3.wgsl" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="shaders\hud\" />
+    <None Include="Shaders\Aisthesis\aisthesis.rev3.wgsl" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="shaders\aisthesis\" />
+    <None Include="Shaders\Spatial\spatial-reasoning.rev3.wgsl" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="shaders\spatial\" />
+    <None Include="Buffers\Layouts\gpu-layouts.rev3.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="buffers\layouts\" />
+    <None Include="Runtime\Browser\webgpu-rev3-envelope-bridge.js" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="runtime\browser\" />
   </ItemGroup>
 </Project>

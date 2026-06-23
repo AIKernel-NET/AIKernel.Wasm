@@ -16,9 +16,11 @@ with kernel runtime, providers, control, and tools after the 0.1.x line stabiliz
 
 ## Cross-Repository Alignment
 
-Shared repository boundaries, v0.1.2 development versioning, dependency order,
-PyPI Trusted Publishing, and Python wrapper scope are defined by
-[Package Release Alignment v0.1.2](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/package-release-alignment-v0.1.2.md).
+Shared repository boundaries, v0.1.3 development versioning, dependency order,
+GPU rev3 provider metadata, and Python wrapper scope follow the canonical
+AIKernel GPU rev3 integration plan. Until the shared v0.1.3 alignment document
+is published, keep Wasm package and wrapper versions synchronized with
+AIKernel.Core, AIKernel.Control, AIKernel.Providers, Dawn, and Cuda13.
 The historical v0.1.1.1 validation rules remain available in
 [AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1.md).
 When a change crosses repositories, start with the
@@ -69,10 +71,10 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.2 remains the canonical integration line. AIKernel.Wasm publishes
-the NuGet-only patch line `0.1.2.1` for this repository. Use
-`0.1.2.1-dev{build-number}` for local NuGet package references and
-`0.1.2.dev{build-number}` for local `aikernel-wasm` wheel validation. It provides:
+Version 0.1.3 remains the canonical integration line. AIKernel.Wasm publishes
+the NuGet-only patch line `0.1.3` for this repository. Use
+`0.1.3-dev{build-number}` for local NuGet package references and
+`0.1.3.dev{build-number}` for local `aikernel-wasm` wheel validation. It provides:
 
 - `AIKernel.Wasm.Runtime`
 - `AIKernel.Wasm.Audio`
@@ -86,8 +88,8 @@ the NuGet-only patch line `0.1.2.1` for this repository. Use
 - WebGPU compute with deterministic CPU fallback through
   `AIKernel.Providers.Standard`
 
-Stable NuGet package artifacts for AIKernel.Wasm are created as `0.1.2.1`.
-The Python wrapper remains on the synchronized `0.1.2` line unless a separate
+Stable NuGet package artifacts for AIKernel.Wasm are created as `0.1.3`.
+The Python wrapper remains on the synchronized `0.1.3` line unless a separate
 PyPI patch task explicitly requests it.
 
 AIKernel.Wasm depends on AIKernel Core contracts and Providers.Standard fallback

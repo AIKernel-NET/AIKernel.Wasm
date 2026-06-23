@@ -20,7 +20,7 @@ Public package metadata には次を含めます。
 
 AIKernel.Wasm は AIKernel contracts、Core runtime package、Providers.Standard
 CPU fallback を使用します。Browser WebGPU binding は `IWebGpuJsInterop` 境界の
-背後に置きます。v0.1.2 Python wrapper は `aikernel-wasm` として package 化されますが、
+背後に置きます。v0.1.3 Python wrapper は `aikernel-wasm` として package 化されますが、
 managed assemblies の薄い wrapper に留まり、browser implementation code は含めません。
 
 新しい browser / native dependency を追加する場合は、release notes と package

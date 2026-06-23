@@ -3,12 +3,14 @@
   "manifestVersion": "1.0",
   "providerId": "wasm.hud",
   "name": "WASM HUD DTO Providers",
-  "version": "0.1.2.1",
+  "version": "0.1.3",
   "assemblyName": "AIKernel.Wasm.Hud",
   "packageId": "AIKernel.Wasm.Hud",
   "capabilities": [
     "wasm.hud.signal",
-    "wasm.overlay.annotation"
+    "wasm.overlay.annotation",
+    "gpu.hud.composite",
+    "gpu.hud.ego-radar"
   ],
   "priority": 60,
   "tags": [
@@ -19,6 +21,7 @@
   ],
   "metadata": {
     "boundary": "wasm",
-    "renders": "false"
+    "renders": "false",
+    "rev3StateVector": "true"
   }
 }

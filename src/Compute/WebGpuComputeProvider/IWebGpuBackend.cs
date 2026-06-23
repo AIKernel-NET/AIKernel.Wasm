@@ -1,6 +1,7 @@
 namespace AIKernel.Wasm.Compute;
 
 using AIKernel.Abstractions.Compute;
+using AIKernel.Dtos.Gpu;
 using System.Runtime.InteropServices;
 
 /// <summary>
@@ -26,6 +27,31 @@ public interface IWebGpuBackend
 
     /// <summary>[EN] Executes a native WebGPU compute pass. [JA] native WebGPU compute pass を実行します。</summary>
     Task ExecuteKernelAsync(ComputeKernel kernel, IReadOnlyList<ComputeBuffer> buffers);
+}
+
+/// <summary>
+/// [EN] Optional rev3 canonical WebGPU pass bridge for HUD, Aisthesis, and Spatial Reasoning.
+/// [JA] HUD、Aisthesis、Spatial Reasoning 用の任意の rev3 canonical WebGPU pass bridge です。
+/// </summary>
+public interface IWebGpuRev3Backend : IWebGpuBackend
+{
+    /// <summary>
+    /// [EN] Dispatches the canonical GPU Aisthesis pass, or returns null when this backend has no native pass.
+    /// [JA] canonical GPU Aisthesis pass を dispatch します。この backend に native pass がない場合は null を返します。
+    /// </summary>
+    Task<GpuAisthesisOutput?> DispatchAisthesisAsync(GpuAisthesisInput input, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// [EN] Dispatches the canonical GPU Spatial Reasoning pass, or returns null when this backend has no native pass.
+    /// [JA] canonical GPU Spatial Reasoning pass を dispatch します。この backend に native pass がない場合は null を返します。
+    /// </summary>
+    Task<GpuSpatialReasoningOutput?> DispatchSpatialReasoningAsync(GpuSpatialReasoningInput input, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// [EN] Dispatches the canonical GPU HUD composite pass, or returns null when this backend has no native pass.
+    /// [JA] canonical GPU HUD composite pass を dispatch します。この backend に native pass がない場合は null を返します。
+    /// </summary>
+    Task<GpuFrameTarget?> DispatchHudCompositeAsync(GpuHudInput input, CancellationToken cancellationToken = default);
 }
 
 internal sealed class NullWebGpuBackend : IWebGpuBackend
@@ -120,7 +146,7 @@ public class WebGpuNativeBackend : IWebGpuBackend
 /// [EN] Browser/WASM WebGPU backend adapter for JavaScript interop.
 /// [JA] JavaScript interop 向けの browser/WASM WebGPU backend adapter です。
 /// </summary>
-public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend
+public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBackend, IWebGpuRev3Backend
 {
     private readonly IWebGpuJsInterop? _jsInterop = jsInterop;
     private readonly Dictionary<ComputeBuffer, byte[]> _buffers = new();
@@ -192,12 +218,101 @@ public class WebGpuWasmBackend(IWebGpuJsInterop? jsInterop = null) : IWebGpuBack
         ExecuteInMemoryVectorAdd(kernel, buffers);
     }
 
+    /// <inheritdoc />
+    public async Task<GpuAisthesisOutput?> DispatchAisthesisAsync(
+        GpuAisthesisInput input,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureAvailable();
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_jsInterop is IWebGpuRev3EnvelopeJsInterop envelopeInterop)
+        {
+            var envelope = WebGpuRev3InteropEnvelope.ForAisthesis(input);
+            EnsureValidDispatchEnvelope(envelope);
+            return await envelopeInterop
+                .DispatchAisthesisEnvelopeAsync(envelope, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (_jsInterop is not IWebGpuRev3JsInterop rev3)
+        {
+            return null;
+        }
+
+        return await rev3.DispatchAisthesisAsync(input, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<GpuSpatialReasoningOutput?> DispatchSpatialReasoningAsync(
+        GpuSpatialReasoningInput input,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureAvailable();
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_jsInterop is IWebGpuRev3EnvelopeJsInterop envelopeInterop)
+        {
+            var envelope = WebGpuRev3InteropEnvelope.ForSpatialReasoning(input);
+            EnsureValidDispatchEnvelope(envelope);
+            return await envelopeInterop
+                .DispatchSpatialReasoningEnvelopeAsync(envelope, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (_jsInterop is not IWebGpuRev3JsInterop rev3)
+        {
+            return null;
+        }
+
+        return await rev3.DispatchSpatialReasoningAsync(input, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<GpuFrameTarget?> DispatchHudCompositeAsync(
+        GpuHudInput input,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureAvailable();
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_jsInterop is IWebGpuRev3EnvelopeJsInterop envelopeInterop)
+        {
+            var envelope = WebGpuRev3InteropEnvelope.ForHudComposite(input);
+            EnsureValidDispatchEnvelope(envelope);
+            return await envelopeInterop
+                .DispatchHudCompositeEnvelopeAsync(envelope, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (_jsInterop is not IWebGpuRev3JsInterop rev3)
+        {
+            return null;
+        }
+
+        return await rev3.DispatchHudCompositeAsync(input, cancellationToken).ConfigureAwait(false);
+    }
+
     private void EnsureAvailable()
     {
         if (!IsAvailable)
         {
             throw new NotSupportedException("WASM WebGPU backend is not available.");
         }
+    }
+
+    private static void EnsureValidDispatchEnvelope(WebGpuRev3DispatchEnvelope envelope)
+    {
+        var validation = WebGpuRev3InteropEnvelope.ValidateDispatchEnvelope(envelope);
+        if (validation.IsValid)
+        {
+            return;
+        }
+
+        var summary = string.Join(
+            "; ",
+            validation.Errors.Select(static issue =>
+                string.IsNullOrWhiteSpace(issue.Path)
+                    ? $"{issue.Code}: {issue.Message}"
+                    : $"{issue.Code}@{issue.Path}: {issue.Message}"));
+        throw new InvalidOperationException($"Invalid WebGPU rev3 dispatch envelope. {summary}");
     }
 
     private void ExecuteInMemoryVectorAdd(ComputeKernel kernel, IReadOnlyList<ComputeBuffer> buffers)
@@ -239,6 +354,38 @@ public interface IWebGpuJsInterop
 
     /// <summary>[EN] Dispatches a JS-owned WebGPU compute pipeline. [JA] JS 所有 WebGPU compute pipeline を dispatch します。</summary>
     Task ExecuteKernelAsync(string wgsl, IReadOnlyList<object?> buffers, int x, int y, int z);
+}
+
+/// <summary>
+/// [EN] Browser JavaScript interop boundary for canonical rev3 GPU passes.
+/// [JA] canonical rev3 GPU pass 用の browser JavaScript interop 境界です。
+/// </summary>
+public interface IWebGpuRev3JsInterop : IWebGpuJsInterop
+{
+    /// <summary>[EN] Dispatches GPU Aisthesis over a raw framebuffer target. [JA] raw framebuffer target に対して GPU Aisthesis を dispatch します。</summary>
+    Task<GpuAisthesisOutput?> DispatchAisthesisAsync(GpuAisthesisInput input, CancellationToken cancellationToken = default);
+
+    /// <summary>[EN] Dispatches GPU Spatial Reasoning over canonical matrices. [JA] canonical matrix に対して GPU Spatial Reasoning を dispatch します。</summary>
+    Task<GpuSpatialReasoningOutput?> DispatchSpatialReasoningAsync(GpuSpatialReasoningInput input, CancellationToken cancellationToken = default);
+
+    /// <summary>[EN] Dispatches GPU HUD composition to an offscreen HUD target. [JA] offscreen HUD target へ GPU HUD composition を dispatch します。</summary>
+    Task<GpuFrameTarget?> DispatchHudCompositeAsync(GpuHudInput input, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// [EN] Browser JavaScript interop boundary that accepts stable rev3 dispatch envelopes.
+/// [JA] 安定した rev3 dispatch envelope を受け取る browser JavaScript interop 境界です。
+/// </summary>
+public interface IWebGpuRev3EnvelopeJsInterop : IWebGpuJsInterop
+{
+    /// <summary>[EN] Dispatches GPU Aisthesis using a JS/Dawn friendly rev3 envelope. [JA] JS/Dawn で扱いやすい rev3 envelope で GPU Aisthesis を dispatch します。</summary>
+    Task<GpuAisthesisOutput?> DispatchAisthesisEnvelopeAsync(WebGpuRev3DispatchEnvelope envelope, CancellationToken cancellationToken = default);
+
+    /// <summary>[EN] Dispatches GPU Spatial Reasoning using a JS/Dawn friendly rev3 envelope. [JA] JS/Dawn で扱いやすい rev3 envelope で GPU Spatial Reasoning を dispatch します。</summary>
+    Task<GpuSpatialReasoningOutput?> DispatchSpatialReasoningEnvelopeAsync(WebGpuRev3DispatchEnvelope envelope, CancellationToken cancellationToken = default);
+
+    /// <summary>[EN] Dispatches GPU HUD composition using a JS/Dawn friendly rev3 envelope. [JA] JS/Dawn で扱いやすい rev3 envelope で GPU HUD composition を dispatch します。</summary>
+    Task<GpuFrameTarget?> DispatchHudCompositeEnvelopeAsync(WebGpuRev3DispatchEnvelope envelope, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

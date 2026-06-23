@@ -2,6 +2,25 @@
 
 [English](RELEASE_NOTES.md)
 
+## 0.1.3
+
+**2026年6月23日 - Canonical GPU rev3 boundary。**
+
+AIKernel.Wasm 0.1.3 は browser/WASM runtime family 向けの canonical GPU
+integration release line です。WebGPU Provider を rev3 GPU HUD、GPU
+Aisthesis、Spatial Reasoning、zero-copy diagnostics、deterministic CPU fallback
+metadata に合わせます。
+
+- rev3 browser dispatch bridge を
+  `runtime/browser/webgpu-rev3-envelope-bridge.js` として package に含めます。
+- HUD composite、Aisthesis raw-frame feature mask、Spatial Reasoning 向けの
+  GPU resident WGSL asset を package に含めます。
+- canonical GPU layout metadata を `buffers/layouts/gpu-layouts.rev3.json` として含めます。
+- release 前の NuGet package asset surface を確認する
+  `scripts/verify-webgpu-package.ps1` を追加します。
+- Python wrapper 資料を 0.1.3 NuGet package surface と native verification
+  metadata に同期します。
+
 ## 0.1.2.1
 
 **2026年6月19日 - WASM perception patch。**

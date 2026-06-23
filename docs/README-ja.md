@@ -16,10 +16,11 @@ control、tools と統合する標準 reference distribution として位置づ�
 
 ## リポジトリ横断整合
 
-共有の repository boundary、v0.1.2 development versioning、依存関係順、
-PyPI Trusted Publishing、Python wrapper scope は
-[Package Release Alignment v0.1.2](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/package-release-alignment-v0.1.2-ja.md)
-で定義します。履歴としての v0.1.1.1 validation rule は
+共有の repository boundary、v0.1.3 development versioning、依存関係順、
+GPU rev3 provider metadata、Python wrapper scope は canonical AIKernel GPU rev3
+integration plan に従います。共有の v0.1.3 alignment document が公開されるまでは、
+Wasm package / wrapper version を AIKernel.Core、AIKernel.Control、
+AIKernel.Providers、Dawn、Cuda13 と同期してください。履歴としての v0.1.1.1 validation rule は
 [AIKernel Repository Alignment v0.1.1.1](https://github.com/AIKernel-NET/AIKernel.NET/blob/main/docs/development/repository-alignment-v0.1.1.1-ja.md)
 に残します。
 複数 repository をまたぐ変更を行う場合は、まず
@@ -71,10 +72,10 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 
 ## Release Scope
 
-Version 0.1.2 は現在の canonical integration line のままです。AIKernel.Wasm は
-この repository の NuGet 限定 patch line として `0.1.2.1` を公開します。local NuGet package reference
-には `0.1.2.1-dev{build-number}`、local `aikernel-wasm` wheel validation には
-`0.1.2.dev{build-number}` を使います。次を提供します。
+Version 0.1.3 は現在の canonical GPU integration line のままです。AIKernel.Wasm は
+この repository の NuGet 限定 patch line として `0.1.3` を公開します。local NuGet package reference
+には `0.1.3-dev{build-number}`、local `aikernel-wasm` wheel validation には
+`0.1.3.dev{build-number}` を使います。次を提供します。
 
 - `AIKernel.Wasm.Runtime`
 - `AIKernel.Wasm.Audio`
@@ -88,8 +89,8 @@ Version 0.1.2 は現在の canonical integration line のままです。AIKernel
 - `AIKernel.Providers.Standard` 経由の deterministic CPU fallback 付き
   WebGPU compute
 
-AIKernel.Wasm の stable NuGet package artifact は `0.1.2.1` として作成します。
-Python wrapper は、別途 PyPI patch task が明示されない限り、同期済み `0.1.2`
+AIKernel.Wasm の stable NuGet package artifact は `0.1.3` として作成します。
+Python wrapper は、別途 PyPI patch task が明示されない限り、同期済み `0.1.3`
 line のまま維持します。
 
 AIKernel.Wasm は AIKernel Core contract と Providers.Standard fallback driver に

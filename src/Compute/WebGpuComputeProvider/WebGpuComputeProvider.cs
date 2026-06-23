@@ -1,11 +1,15 @@
+using System.Globalization;
 using AIKernel.Abstractions.Compute;
 using AIKernel.Abstractions.Events;
+using AIKernel.Abstractions.Gpu;
 using AIKernel.Abstractions.Models;
 using AIKernel.Abstractions.Providers;
 using AIKernel.Common.Results;
 using AIKernel.Dtos.Capabilities;
 using AIKernel.Dtos.Core;
+using AIKernel.Dtos.Gpu;
 using AIKernel.Dtos.Routing;
+using AIKernel.Enums;
 using AIKernel.Providers.Standard.Compute;
 
 namespace AIKernel.Wasm.Compute;
@@ -18,9 +22,9 @@ public class WebGpuComputeProvider(
     WebGpuComputeSettings settings,
     IWebGpuBackend? backend = null,
     IComputeProvider? cpuFallback = null,
-    IEventBus? eventBus = null) : IProvider, IComputeProvider
+    IEventBus? eventBus = null) : IProvider, IComputeProvider, IGpuProvider, IGpuAisthesisProcessor, IGpuSpatialReasoner, IGpuHudComposer, IGpuDiagnostics
 {
-    private static readonly WebGpuComputeProviderCapabilities Capabilities = new();
+    private static readonly WebGpuComputeProviderCapabilities ProviderCapabilities = new();
     private readonly IWebGpuBackend _backend = backend ?? NullWebGpuBackend.Instance;
     private readonly IComputeProvider _cpuFallback = cpuFallback ?? new CpuComputeProvider();
     private readonly IEventBus? _eventBus = eventBus;
@@ -50,11 +54,31 @@ public class WebGpuComputeProvider(
     /// <summary>[EN] Returns true when CPU fallback is currently active. [JA] CPU fallback が現在有効な場合 true を返します。</summary>
     public bool UsingCpuFallback => _usingCpuFallback;
 
+    /// <summary>[EN] Active backend for canonical GPU execution. [JA] canonical GPU execution 用の active backend です。</summary>
+    public GpuBackend Backend => _usingCpuFallback ? GpuBackend.CpuFallback : GpuBackend.WebGpu;
+
+    /// <summary>
+    /// [EN] Canonical v0.1.3 GPU capabilities exposed by the WebGPU provider.
+    /// [JA] WebGPU Provider が公開する canonical v0.1.3 GPU capability です。
+    /// </summary>
+    public GpuProviderCapabilities Capabilities { get; } =
+        GpuProviderCapabilities.SupportsCompute |
+        GpuProviderCapabilities.SupportsHudComposite |
+        GpuProviderCapabilities.SupportsAisthesis |
+        GpuProviderCapabilities.SupportsSpatialReasoning |
+        GpuProviderCapabilities.SupportsZeroCopyRawTexture |
+        GpuProviderCapabilities.SupportsNativeValidation |
+        GpuProviderCapabilities.SupportsCpuFallback |
+        GpuProviderCapabilities.SupportsFrameDiagnostics;
+
+    /// <summary>[EN] Compatibility alias for the canonical GPU capability set. [JA] canonical GPU capability set の互換 alias です。</summary>
+    public GpuProviderCapabilities GpuCapabilities => Capabilities;
+
     /// <summary>
     /// [EN] Returns provider capabilities for AIKernel provider registration.
     /// [JA] AIKernel Provider 登録用の provider capabilities を返します。
     /// </summary>
-    public IProviderCapabilities GetCapabilities() => Capabilities;
+    public IProviderCapabilities GetCapabilities() => ProviderCapabilities;
 
     /// <summary>
     /// [EN] Returns provider availability. CPU fallback makes this provider available in unsupported browsers.
@@ -206,6 +230,181 @@ public class WebGpuComputeProvider(
                 _settings.AdapterProfile,
                 _settings.ToMetadata()));
 
+    /// <summary>
+    /// [EN] Creates a canonical GPU context backed by WebGPU or deterministic CPU fallback.
+    /// [JA] WebGPU または deterministic CPU fallback による canonical GPU context を作成します。
+    /// </summary>
+    public async ValueTask<IGpuContext> CreateContextAsync(
+        GpuProviderOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        if (options.ForceCpuFallback)
+        {
+            _usingCpuFallback = true;
+            _initialized = true;
+        }
+        else
+        {
+            await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return new WebGpuRuntimeContext(
+            $"{ProviderId}:{Guid.NewGuid():N}",
+            Backend,
+            Capabilities,
+            _usingCpuFallback);
+    }
+
+    /// <summary>
+    /// [EN] Captures the canonical game/Bonsai/HUD/sensor diagnostics table for the active backend.
+    /// [JA] active backend 用の canonical game/Bonsai/HUD/sensor diagnostics table を取得します。
+    /// </summary>
+    public async ValueTask<AIKernel.Dtos.Gpu.GpuFrameDiagnostics> CaptureFrameDiagnosticsAsync(
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        var diagnostics = CreateFrameDiagnostics(frame);
+        ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuCanonicalValidation.ValidateFrameDiagnostics(diagnostics));
+        return diagnostics;
+    }
+
+    /// <summary>
+    /// [EN] Runs canonical GPU Aisthesis contract validation and deterministic fallback feature extraction.
+    /// [JA] canonical GPU Aisthesis contract validation と deterministic fallback feature extraction を実行します。
+    /// </summary>
+    public async ValueTask<AIKernel.Dtos.Gpu.GpuAisthesisOutput> ProcessAsync(
+        AIKernel.Dtos.Gpu.GpuAisthesisInput input,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentNullException.ThrowIfNull(input);
+        await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuCanonicalValidation.ValidateAisthesisInput(input));
+
+        if (!_usingCpuFallback && _backend is IWebGpuRev3Backend rev3Backend)
+        {
+            var dispatched = await rev3Backend.DispatchAisthesisAsync(input, cancellationToken).ConfigureAwait(false);
+            if (dispatched is not null)
+            {
+                return NormalizeAisthesisOutput(dispatched, input);
+            }
+        }
+
+        var vector = new float[AIKernel.Dtos.Gpu.GpuCanonicalLayouts.FeatureVector.Stride];
+        vector[0] = input.RawFramebuffer.Width;
+        vector[1] = input.RawFramebuffer.Height;
+        vector[2] = input.RawFramebuffer.ZeroCopy ? 1.0f : 0.0f;
+        vector[3] = _usingCpuFallback ? 0.0f : 1.0f;
+        var enabled = input.Features
+            .Where(static pair => pair.Value)
+            .OrderBy(static pair => pair.Key, StringComparer.Ordinal)
+            .Take(vector.Length - 4)
+            .Select(static pair => pair.Key.GetHashCode(StringComparison.Ordinal) & 0xFF)
+            .Select(static value => value / 255.0f)
+            .ToArray();
+        enabled.CopyTo(vector, 4);
+
+        return new AIKernel.Dtos.Gpu.GpuAisthesisOutput
+        {
+            Frame = input.Frame,
+            FeatureVector = vector,
+            MaskTexture = new AIKernel.Dtos.Gpu.GpuFrameTarget
+            {
+                TargetId = $"{input.RawFramebuffer.TargetId}:feature-mask",
+                Kind = GpuFrameTargetKind.FeatureMask,
+                Backend = Backend,
+                Width = input.RawFramebuffer.Width,
+                Height = input.RawFramebuffer.Height,
+                PixelFormat = input.RawFramebuffer.PixelFormat,
+                ZeroCopy = !_usingCpuFallback && input.RawFramebuffer.ZeroCopy
+            },
+            Diagnostics = CreatePathDiagnostics("aisthesis", input.Frame)
+        };
+    }
+
+    /// <summary>
+    /// [EN] Runs canonical Topos/Route/Threat/Zoe spatial reasoning over flat matrices.
+    /// [JA] flat matrix 上で canonical Topos/Route/Threat/Zoe spatial reasoning を実行します。
+    /// </summary>
+    public async ValueTask<AIKernel.Dtos.Gpu.GpuSpatialReasoningOutput> ReasonAsync(
+        AIKernel.Dtos.Gpu.GpuSpatialReasoningInput input,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentNullException.ThrowIfNull(input);
+        await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuCanonicalValidation.ValidateSpatialReasoningInput(input));
+
+        if (!_usingCpuFallback && _backend is IWebGpuRev3Backend rev3Backend)
+        {
+            var dispatched = await rev3Backend.DispatchSpatialReasoningAsync(input, cancellationToken).ConfigureAwait(false);
+            if (dispatched is not null)
+            {
+                return NormalizeSpatialReasoningOutput(dispatched, input);
+            }
+        }
+
+        var vector = new float[AIKernel.Dtos.Gpu.GpuCanonicalLayouts.SpatialVector.Stride];
+        for (var matrixIndex = 0; matrixIndex < input.AisMatrices.Count; matrixIndex++)
+        {
+            var matrix = input.AisMatrices[matrixIndex];
+            var offset = matrixIndex * 4;
+            vector[offset] = matrix.Count == 0 ? 0.0f : matrix.Average();
+            vector[offset + 1] = matrix.Count == 0 ? 0.0f : matrix.Max();
+            vector[offset + 2] = matrix.Count == 0 ? 0.0f : matrix.Min();
+            vector[offset + 3] = matrix.Count(value => value > 0.5f) / (float)matrix.Count;
+        }
+
+        input.StateVector
+            .Take(Math.Min(input.StateVector.Count, vector.Length - 16))
+            .Select((value, index) => new { value, index })
+            .ToList()
+            .ForEach(item => vector[16 + item.index] = item.value);
+
+        return new AIKernel.Dtos.Gpu.GpuSpatialReasoningOutput
+        {
+            Frame = input.Frame,
+            SpatialVector = vector,
+            Diagnostics = CreatePathDiagnostics("spatial", input.Frame)
+        };
+    }
+
+    /// <summary>
+    /// [EN] Creates or returns the HUD composite target for canonical GPU HUD composition.
+    /// [JA] canonical GPU HUD composition 用の HUD composite target を作成または返却します。
+    /// </summary>
+    public async ValueTask<AIKernel.Dtos.Gpu.GpuFrameTarget> ComposeAsync(
+        AIKernel.Dtos.Gpu.GpuHudInput input,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentNullException.ThrowIfNull(input);
+        await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuCanonicalValidation.ValidateHudInput(input));
+
+        if (!_usingCpuFallback && _backend is IWebGpuRev3Backend rev3Backend)
+        {
+            var dispatched = await rev3Backend.DispatchHudCompositeAsync(input, cancellationToken).ConfigureAwait(false);
+            if (dispatched is not null)
+            {
+                return NormalizeHudCompositeTarget(dispatched, input);
+            }
+        }
+
+        return input.Frame.HudTarget ?? new AIKernel.Dtos.Gpu.GpuFrameTarget
+        {
+            TargetId = $"{input.Frame.FrameId}:hud-composite",
+            Kind = GpuFrameTargetKind.HudCompositeOffscreen,
+            Backend = Backend,
+            Width = input.Frame.RawTarget.Width,
+            Height = input.Frame.RawTarget.Height,
+            PixelFormat = input.Frame.RawTarget.PixelFormat,
+            ZeroCopy = !_usingCpuFallback && input.Frame.RawTarget.ZeroCopy
+        };
+    }
+
     private Either<IComputeProvider, IWebGpuBackend> BackendSelection(bool usingCpuFallback)
         => usingCpuFallback
             ? Either<IComputeProvider, IWebGpuBackend>.FromLeft(_cpuFallback)
@@ -252,19 +451,364 @@ public class WebGpuComputeProvider(
                 new Dictionary<string, string>(StringComparer.Ordinal)
                 {
                     ["providerId"] = ProviderId,
-                    ["backend"] = backend,
+                    [AIKernel.Dtos.Gpu.GpuProviderMetadataKeys.Backend] = backend,
                     ["dispatch"] = $"{kernel.DispatchX},{kernel.DispatchY},{kernel.DispatchZ}",
                     ["workgroupSize"] = $"{kernel.WorkgroupSizeX},{kernel.WorkgroupSizeY},{kernel.WorkgroupSizeZ}"
                 });
+
+    private AIKernel.Dtos.Gpu.GpuFrameDiagnostics CreateFrameDiagnostics(
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame)
+        => new()
+        {
+            GamePath = CreatePathDiagnostics("game", frame),
+            BonsaiPath = CreatePathDiagnostics("bonsai", frame),
+            HudPath = CreatePathDiagnostics("hud", frame),
+            SensorPath = CreatePathDiagnostics("sensor", frame)
+        };
+
+    private AIKernel.Dtos.Gpu.GpuDiagnosticsPathInfo CreatePathDiagnostics(
+        string passId,
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame = null)
+        => new()
+        {
+            Backend = Backend.ToString(),
+            ZeroCopy = !_usingCpuFallback,
+            Readback = _usingCpuFallback ? GpuReadbackPolicy.RequiredFallback : GpuReadbackPolicy.None,
+            FallbackReason = _usingCpuFallback ? "cpu-fallback" : null,
+            FrameId = frame?.FrameId,
+            PassId = passId,
+            MemoryEstimate = EstimatePathMemory(frame, passId),
+            Metadata = WebGpuRev3DiagnosticsMetadata.Create(passId, _usingCpuFallback, frame: frame)
+        };
+
+    private AIKernel.Dtos.Gpu.GpuAisthesisOutput NormalizeAisthesisOutput(
+        AIKernel.Dtos.Gpu.GpuAisthesisOutput output,
+        AIKernel.Dtos.Gpu.GpuAisthesisInput input)
+    {
+        var vector = NormalizeFloatVector(
+            output.FeatureVector,
+            AIKernel.Dtos.Gpu.GpuCanonicalLayouts.FeatureVector.Stride);
+        var mask = output.MaskTexture ?? new AIKernel.Dtos.Gpu.GpuFrameTarget
+        {
+            TargetId = $"{input.RawFramebuffer.TargetId}:feature-mask",
+            Kind = GpuFrameTargetKind.FeatureMask,
+            Backend = Backend,
+            Width = input.RawFramebuffer.Width,
+            Height = input.RawFramebuffer.Height,
+            PixelFormat = input.RawFramebuffer.PixelFormat,
+            ZeroCopy = input.RawFramebuffer.ZeroCopy
+        };
+
+        return output with
+        {
+            Frame = output.Frame.FrameId == input.Frame.FrameId ? output.Frame : input.Frame,
+            FeatureVector = vector,
+            MaskTexture = mask with
+            {
+                Kind = GpuFrameTargetKind.FeatureMask,
+                Backend = Backend,
+                ZeroCopy = !_usingCpuFallback && mask.ZeroCopy
+            },
+            Diagnostics = NormalizeDiagnostics(output.Diagnostics, "aisthesis:webgpu", input.Frame)
+        };
+    }
+
+    private AIKernel.Dtos.Gpu.GpuSpatialReasoningOutput NormalizeSpatialReasoningOutput(
+        AIKernel.Dtos.Gpu.GpuSpatialReasoningOutput output,
+        AIKernel.Dtos.Gpu.GpuSpatialReasoningInput input)
+        => output with
+        {
+            Frame = output.Frame.FrameId == input.Frame.FrameId ? output.Frame : input.Frame,
+            SpatialVector = NormalizeFloatVector(
+                output.SpatialVector,
+                AIKernel.Dtos.Gpu.GpuCanonicalLayouts.SpatialVector.Stride),
+            Diagnostics = NormalizeDiagnostics(output.Diagnostics, "spatial:webgpu", input.Frame)
+        };
+
+    private AIKernel.Dtos.Gpu.GpuFrameTarget NormalizeHudCompositeTarget(
+        AIKernel.Dtos.Gpu.GpuFrameTarget target,
+        AIKernel.Dtos.Gpu.GpuHudInput input)
+        => target with
+        {
+            Kind = GpuFrameTargetKind.HudCompositeOffscreen,
+            Backend = Backend,
+            Width = target.Width > 0 ? target.Width : input.Frame.RawTarget.Width,
+            Height = target.Height > 0 ? target.Height : input.Frame.RawTarget.Height,
+            PixelFormat = target.PixelFormat == FramePixelFormat.Unknown ? input.Frame.RawTarget.PixelFormat : target.PixelFormat,
+            ZeroCopy = !_usingCpuFallback && target.ZeroCopy
+        };
+
+    private AIKernel.Dtos.Gpu.GpuDiagnosticsPathInfo NormalizeDiagnostics(
+        AIKernel.Dtos.Gpu.GpuDiagnosticsPathInfo diagnostics,
+        string passId,
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame = null)
+    {
+        var resolvedPassId = string.IsNullOrWhiteSpace(diagnostics.PassId) ? passId : diagnostics.PassId;
+        return diagnostics with
+        {
+            Backend = string.IsNullOrWhiteSpace(diagnostics.Backend) ? Backend.ToString() : diagnostics.Backend,
+            ZeroCopy = !_usingCpuFallback && diagnostics.ZeroCopy,
+            Readback = !_usingCpuFallback && diagnostics.ZeroCopy ? GpuReadbackPolicy.None : diagnostics.Readback,
+            FallbackReason = !_usingCpuFallback && diagnostics.ZeroCopy ? null : diagnostics.FallbackReason,
+            FrameId = string.IsNullOrWhiteSpace(diagnostics.FrameId) ? frame?.FrameId : diagnostics.FrameId,
+            PassId = resolvedPassId,
+            MemoryEstimate = diagnostics.MemoryEstimate ?? EstimatePathMemory(frame, passId),
+            Metadata = WebGpuRev3DiagnosticsMetadata.Create(resolvedPassId, _usingCpuFallback, diagnostics.Metadata, frame)
+        };
+    }
+
+    private static long? EstimatePathMemory(
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame,
+        string passId)
+    {
+        var target = string.Equals(passId, "hud", StringComparison.OrdinalIgnoreCase)
+            ? frame?.HudTarget ?? frame?.RawTarget
+            : frame?.RawTarget;
+        if (target is null || target.Width <= 0 || target.Height <= 0)
+        {
+            return null;
+        }
+
+        var bytesPerPixel = target.PixelFormat switch
+        {
+            FramePixelFormat.Indexed8 or FramePixelFormat.Luminance8 => 1,
+            FramePixelFormat.Rgb24 => 3,
+            FramePixelFormat.Rgba32 or FramePixelFormat.Bgra32 => 4,
+            _ => 4
+        };
+        return (long)target.Width * target.Height * bytesPerPixel;
+    }
+
+    private static IReadOnlyList<float> NormalizeFloatVector(IReadOnlyList<float> values, int length)
+    {
+        var vector = new float[length];
+        var count = Math.Min(values.Count, length);
+        for (var index = 0; index < count; index++)
+        {
+            vector[index] = values[index];
+        }
+
+        return vector;
+    }
+
+    private static void ThrowIfInvalid(AIKernel.Dtos.Gpu.GpuValidationResult validation)
+    {
+        if (validation.IsValid)
+        {
+            return;
+        }
+
+        var message = string.Join(
+            "; ",
+            validation.Errors.Select(static issue => $"{issue.Code}:{issue.Path}"));
+        throw new ArgumentException($"Canonical GPU contract validation failed. {message}");
+    }
+}
+
+internal static class WebGpuRev3DiagnosticsMetadata
+{
+    public static IReadOnlyDictionary<string, string> Create(
+        string passId,
+        IReadOnlyDictionary<string, string>? metadata = null)
+        => Create(passId, usingCpuFallback: false, metadata);
+
+    public static IReadOnlyDictionary<string, string> Create(
+        string passId,
+        bool usingCpuFallback,
+        IReadOnlyDictionary<string, string>? metadata = null,
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame = null)
+    {
+        var values = new SortedDictionary<string, string>(StringComparer.Ordinal)
+        {
+            [GpuDiagnosticsMetadataKeys.Rev3AuthoritativeReady] = "false",
+            [GpuDiagnosticsMetadataKeys.Rev3CandidateStreak] = "0",
+            [GpuDiagnosticsMetadataKeys.Rev3DiagnosticReady] = "false",
+            [GpuDiagnosticsMetadataKeys.Rev3DiagnosticStreak] = "0",
+            [GpuDiagnosticsMetadataKeys.Rev3ExecutionMode] = GpuRev3ExecutionModes.CSharpDeterministic,
+            [GpuDiagnosticsMetadataKeys.Rev3FeatureMaskStorageTexture] = "false",
+            [GpuDiagnosticsMetadataKeys.Rev3FrameIndex] =
+                (frame?.FrameIndex ?? 0).ToString(CultureInfo.InvariantCulture),
+            [GpuDiagnosticsMetadataKeys.Rev3PassReadiness] = CreatePassReadiness(usingCpuFallback),
+            [GpuDiagnosticsMetadataKeys.Rev3PassId] = passId,
+            [GpuDiagnosticsMetadataKeys.Rev3PathRole] = ResolvePathRole(passId),
+            [GpuDiagnosticsMetadataKeys.Rev3PilotState] = GpuRev3PilotStates.NotEvaluated,
+            [GpuDiagnosticsMetadataKeys.Rev3PromotionGate] = GpuRev3PromotionGates.NotEvaluated,
+            [GpuDiagnosticsMetadataKeys.Rev3RequiredStreak] = "0",
+            [GpuDiagnosticsMetadataKeys.Rev3SampleTicks] =
+                (frame?.SampleTicks ?? 0).ToString(CultureInfo.InvariantCulture)
+        };
+
+        AddExecutionLayerMetadata(values, usingCpuFallback);
+
+        if (metadata is null)
+        {
+            AddPromotionReadinessMetadata(values);
+            return values;
+        }
+
+        foreach (var pair in metadata)
+        {
+            if (!string.IsNullOrWhiteSpace(pair.Key) && pair.Value is not null)
+            {
+                values[pair.Key] = pair.Value;
+            }
+        }
+
+        AddPromotionReadinessMetadata(values);
+        return values;
+    }
+
+    private static void AddPromotionReadinessMetadata(SortedDictionary<string, string> values)
+    {
+        var readiness = GpuCanonicalValidation.EvaluateRev3PromotionReadiness(values);
+        values[GpuDiagnosticsMetadataKeys.Rev3PromotionBlocked] = Flag(readiness.IsBlocked);
+        values[GpuDiagnosticsMetadataKeys.Rev3PromotionCandidateReady] = Flag(readiness.IsPromotionCandidate);
+        values[GpuDiagnosticsMetadataKeys.Rev3PromotionDiagnosticStable] = Flag(readiness.IsDiagnosticStable);
+        values[GpuDiagnosticsMetadataKeys.Rev3PromotionReason] = readiness.Reason;
+    }
+
+    private static string Flag(bool value)
+        => value ? "true" : "false";
+
+    private static void AddExecutionLayerMetadata(
+        SortedDictionary<string, string> values,
+        bool usingCpuFallback)
+    {
+        values[GpuProviderMetadataKeys.AotCompilerHooks] = usingCpuFallback
+            ? "disabled"
+            : "planned-gpu-native-execution";
+        values[GpuProviderMetadataKeys.DeterministicFrameSampling] = "frame-token-index-sample-ticks";
+        values[GpuProviderMetadataKeys.GpuBypass] = usingCpuFallback
+            ? "cpu-fallback"
+            : "raw-texture-binding";
+        values[GpuProviderMetadataKeys.NativeJsBridge] = usingCpuFallback
+            ? "not-active"
+            : "rev3-envelope-bridge";
+        values[GpuProviderMetadataKeys.PassBridge] = usingCpuFallback
+            ? "deterministic-csharp"
+            : "optional-native-or-js";
+        values[GpuProviderMetadataKeys.RawCaptureSource] = usingCpuFallback
+            ? "cpu-framebuffer"
+            : "raw-framebuffer";
+        values[GpuProviderMetadataKeys.ZeroCopyBufferHandling] = usingCpuFallback
+            ? "cpu-readback-buffer"
+            : "raw-framebuffer-texture";
+    }
+
+    private static string CreatePassReadiness(bool usingCpuFallback)
+        => usingCpuFallback
+            ? "Passes.{Aisthesis,SpatialReasoning,HudComposite}:ShaderBound=false,PipelineCached=false,BuiltInExecutor=false,InjectedExecutor=false,ReadyForBuiltIn=false"
+            : "Passes.{Aisthesis,SpatialReasoning,HudComposite}:ShaderBound=false,PipelineCached=false,BuiltInExecutor=true,InjectedExecutor=false,ReadyForBuiltIn=false";
+
+    private static string ResolvePathRole(string passId)
+    {
+        return GpuRev3PathRoles.TryResolveFromPassId(passId, out var role)
+            ? role
+            : "unknown";
+    }
+}
+
+internal sealed class WebGpuRuntimeContext(
+    string contextId,
+    GpuBackend backend,
+    GpuProviderCapabilities capabilities,
+    bool usingCpuFallback) : IGpuContext, IGpuDiagnostics
+{
+    private long _frameIndex;
+
+    public string ContextId { get; } = contextId;
+
+    public GpuBackend Backend { get; } = backend;
+
+    public GpuProviderCapabilities Capabilities { get; } = capabilities;
+
+    public bool UsingCpuFallback { get; } = usingCpuFallback;
+
+    public AIKernel.Dtos.Gpu.GpuFrameDiagnostics Diagnostics { get; } =
+        CreateFrameDiagnostics(null, backend, usingCpuFallback);
+
+    public AIKernel.Dtos.Gpu.GpuFrameToken CreateFrameToken(
+        AIKernel.Dtos.Gpu.GpuFrameTarget rawTarget,
+        AIKernel.Dtos.Gpu.GpuFrameTarget? hudTarget = null)
+    {
+        ArgumentNullException.ThrowIfNull(rawTarget);
+        var frameIndex = Interlocked.Increment(ref _frameIndex);
+        return new AIKernel.Dtos.Gpu.GpuFrameToken
+        {
+            FrameId = $"{ContextId}:frame:{frameIndex}",
+            FrameIndex = frameIndex,
+            SampleTicks = frameIndex,
+            RawTarget = rawTarget,
+            HudTarget = hudTarget
+        };
+    }
+
+    public ValueTask DisposeAsync()
+        => ValueTask.CompletedTask;
+
+    public ValueTask<AIKernel.Dtos.Gpu.GpuFrameDiagnostics> CaptureFrameDiagnosticsAsync(
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(CreateFrameDiagnostics(frame, Backend, UsingCpuFallback));
+    }
+
+    private static AIKernel.Dtos.Gpu.GpuFrameDiagnostics CreateFrameDiagnostics(
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame,
+        GpuBackend backend,
+        bool usingCpuFallback)
+        => new()
+        {
+            GamePath = CreateDiagnostics("game", backend, usingCpuFallback, frame),
+            BonsaiPath = CreateDiagnostics("bonsai", backend, usingCpuFallback, frame),
+            HudPath = CreateDiagnostics("hud", backend, usingCpuFallback, frame),
+            SensorPath = CreateDiagnostics("sensor", backend, usingCpuFallback, frame)
+        };
+
+    private static AIKernel.Dtos.Gpu.GpuDiagnosticsPathInfo CreateDiagnostics(
+        string passId,
+        GpuBackend backend,
+        bool usingCpuFallback,
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame = null)
+        => new()
+        {
+            Backend = backend.ToString(),
+            ZeroCopy = !usingCpuFallback,
+            Readback = usingCpuFallback ? GpuReadbackPolicy.RequiredFallback : GpuReadbackPolicy.None,
+            FallbackReason = usingCpuFallback ? "cpu-fallback" : null,
+            FrameId = frame?.FrameId,
+            PassId = passId,
+            MemoryEstimate = EstimatePathMemory(frame, passId),
+            Metadata = WebGpuRev3DiagnosticsMetadata.Create(passId, usingCpuFallback, frame: frame)
+        };
+
+    private static long? EstimatePathMemory(
+        AIKernel.Dtos.Gpu.GpuFrameToken? frame,
+        string passId)
+    {
+        var target = string.Equals(passId, "hud", StringComparison.OrdinalIgnoreCase)
+            ? frame?.HudTarget ?? frame?.RawTarget
+            : frame?.RawTarget;
+        if (target is null || target.Width <= 0 || target.Height <= 0)
+        {
+            return null;
+        }
+
+        var bytesPerPixel = target.PixelFormat switch
+        {
+            FramePixelFormat.Indexed8 or FramePixelFormat.Luminance8 => 1,
+            FramePixelFormat.Rgb24 => 3,
+            FramePixelFormat.Rgba32 or FramePixelFormat.Bgra32 => 4,
+            _ => 4
+        };
+        return (long)target.Width * target.Height * bytesPerPixel;
+    }
 }
 
 internal sealed class WebGpuComputeProviderCapabilities : IProviderCapabilities
 {
-    private static readonly string[] Operations =
-    [
-        "compute.dispatch",
-        "compute.vector_add"
-    ];
+    private static readonly IReadOnlyList<string> Operations = AIKernel.Dtos.Gpu.GpuOperationNames.WebGpuComputeProviderOperations;
 
     private static readonly string[] DataTypes =
     [

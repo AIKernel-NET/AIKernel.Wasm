@@ -9,6 +9,7 @@ AIKernel.Wasm package 公開前にこの checklist を使用します。
 ```powershell
 dotnet build AIKernel.Wasm.slnx -c Release -p:WarningsAsErrors=1591
 dotnet test AIKernel.Wasm.slnx -c Release --no-build
+.\scripts\verify-webgpu-package.ps1
 ```
 
 成功条件:
@@ -17,6 +18,8 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 - runtime test がすべて通る
 - audio、display、input、concept-elevation boundary test がすべて通る
 - WebGPU provider test がすべて通る
+- WebGPU rev3 package smoke により browser bridge、WGSL shader、buffer layout、
+  provider manifest、vector-add sample が package に含まれている
 
 ## Package Metadata
 
@@ -31,10 +34,10 @@ NuGet package metadata の確認項目:
 - README inclusion
 - release notes
 
-v0.1.2.1 NuGet patch では、AIKernel.Wasm package artifact を `0.1.2.1`
+v0.1.3 NuGet patch では、AIKernel.Wasm package artifact を `0.1.3`
 として公開します。AIKernel.NET、AIKernel.Core、AIKernel.Providers への依存は
-`0.1.2` のまま維持します。Python wrapper は、別途 PyPI patch task が明示されない限り
-`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel で検証します。
+`0.1.3` のまま維持します。Python wrapper は、別途 PyPI patch task が明示されない限り
+`0.1.3.dev{buildNumber}` の `aikernel-wasm` wheel で検証します。
 
 ## Documentation
 

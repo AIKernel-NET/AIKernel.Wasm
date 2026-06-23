@@ -32,11 +32,12 @@ line stabilizes.
 - `AIKernel.Wasm.Input`
 - `AIKernel.Wasm.WebGpuComputeProvider`
 
-AIKernel.Wasm 0.1.2.1 is the NuGet patch line for the AIKernel.Wasm 0.1.2
+AIKernel.Wasm 0.1.3 is the canonical GPU integration line for the AIKernel.Wasm
 runtime family. It follows the same development policy as AIKernel.Core,
-AIKernel.Control, and AIKernel.Providers 0.1.2. The line publishes NuGet packages and synchronized Python wrappers, and uses
-`0.1.2.1-dev{build-number}` for local development packages, and does not create
-or publish a PyPI package.
+AIKernel.Control, and AIKernel.Providers 0.1.3. The line publishes NuGet
+packages and synchronized Python wrappers, uses `0.1.3-dev{build-number}` for
+local development packages, and keeps the Python wrapper as a synchronized
+metadata/discovery surface rather than a separate PyPI runtime implementation.
 
 ## Quick Start
 
@@ -45,11 +46,11 @@ paths work on Windows and Linux; real browser WebGPU validation remains a
 separate manual check.
 
 ```bash
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.3
+dotnet add package AIKernel.Wasm.Audio --version 0.1.3
+dotnet add package AIKernel.Wasm.Display --version 0.1.3
+dotnet add package AIKernel.Wasm.Input --version 0.1.3
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.3
 ```
 
 Use `AIKernel.Wasm.Runtime` for process, memory, stdin, file system, event,
@@ -59,7 +60,9 @@ browser audio boundary, frame surfaces, or virtual input boundary. Add
 `AIKernel.Wasm.WebGpuComputeProvider` only when the host needs the WebGPU compute
 boundary.
 
-Python materials in `python/` are synchronized wrapper materials for this update line. Use the synchronized PyPI wrapper for 0.1.2.
+Python materials in `python/` are synchronized wrapper materials for this
+update line. They expose package metadata, provider descriptors, and native
+verification hints for 0.1.3 without re-implementing browser/WASM execution.
 
 ## Documentation
 
@@ -137,6 +140,10 @@ The provider exposes:
 
 - `compute.dispatch`
 - `compute.vector_add`
+- `gpu.hud.composite`
+- `gpu.aisthesis.raw-frame`
+- `gpu.spatial-reasoning`
+- `gpu.zero-copy.raw-texture`
 
 Backend bindings are separated into:
 
@@ -152,6 +159,20 @@ When WebGPU is unavailable, the provider delegates CPU fallback execution to
 `AIKernel.Providers.Standard.Compute.CpuComputeProvider`. Kernel execution
 publishes `GpuKernelExecuted` when an `IEventBus` is supplied.
 
+The v0.1.3 WebGPU provider also packages the canonical rev3 browser bridge and
+GPU-resident assets:
+
+- `runtime/browser/webgpu-rev3-envelope-bridge.js`
+- `shaders/hud/hud-composite.rev3.wgsl`
+- `shaders/aisthesis/aisthesis.rev3.wgsl`
+- `shaders/spatial/spatial-reasoning.rev3.wgsl`
+- `buffers/layouts/gpu-layouts.rev3.json`
+
+Use `scripts/verify-webgpu-package.ps1` to pack
+`AIKernel.Wasm.WebGpuComputeProvider` and assert that the rev3 bridge, WGSL
+shaders, buffer layouts, provider manifest, and vector-add sample are included
+in the NuGet package.
+
 ## Python Wrapper
 
 `python/` contains synchronized `aikernel-wasm` Python wrapper materials. They document how the public WASM runtime providers and WebGPU compute provider may
@@ -165,8 +186,8 @@ be exposed through pythonnet as a thin managed wrapper:
 - `WebGpuComputeProvider`, `WebGpuComputeInvoker`, `WebGpuComputeCapability`
 
 The wrapper does not re-implement WASM runtime semantics in Python. In the
-0.1.2 development line these materials are not built, installed, or published
-as a PyPI package.
+0.1.3 development line these materials are synchronized with the NuGet package
+surface and keep browser execution at the WASM/WebGPU boundary.
 
 ## Control Integration
 

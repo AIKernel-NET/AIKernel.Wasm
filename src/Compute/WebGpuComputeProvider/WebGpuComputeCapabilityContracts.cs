@@ -1,4 +1,5 @@
 using AIKernel.Dtos.Capabilities;
+using AIKernel.Dtos.Gpu;
 using AIKernel.Enums;
 
 namespace AIKernel.Wasm.Compute;
@@ -23,12 +24,12 @@ public static class WebGpuComputeCapabilityContracts
             "WebGPU Compute Provider",
             CapabilityModuleKind.NativeLibrary,
             CapabilityInvocationMode.Direct,
-            GetMetadataValue(descriptor.Metadata, "version", "0.1.0"),
-            "webgpu_dispatch",
+            GetMetadataValue(descriptor.Metadata, GpuProviderMetadataKeys.Version, "0.1.0"),
+            GpuOperationNames.WebGpuDispatchEntryPoint,
             null,
             null,
-            ["compute.dispatch", "compute.vector_add"],
-            ["compute.execute", "buffer.read", "buffer.write"],
+            GpuOperationNames.WebGpuComputeProviderOperations,
+            GpuPermissionNames.WebGpuComputeRequiredPermissions,
             descriptor.Metadata);
     }
 

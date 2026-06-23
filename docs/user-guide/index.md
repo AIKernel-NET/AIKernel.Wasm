@@ -36,17 +36,17 @@ validation is a separate operator check.
 NuGet packages:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.3
+dotnet add package AIKernel.Wasm.Audio --version 0.1.3
+dotnet add package AIKernel.Wasm.Display --version 0.1.3
+dotnet add package AIKernel.Wasm.Input --version 0.1.3
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.3
 ```
 
-For local development packages, use `0.1.2.1-dev{build-number}` from the shared
+For local development packages, use `0.1.3-dev{build-number}` from the shared
 local NuGet source.
 
-Python validation uses `0.1.2.dev{buildNumber}` `aikernel-wasm` wheels until
+Python validation uses `0.1.3.dev{buildNumber}` `aikernel-wasm` wheels until
 stable publication is explicitly opened.
 
 ## Create a Runtime Context
@@ -272,7 +272,7 @@ Expected capability:
 ## Python Wrapper Materials
 
 The Python wrapper material is a managed-wrapper reference. It does not execute
-WASM or WebGPU logic in Python; the synchronized wrapper is packaged through the 0.1.2 release flow. The next official v0.1.2 canonical series is expected to
+WASM or WebGPU logic in Python; the synchronized wrapper is packaged through the 0.1.3 release flow. The next official v0.1.3 canonical series is expected to
 publish the refreshed PyPI package family together with NuGet.
 
 ## Common Failure Modes

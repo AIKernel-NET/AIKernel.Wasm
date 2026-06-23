@@ -9,6 +9,7 @@ Use this checklist before publishing AIKernel.Wasm packages.
 ```powershell
 dotnet build AIKernel.Wasm.slnx -c Release -p:WarningsAsErrors=1591
 dotnet test AIKernel.Wasm.slnx -c Release --no-build
+.\scripts\verify-webgpu-package.ps1
 ```
 
 Success criteria:
@@ -17,6 +18,8 @@ Success criteria:
 - all runtime tests pass
 - all audio, display, input, and concept-elevation boundary tests pass
 - all WebGPU provider tests pass
+- WebGPU rev3 package smoke confirms the browser bridge, WGSL shaders, buffer
+  layouts, provider manifest, and vector-add sample are present in the package
 
 ## Package Metadata
 
@@ -31,10 +34,10 @@ Check NuGet package metadata:
 - README inclusion
 - release notes
 
-For the v0.1.2.1 NuGet patch, publish AIKernel.Wasm package artifacts as
-`0.1.2.1` while keeping AIKernel.NET, AIKernel.Core, and AIKernel.Providers
-dependencies on `0.1.2`. Validate the `aikernel-wasm` wheel with
-`0.1.2.dev{buildNumber}` unless a separate PyPI patch task explicitly requests
+For the v0.1.3 NuGet patch, publish AIKernel.Wasm package artifacts as
+`0.1.3` while keeping AIKernel.NET, AIKernel.Core, and AIKernel.Providers
+dependencies on `0.1.3`. Validate the `aikernel-wasm` wheel with
+`0.1.3.dev{buildNumber}` unless a separate PyPI patch task explicitly requests
 a Python wrapper update.
 
 ## Documentation
