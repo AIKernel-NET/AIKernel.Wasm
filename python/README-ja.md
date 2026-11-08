@@ -42,3 +42,16 @@ managed assembly は `aikernel_wasm/native` に同梱するか、NuGet/local pac
 v0.1.3 package では generated managed API catalog を公開します。
 `managed_api_catalog()`、`managed_api_summary()`、`managed_type_names()`、
 `find_managed_type(full_name)` で確認できます。
+
+## 0.1.3 の公開前検証
+
+開発版では、NuGet の `0.1.3-dev3` フィード由来の AIKernel DLL 8個と、
+依存グラフに含まれる `Microsoft.Extensions.DependencyInjection.Abstractions` 10.0.8 を
+同梱します。`WasmRuntime.create()`、`WasmRuntimeContext.create()`、
+`WebGpuWasmBackend.create()` は .NET のコンストラクターの既定値を使います。
+既定のランタイムコンテキストのリニアメモリは 64 KiB です。
+
+開発版 wheel は作業用コピーから `0.1.3.dev3` としてビルドします。
+安定版 `0.1.3` のビルド前は、安定版の依存グラフから DLL を差し替え、
+wheel をインストールして再検証してください。[リリースノート](../RELEASE_NOTES-ja.md)
+も参照してください。

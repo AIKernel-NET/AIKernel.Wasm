@@ -2,9 +2,7 @@
 
 [English](RELEASE_NOTES.md)
 
-## 0.1.3
-
-**2026年6月23日 - Canonical GPU canonical boundary。**
+## 0.1.3（公開準備中）
 
 AIKernel.Wasm 0.1.3 は browser/WASM runtime family 向けの canonical GPU
 integration release line です。WebGPU Provider を canonical GPU HUD、GPU
@@ -18,8 +16,15 @@ metadata に合わせます。
 - canonical GPU layout metadata を `buffers/layouts/gpu-layouts.json` として含めます。
 - release 前の NuGet package asset surface を確認する
   `scripts/verify-webgpu-package.ps1` を追加します。
-- Python wrapper 資料を 0.1.3 NuGet package surface と native verification
-  metadata に同期します。
+- ローカルの `0.1.3-dev3` では Release テスト64件に合格し、Chrome の
+  NVIDIA アダプターで同梱 WebGPU の3パスを確認しました。
+- Python の `WasmRuntime.create()`、`WasmRuntimeContext.create()`、
+  `WebGpuWasmBackend.create()` は .NET のコンストラクターの既定値を使います。
+  開発版には `0.1.3-dev3` の AIKernel DLL と依存解決で選ばれた DI DLL（10.0.8）を同梱します。
+- ローカルの `0.1.3.dev3` wheel を新規仮想環境にインストールし、同梱 DLL 9個の
+  読み込みと Python テスト8件の合格を確認しました。
+- 安定版 `0.1.3` の公開前には、安定版の依存グラフから DLL を差し替え、
+  wheel をインストールして再検証します。
 
 ## 0.1.2.1
 
