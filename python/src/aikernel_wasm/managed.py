@@ -43,14 +43,28 @@ def managed_type(type_name: str, assembly_name: str):
 
 
 def create_managed(type_name: str, assembly_name: str):
-    """[EN] Create a managed object with its public default constructor.
+    """[EN] Create a managed object using its public parameterless or optional defaults.
 
-    [JA] public default constructor で managed object を作成します。
+    [JA] public コンストラクターの引数なし呼び出し、または省略可能な引数の既定値で作成します。
     """
-    load_wasm_runtime()
-    from System import Activator  # type: ignore[import-not-found]
+    resolved = managed_type(type_name, assembly_name)
+    from System import Activator, Type  # type: ignore[import-not-found]
 
-    return Activator.CreateInstance(managed_type(type_name, assembly_name))
+    default_constructors = []
+    for constructor in resolved.GetConstructors():
+        parameters = constructor.GetParameters()
+        if len(parameters) == 0:
+            return Activator.CreateInstance(resolved)
+        if all(parameter.IsOptional and parameter.HasDefaultValue for parameter in parameters):
+            default_constructors.append((constructor, len(parameters)))
+
+    if len(default_constructors) == 1:
+        constructor, parameter_count = default_constructors[0]
+        # Let .NET substitute the typed defaults instead of round-tripping them through Python.
+        return constructor.Invoke(_object_array((Type.Missing,) * parameter_count))
+
+    # Preserve the original failure for required arguments or ambiguous overloads.
+    return Activator.CreateInstance(resolved)
 
 
 def call_static(type_name: str, assembly_name: str, method_name: str, *args):
