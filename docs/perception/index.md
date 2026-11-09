@@ -2,7 +2,7 @@
 
 `AIKernel.Wasm.Perception`, `AIKernel.Wasm.Spatial`, `AIKernel.Wasm.Hud`, and `AIKernel.Wasm.Models` provide browser/WASM-owned execution surfaces for perception and model dispatch.
 
-These packages are implementation-side surfaces for the v0.1.2 canonical package line. They preserve thin contracts so future canonical updates can promote or consolidate auditory perception, spatial cognition, and resident model execution contracts in AIKernel.NET.
+These packages are implementation-side surfaces for the v0.1.3 canonical package line. They preserve thin contracts so future canonical updates can promote or consolidate auditory perception, spatial cognition, and resident model execution contracts in AIKernel.NET.
 
 ## Boundaries
 

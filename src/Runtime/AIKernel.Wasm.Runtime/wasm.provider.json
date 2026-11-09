@@ -1,7 +1,7 @@
 {
   "providerId": "wasm.runtime",
   "name": "AIKernel WASM Runtime",
-  "version": "0.1.2.1",
+  "version": "0.1.3",
   "assembly": "AIKernel.Wasm.Runtime.dll",
   "capabilities": [
     "wasm.runtime",
@@ -13,10 +13,13 @@
     "wasm.audio",
     "wasm.screenshot",
     "wasm.savestate",
-    "wasm.time"
+    "wasm.time",
+    "wasm.gpu-minimal-mode",
+    "wasm.cpu-fallback-detection"
   ],
   "metadata": {
     "scope": "browser-wasm",
-    "status": "runtime-service"
+    "status": "runtime-service",
+    "gpuMinimalMode": "supported"
   }
 }

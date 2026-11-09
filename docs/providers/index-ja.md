@@ -106,7 +106,7 @@ Provider は `compute.dispatch` と `compute.vector_add` を持つ `webgpu.compu
 
 ## Python Wrapper
 
-`aikernel-wasm` package は 0.1.2 Python wrapper family の一部です。Python 側で
+`aikernel-wasm` package は 0.1.3 Python wrapper family の一部です。Python 側で
 WASM、WebGPU、WebAudio、perception logic を再実装せずに、wrapper / descriptor を
-公開します。安定版 wheel は 0.1.2 公開タスク開始後に作成し、local validation では
-`0.1.2.dev<build-number>` を使います。
+公開します。安定版 wheel は 0.1.3 公開タスク開始後に作成し、local validation では
+`0.1.3.dev<build-number>` を使います。

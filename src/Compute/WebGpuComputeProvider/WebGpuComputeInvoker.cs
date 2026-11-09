@@ -1,6 +1,7 @@
 using AIKernel.Abstractions.Capabilities;
 using AIKernel.Common.Results;
 using AIKernel.Dtos.Capabilities;
+using AIKernel.Dtos.Gpu;
 
 namespace AIKernel.Wasm.Compute;
 
@@ -10,6 +11,8 @@ namespace AIKernel.Wasm.Compute;
 /// </summary>
 public class WebGpuComputeInvoker : ICapabilityModuleInvoker
 {
+    private static readonly WebGpuComputeSettings DefaultSettings = new();
+
     /// <summary>
     /// [EN] Invokes a WebGPU compute capability operation.
     /// [JA] WebGPU compute capability operation を実行します。
@@ -21,9 +24,15 @@ public class WebGpuComputeInvoker : ICapabilityModuleInvoker
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
 
-        var supported = request.Operation is "compute.dispatch" or "compute.vector_add";
+        var supported = GpuOperationNames.WebGpuComputeProviderOperations
+            .Contains(request.Operation, StringComparer.OrdinalIgnoreCase);
         var metadata = new SortedDictionary<string, string>(StringComparer.Ordinal);
         foreach (var item in request.Metadata.OrderBy(x => x.Key, StringComparer.Ordinal))
+        {
+            metadata[item.Key] = item.Value;
+        }
+
+        foreach (var item in DefaultSettings.ToMetadata())
         {
             metadata[item.Key] = item.Value;
         }

@@ -7,7 +7,7 @@
 
 ## Package Policy
 
-local validation では `0.1.2.dev{buildNumber}` wheel を使います。stable `0.1.2`
+local validation では `0.1.3.dev{buildNumber}` wheel を使います。stable `0.1.3`
 publication は共有の Trusted Publishing flow を使い、release task が明示的に
 publication を開始した場合だけ行います。
 

@@ -7,7 +7,7 @@ thin pythonnet wrapper.
 
 ## Package Policy
 
-Use `0.1.2.dev{buildNumber}` wheels for local validation. Stable `0.1.2`
+Use `0.1.3.dev{buildNumber}` wheels for local validation. Stable `0.1.3`
 publication uses the shared Trusted Publishing flow and starts only when the
 release task explicitly opens publication.
 

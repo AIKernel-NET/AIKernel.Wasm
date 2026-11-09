@@ -3215,7 +3215,7 @@ _CATALOG: tuple[ManagedTypeDescriptor, ...] = (
         members=(
             ManagedMemberDescriptor('method', 'ToContract', 'public static CapabilityModuleDescriptor ToContract('),
             ManagedMemberDescriptor('method', 'CapabilityModuleDescriptor', 'return new CapabilityModuleDescriptor('),
-            ManagedMemberDescriptor('method', 'GetMetadataValue', 'GetMetadataValue(descriptor.Metadata, "version", "0.1.0"),'),
+            ManagedMemberDescriptor('method', 'GetMetadataValue', 'GetMetadataValue(descriptor.Metadata, "version", "0.1.3"),'),
         ),
     ),
     ManagedTypeDescriptor(
@@ -3301,7 +3301,7 @@ _CATALOG: tuple[ManagedTypeDescriptor, ...] = (
         members=(
             ManagedMemberDescriptor('property', 'ProviderId', 'public string ProviderId { get; init; } = "webgpu.compute";'),
             ManagedMemberDescriptor('property', 'Name', 'public string Name { get; init; } = "WebGPU Compute Provider";'),
-            ManagedMemberDescriptor('property', 'Version', 'public string Version { get; init; } = "0.1.0";'),
+            ManagedMemberDescriptor('property', 'Version', 'public string Version { get; init; } = "0.1.3";'),
             ManagedMemberDescriptor('property', 'AdapterProfile', 'public string AdapterProfile { get; init; } = "webgpu-browser";'),
             ManagedMemberDescriptor('property', 'ForceCpuFallback', 'public bool ForceCpuFallback { get; init; }'),
             ManagedMemberDescriptor('property', 'BackendName', 'public string? BackendName { get; init; } = "browser-webgpu";'),

@@ -36,18 +36,18 @@ validation は別の operator check です。
 NuGet package:
 
 ```powershell
-dotnet add package AIKernel.Wasm.Runtime --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Audio --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Display --version 0.1.2.1
-dotnet add package AIKernel.Wasm.Input --version 0.1.2.1
-dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.2.1
+dotnet add package AIKernel.Wasm.Runtime --version 0.1.3
+dotnet add package AIKernel.Wasm.Audio --version 0.1.3
+dotnet add package AIKernel.Wasm.Display --version 0.1.3
+dotnet add package AIKernel.Wasm.Input --version 0.1.3
+dotnet add package AIKernel.Wasm.WebGpuComputeProvider --version 0.1.3
 ```
 
 local development package では、shared local NuGet source の
-`0.1.2.1-dev{build-number}` を使います。
+`0.1.3-dev{build-number}` を使います。
 
 Python validation では、stable publication が明示的に開始されるまで
-`0.1.2.dev{buildNumber}` の `aikernel-wasm` wheel を使います。
+`0.1.3.dev{buildNumber}` の `aikernel-wasm` wheel を使います。
 
 ## Create a Runtime Context
 
@@ -271,8 +271,8 @@ Console.WriteLine(string.Join(", ", descriptor.ProvidedOperations));
 ## Python Wrapper Materials
 
 Python wrapper material は managed wrapper の reference です。Python 側で WASM
-execution や WebGPU logic を再実装せず、0.1.2 development line では PyPI
-package として配布しません。次の公式 v0.1.2 正典シリーズでは、NuGet と合わせて
+execution や WebGPU logic を再実装せず、0.1.3 development line では PyPI
+package として配布しません。次の公式 v0.1.3 正典シリーズでは、NuGet と合わせて
 更新済み PyPI package family を公開する前提です。
 
 ## Common Failure Modes

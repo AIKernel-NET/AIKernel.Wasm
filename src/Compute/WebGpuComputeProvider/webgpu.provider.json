@@ -1,16 +1,36 @@
 {
   "providerId": "webgpu.compute",
   "name": "WebGPU Compute",
-  "version": "0.1.2.1",
+  "version": "0.1.3",
   "assembly": "WebGpuComputeProvider.dll",
   "capabilities": [
     "compute.dispatch",
-    "compute.vector_add"
+    "compute.vector_add",
+    "gpu.hud.composite",
+    "gpu.aisthesis.raw-frame",
+    "gpu.spatial-reasoning",
+    "gpu.zero-copy.raw-texture"
   ],
   "metadata": {
     "adapterProfile": "webgpu-browser",
     "backend": "browser-webgpu",
     "fallback": "cpu",
+    "canonical": "true",
+    "rawCaptureSource": "raw-framebuffer",
+    "passBridge": "optional-native-or-js",
+    "gpuBypass": "raw-texture-binding",
+    "nativeJsBridge": "canonical-envelope-bridge",
+    "aotCompilerHooks": "planned-gpu-native-execution",
+    "deterministicFrameSampling": "frame-token-index-sample-ticks",
+    "zeroCopyBufferHandling": "raw-framebuffer-texture",
+    "hudComposite": "gpu",
+    "aisMatrixOrder": "topos,route,threat,zoe",
+    "envelopeBridge": "runtime/browser/webgpu-envelope-bridge.js",
+    "envelopeSchema": "aikernel.gpu.dispatch",
+    "envelopeBridgeFactory": "createWebGpuEnvelopeBridge",
+    "envelopeBridgeExecutorFactory": "createWebGpuBrowserExecutor",
+    "envelopeBridgeGlobal": "AIKernelWebGpu",
+    "browserPassReadiness": "Passes.{Aisthesis,SpatialReasoning,HudComposite}:ShaderBound,PipelineCached,BuiltInExecutor,InjectedExecutor,ReadyForBuiltIn",
     "providerType": "AIKernel.Wasm.Comput.WebGpuComputeProvider",
     "invokerType": "AIKernel.Wasm.Comput.WebGpuComputeInvoker"
   },
