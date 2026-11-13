@@ -37,7 +37,7 @@ public abstract class WasmProviderBase : IProvider
     public string Name { get; }
 
     /// <summary>[EN] Provider version. [JA] Provider version です。</summary>
-    public string Version => "0.1.3";
+    public string Version => global::AIKernel.Wasm.WasmBuildVersion.Value;
 
     /// <summary>[EN] Gets provider capabilities. [JA] Provider capability を取得します。</summary>
     public IProviderCapabilities GetCapabilities() => _capabilities;

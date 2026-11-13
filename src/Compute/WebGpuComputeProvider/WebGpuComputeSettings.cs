@@ -17,7 +17,7 @@ public record WebGpuComputeSettings
     public string Name { get; init; } = "WebGPU Compute Provider";
 
     /// <summary>[EN] Provider contract version. [JA] Provider 契約 version です。</summary>
-    public string Version { get; init; } = "0.1.3";
+    public string Version { get; init; } = global::AIKernel.Wasm.WasmBuildVersion.Value;
 
     /// <summary>[EN] WebGPU adapter profile used for metadata. [JA] metadata に使用する WebGPU adapter profile です。</summary>
     public string AdapterProfile { get; init; } = "webgpu-browser";
