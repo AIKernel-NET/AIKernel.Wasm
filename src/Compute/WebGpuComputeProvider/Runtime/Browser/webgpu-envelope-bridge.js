@@ -339,6 +339,86 @@ export function createWebGpuBrowserExecutor(options = {}) {
         notifyFallback(lastFallbackReason);
     }
 
+    function rejectLimit(reason) {
+        onFallback(reason);
+        throw new RangeError(reason);
+    }
+
+    function supportedLimit(name) {
+        // Device limits can be lower than adapter limits. Never substitute defaults
+        // when the actual device's limits are unavailable.
+        const deviceLimit = device?.limits?.[name];
+        const adapterLimit = adapter ? adapter.limits?.[name] : deviceLimit;
+        if (!Number.isSafeInteger(deviceLimit) || deviceLimit <= 0 ||
+            !Number.isSafeInteger(adapterLimit) || adapterLimit <= 0) {
+            rejectLimit(`webgpu-limit-unavailable:${name}`);
+        }
+        return Math.min(deviceLimit, adapterLimit);
+    }
+
+    function sizeValue(value) {
+        if (!Number.isSafeInteger(value) || value < 0) {
+            rejectLimit("webgpu-invalid-size");
+        }
+        return value;
+    }
+
+    function floatByteSize(count) {
+        return Math.max(sizeValue(sizeValue(count) * Float32Array.BYTES_PER_ELEMENT), 4);
+    }
+
+    function checkBufferSize(size, usage) {
+        sizeValue(size);
+        const names = ["maxBufferSize"];
+        if (usage & GPU_BUFFER_USAGE.STORAGE) names.push("maxStorageBufferBindingSize");
+        if (usage & GPU_BUFFER_USAGE.UNIFORM) names.push("maxUniformBufferBindingSize");
+        for (const name of names) {
+            if (size > supportedLimit(name)) rejectLimit(`webgpu-limit-exceeded:${name}`);
+        }
+        return size;
+    }
+
+    function checkDispatch(x, y, z) {
+        const maximum = supportedLimit("maxComputeWorkgroupsPerDimension");
+        for (const count of [x, y, z]) {
+            if (!Number.isSafeInteger(count) || count < 0) rejectLimit("webgpu-invalid-dispatch");
+            if (count > maximum) rejectLimit("webgpu-limit-exceeded:maxComputeWorkgroupsPerDimension");
+        }
+    }
+
+    function frameDispatch(target) {
+        return [Math.max(1, Math.ceil(sizeValue(target.Width) / 8)),
+            Math.max(1, Math.ceil(sizeValue(target.Height) / 8)), 1];
+    }
+
+    function dispatchWorkgroups(pass, x, y, z) {
+        checkDispatch(x, y, z);
+        pass.dispatchWorkgroups(x, y, z);
+    }
+
+    function validatePassLimits(envelope) {
+        // Validate the whole plan before the first shader, allocation, or submission.
+        for (const buffer of envelope.Buffers ?? []) {
+            const declared = sizeValue(buffer.Stride ?? 0) * sizeValue(buffer.Count ?? 0);
+            const count = Math.max(sizeValue(declared), sizeValue(buffer.Values?.length ?? 0));
+            checkBufferSize(floatByteSize(count), GPU_BUFFER_USAGE.STORAGE);
+        }
+        if (envelope.PassKind === PASS_HUD_COMPOSITE) {
+            checkBufferSize(floatByteSize(16), GPU_BUFFER_USAGE.UNIFORM);
+            const hud = envelope.Targets.find(target => target.Role === "hud");
+            if (hud) checkDispatch(...frameDispatch(hud));
+        } else {
+            checkBufferSize(floatByteSize(VECTOR_STRIDE), GPU_BUFFER_USAGE.STORAGE);
+            checkBufferSize(floatByteSize(VECTOR_STRIDE), GPU_BUFFER_USAGE.COPY_DST | GPU_BUFFER_USAGE.MAP_READ);
+            if (envelope.PassKind === PASS_SPATIAL_REASONING) {
+                checkBufferSize(floatByteSize(4 * 81 + 16), GPU_BUFFER_USAGE.STORAGE);
+                checkDispatch(1, 1, 1);
+            } else {
+                checkDispatch(...frameDispatch(requireTarget(envelope, "raw", TARGET_RAW_FRAMEBUFFER)));
+            }
+        }
+    }
+
     function targetTexture(target) {
         if (!textureRegistry) {
             return null;
@@ -481,6 +561,7 @@ export function createWebGpuBrowserExecutor(options = {}) {
             return null;
         }
 
+        validatePassLimits(envelope);
         const raw = requireTarget(envelope, "raw", TARGET_RAW_FRAMEBUFFER);
         if ((readiness.requireRawZeroCopy ?? true) && !raw.ZeroCopy) {
             onFallback("raw-target-not-zero-copy");
@@ -532,11 +613,16 @@ export function createWebGpuBrowserExecutor(options = {}) {
             return null;
         }
 
+        usage = usage || GPU_BUFFER_USAGE.STORAGE | GPU_BUFFER_USAGE.COPY_DST | GPU_BUFFER_USAGE.COPY_SRC;
+        // Check length before materializing a typed array, including array-like inputs.
+        const count = values == null ? 0 : typeof values === "number" ? values : values.length;
+        checkBufferSize(floatByteSize(count), usage);
         const source = values instanceof Float32Array ? values : new Float32Array(values ?? []);
+        const size = checkBufferSize(Math.max(source.byteLength, 4), usage);
         const buffer = device.createBuffer({
             label,
-            size: Math.max(source.byteLength, 4),
-            usage: usage || GPU_BUFFER_USAGE.STORAGE | GPU_BUFFER_USAGE.COPY_DST | GPU_BUFFER_USAGE.COPY_SRC
+            size,
+            usage
         });
 
         if (source.byteLength > 0) {
@@ -579,10 +665,12 @@ export function createWebGpuBrowserExecutor(options = {}) {
             return null;
         }
 
+        usage = usage || GPU_BUFFER_USAGE.STORAGE | GPU_BUFFER_USAGE.COPY_SRC | GPU_BUFFER_USAGE.COPY_DST;
+        const size = checkBufferSize(floatByteSize(floatCount), usage);
         return device.createBuffer({
             label,
-            size: Math.max(floatCount * Float32Array.BYTES_PER_ELEMENT, 4),
-            usage: usage || GPU_BUFFER_USAGE.STORAGE | GPU_BUFFER_USAGE.COPY_SRC | GPU_BUFFER_USAGE.COPY_DST
+            size,
+            usage
         });
     }
 
@@ -604,14 +692,16 @@ export function createWebGpuBrowserExecutor(options = {}) {
     }
 
     async function readFloatBuffer(buffer, floatCount) {
-        if (!device || !buffer || floatCount <= 0) {
+        sizeValue(floatCount);
+        if (!device || !buffer || floatCount === 0) {
             return [];
         }
 
         const byteLength = floatCount * Float32Array.BYTES_PER_ELEMENT;
+        const size = checkBufferSize(floatByteSize(floatCount), GPU_BUFFER_USAGE.COPY_DST | GPU_BUFFER_USAGE.MAP_READ);
         const readback = device.createBuffer({
             label: "AIKernel canonical readback",
-            size: Math.max(byteLength, 4),
+            size,
             usage: GPU_BUFFER_USAGE.COPY_DST | GPU_BUFFER_USAGE.MAP_READ
         });
         const encoder = device.createCommandEncoder({ label: "AIKernel canonical readback encoder" });
@@ -705,10 +795,7 @@ export function createWebGpuBrowserExecutor(options = {}) {
         const pass = encoder.beginComputePass({ label: "AIKernel canonical aisthesis pass" });
         pass.setPipeline(pipeline);
         pass.setBindGroup(0, bindGroup);
-        pass.dispatchWorkgroups(
-            Math.max(1, Math.ceil(context.rawTarget.Width / 8)),
-            Math.max(1, Math.ceil(context.rawTarget.Height / 8)),
-            1);
+        dispatchWorkgroups(pass, ...frameDispatch(context.rawTarget));
         pass.end();
         queue.submit([encoder.finish()]);
 
@@ -759,7 +846,7 @@ export function createWebGpuBrowserExecutor(options = {}) {
         const pass = encoder.beginComputePass({ label: "AIKernel canonical spatial pass" });
         pass.setPipeline(pipeline);
         pass.setBindGroup(0, bindGroup);
-        pass.dispatchWorkgroups(1, 1, 1);
+        dispatchWorkgroups(pass, 1, 1, 1);
         pass.end();
         queue.submit([encoder.finish()]);
 
@@ -808,10 +895,7 @@ export function createWebGpuBrowserExecutor(options = {}) {
         const pass = encoder.beginComputePass({ label: "AIKernel canonical hud composite pass" });
         pass.setPipeline(pipeline);
         pass.setBindGroup(0, bindGroup);
-        pass.dispatchWorkgroups(
-            Math.max(1, Math.ceil(hudTarget.Width / 8)),
-            Math.max(1, Math.ceil(hudTarget.Height / 8)),
-            1);
+        dispatchWorkgroups(pass, ...frameDispatch(hudTarget));
         pass.end();
         queue.submit([encoder.finish()]);
 
@@ -1105,8 +1189,8 @@ function normalizeTarget(target) {
         TargetId: valueOf(target, "TargetId", "targetId") ?? "",
         Kind: numberOf(valueOf(target, "Kind", "kind")),
         Backend: numberOf(valueOf(target, "Backend", "backend")),
-        Width: numberOf(valueOf(target, "Width", "width")),
-        Height: numberOf(valueOf(target, "Height", "height")),
+        Width: sizeOf(valueOf(target, "Width", "width")),
+        Height: sizeOf(valueOf(target, "Height", "height")),
         PixelFormat: numberOf(valueOf(target, "PixelFormat", "pixelFormat")),
         ZeroCopy: !!valueOf(target, "ZeroCopy", "zeroCopy")
     };
@@ -1116,8 +1200,8 @@ function normalizeBuffer(buffer) {
     return {
         Name: valueOf(buffer, "Name", "name") ?? "",
         LayoutName: valueOf(buffer, "LayoutName", "layoutName") ?? "",
-        Stride: numberOf(valueOf(buffer, "Stride", "stride")),
-        Count: numberOf(valueOf(buffer, "Count", "count")),
+        Stride: sizeOf(valueOf(buffer, "Stride", "stride")),
+        Count: sizeOf(valueOf(buffer, "Count", "count")),
         Values: Array.from(valueOf(buffer, "Values", "values") ?? [])
     };
 }
@@ -1426,6 +1510,12 @@ function padVector(values, length) {
 function numberOf(value) {
     const number = Number(value);
     return Number.isFinite(number) ? number : 0;
+}
+
+function sizeOf(value) {
+    const number = Number(value ?? 0);
+    if (!Number.isSafeInteger(number) || number < 0) throw new RangeError("webgpu-invalid-size");
+    return number;
 }
 
 function valueOf(source, pascalName, camelName) {

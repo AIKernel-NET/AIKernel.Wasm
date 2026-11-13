@@ -261,6 +261,13 @@ function matrixBuffer(name, value) {
 
 function createFakeWebGpuDevice() {
   const device = {
+    // Real GPUDevice objects expose limits; retain the existing behavioral assertions.
+    limits: {
+      maxBufferSize: 268435456,
+      maxStorageBufferBindingSize: 134217728,
+      maxUniformBufferBindingSize: 65536,
+      maxComputeWorkgroupsPerDimension: 65535
+    },
     queue: {
       writeBuffer(buffer, offset, sourceBuffer, sourceOffset = 0, byteLength = sourceBuffer.byteLength) {
         const source = new Uint8Array(sourceBuffer, sourceOffset, byteLength);
