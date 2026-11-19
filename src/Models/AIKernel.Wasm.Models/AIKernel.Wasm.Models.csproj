@@ -9,7 +9,8 @@ JA: descriptor-driven な WebGPU resident model 境界を提供する AIKernel W
 
   <ItemGroup>
     <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
-    <PackageReference Include="AIKernel.Common" Version="[$(AIKernelCorePackageVersion)]" />
+    <ProjectReference Include="$(AIKernelCommonSourceProject)" Condition="'$(AIKernelCommonSourceProject)' != ''" />
+    <PackageReference Condition="'$(AIKernelCommonSourceProject)' == ''" Include="AIKernel.Common" Version="[$(AIKernelCorePackageVersion)]" />
     <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
     <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />

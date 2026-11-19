@@ -54,4 +54,9 @@
       <FileWrites Include="$(IntermediateOutputPath)WasmBuildVersion.g.cs" />
     </ItemGroup>
   </Target>
+  <!-- The dev checkout consumes the shared cancellation API from the matching Core source.
+       Versioned release feeds still resolve the requested Common package. -->
+  <PropertyGroup Condition="'$(AIKernelCommonSourceProject)' == '' and '$(AIKernelCorePackageVersion)' == '0.1.3'">
+    <AIKernelCommonSourceProject Condition="Exists('$(MSBuildThisFileDirectory)../AIKernel.Core/src/AIKernel.Common/AIKernel.Common.csproj')">$(MSBuildThisFileDirectory)../AIKernel.Core/src/AIKernel.Common/AIKernel.Common.csproj</AIKernelCommonSourceProject>
+  </PropertyGroup>
 </Project>
