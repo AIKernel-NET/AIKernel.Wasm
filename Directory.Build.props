@@ -45,4 +45,13 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" />
     <None Include="$(MSBuildThisFileDirectory)assets\aikernel-logo128x128.png" Pack="true" PackagePath="\" />
   </ItemGroup>
+  <Target Name="GenerateWasmBuildVersion" BeforeTargets="BeforeCompile">
+    <WriteLinesToFile File="$(IntermediateOutputPath)WasmBuildVersion.g.cs"
+                      Lines="namespace AIKernel.Wasm%3B internal static class WasmBuildVersion { internal const string Value = &quot;$(PackageVersion)&quot;%3B }"
+                      Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)WasmBuildVersion.g.cs" />
+      <FileWrites Include="$(IntermediateOutputPath)WasmBuildVersion.g.cs" />
+    </ItemGroup>
+  </Target>
 </Project>

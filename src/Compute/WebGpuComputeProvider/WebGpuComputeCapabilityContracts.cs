@@ -24,7 +24,7 @@ public static class WebGpuComputeCapabilityContracts
             "WebGPU Compute Provider",
             CapabilityModuleKind.NativeLibrary,
             CapabilityInvocationMode.Direct,
-            GetMetadataValue(descriptor.Metadata, GpuProviderMetadataKeys.Version, "0.1.3"),
+            GetMetadataValue(descriptor.Metadata, GpuProviderMetadataKeys.Version, global::AIKernel.Wasm.WasmBuildVersion.Value),
             GpuOperationNames.WebGpuDispatchEntryPoint,
             null,
             null,
