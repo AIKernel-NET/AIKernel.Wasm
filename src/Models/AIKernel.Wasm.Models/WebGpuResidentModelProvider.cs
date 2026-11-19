@@ -99,7 +99,7 @@ public sealed class WebGpuResidentModelProvider : WasmKernelProviderBase
                 Metadata = MergeMetadata(request)
             });
         }
-        catch (OperationCanceledException)
+        catch (Exception ex) when (CancellationExceptionClassifier.IsCancellation(ex))
         {
             throw;
         }
