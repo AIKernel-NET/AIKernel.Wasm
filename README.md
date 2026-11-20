@@ -235,8 +235,8 @@ dotnet test AIKernel.Wasm.slnx -c Release --no-build
 WASM runtime and WebGPU changes must follow the shared AIKernel development
 discipline:
 
-- [AIKernel Development Guidelines](../AIKernel.NET/docs/guidelines/AIKERNEL_DEVELOPMENT_GUIDELINES.md)
-- [AIKernel 開発ガイドライン](../AIKernel.NET/docs/guidelines/AIKERNEL_DEVELOPMENT_GUIDELINES-jp.md)
+- [AIKernel Development Guidelines](https://github.com/AIKernel-NET/AIKernel.NET/blob/dev/docs/guidelines/AIKERNEL_DEVELOPMENT_GUIDELINES.md)
+- [AIKernel 開発ガイドライン](https://github.com/AIKernel-NET/AIKernel.NET/blob/dev/docs/guidelines/AIKERNEL_DEVELOPMENT_GUIDELINES-jp.md)
 
 Runtime/provider code should preserve deterministic process state, use
 fail-closed Result/Try boundaries for host integration, keep browser-specific
