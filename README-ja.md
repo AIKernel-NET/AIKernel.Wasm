@@ -1,5 +1,7 @@
 # AIKernel.Wasm
 
+プロセスと線形メモリの管理には `AIKernel.Wasm.Runtime.Abstractions.IWasmProcessRuntime` を使います。バイトコードの実行要求を受ける `AIKernel.Abstractions.Runtime.IWasmRuntime` は、組み込む実行エンジンが実装する契約です。
+
 [English README](README.md)
 
 AIKernel.Wasm は、AIKernel の browser / WebAssembly runtime と WebGPU 境界を
@@ -14,12 +16,12 @@ AIKernel.Abstractions から参照します。AIKernel.Wasm は browser /
 WebAssembly 実装を提供し、WASM runtime の関心事を Core や
 AIKernel.Providers に逆流させません。
 
-AIOS SDK において、AIKernel.Wasm は sandboxed runtime layer です。browser /
-WebAssembly process、isolated memory、WASI-style service、WebGPU boundary を
-扱う軽量 VM surface として、WASM sandbox が必要な AIOS distribution に追加します。
+マネージドランタイムはプロセス状態、上限付きメモリ、ホスト関数を管理します。
+バイトコードを実行する場合は、ブラウザーなどの WebAssembly エンジンを組み込みます。
+信頼できないモジュールを受け入れるホストは、実行の隔離とインポートの許可範囲を設定してください。
 
 AIKernel には、公式 AIOS ディストリビューションである **AIKernel.Monolith** もあります。
-Monolith は 0.1.x 系の安定化後に、sandboxed runtime layer をより広い SDK と
+Monolith は 0.1.x 系の安定化後に、ランタイムモデル をより広い SDK と
 統合する標準 AIOS として開発が開始されています。
 
 ## Package
@@ -193,9 +195,9 @@ AIKernel.Wasm は `ProcessStarted`、`ProcessStopped`、`ProcessCrashed`、
 
 ## WASM Application Execution
 
-WASM application は AIKernel process として表現されます。host は
-`IProcessHost.CreateProcessAsync` から process を作成し、必要に応じて
-module byte と initial memory size を含む `WasmProcessOptions` を渡します。
+ホストは `IProcessHost.CreateProcessAsync` でプロセスを作成し、
+`WasmProcessOptions.ModuleBytes` に WebAssembly v1 のモジュールを渡します。
+`InitialMemoryBytes` の既定値は 65,536 バイトです。
 返された `IProcess` は start、stop、list、kill、restart、log observation、
 scheduler rule 連携を、他の Provider と同じ OS command model で扱えます。
 

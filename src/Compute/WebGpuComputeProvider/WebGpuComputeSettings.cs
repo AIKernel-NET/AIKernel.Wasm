@@ -10,6 +10,9 @@ namespace AIKernel.Wasm.Compute;
 /// </summary>
 public record WebGpuComputeSettings
 {
+    /// <summary>Maximum size of one managed and native buffer allocation, in bytes.</summary>
+    public int MaximumBufferBytes { get; init; } = 256 * 1024 * 1024;
+
     /// <summary>[EN] Provider id. [JA] Provider id です。</summary>
     public string ProviderId { get; init; } = "webgpu.compute";
 

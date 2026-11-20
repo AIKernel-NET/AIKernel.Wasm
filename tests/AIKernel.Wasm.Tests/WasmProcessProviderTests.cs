@@ -10,6 +10,21 @@ using AIKernel.Wasm.Runtime;
 /// </summary>
 public sealed class WasmProcessProviderTests
 {
+    [Fact]
+    public async Task InvalidModuleAndUnboundedStateAreRejectedBeforeMutation()
+    {
+        using var runtime = new WasmRuntime();
+        Assert.True((await runtime.TryCreateProcessAsync("empty")).IsFailure);
+        Assert.True(runtime.TryCreateContext(64 * 1024 * 1024 + 1).IsFailure);
+        using var ctx = runtime.CreateContext(8);
+        ctx.WriteByte(0, 17);
+        Assert.True(ctx.TryRestoreState(new byte[9]).IsFailure);
+        Assert.Equal(17, ctx.ReadByte(0));
+        ctx.Dispose();
+        Assert.True(ctx.TryRestoreState(new byte[8]).IsFailure);
+        Assert.Throws<ObjectDisposedException>(() => ctx.SetAudioBuffer(new byte[1]));
+    }
+
     /// <summary>
     /// [EN] Verifies start and stop state transitions publish OS events.
     /// [JA] start / stop の state transition が OS event を publish することを検証します。
@@ -31,7 +46,7 @@ public sealed class WasmProcessProviderTests
         });
 
         var provider = new WasmProcessProvider(eventBus);
-        var process = await provider.CreateProcessAsync("sample");
+        var process = await provider.CreateProcessAsync("sample", new WasmProcessOptions([0, 97, 115, 109, 1, 0, 0, 0]));
 
         Assert.Equal(ProcessState.Starting, process.State);
         await process.StartAsync();
@@ -58,7 +73,7 @@ public sealed class WasmProcessProviderTests
         });
 
         var provider = new WasmProcessProvider(eventBus);
-        var process = Assert.IsType<WasmProcess>(await provider.CreateProcessAsync("sample"));
+        var process = Assert.IsType<WasmProcess>(await provider.CreateProcessAsync("sample", new WasmProcessOptions([0, 97, 115, 109, 1, 0, 0, 0])));
 
         await process.CrashAsync("runtime trap");
 

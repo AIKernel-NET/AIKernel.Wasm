@@ -15,6 +15,12 @@ public sealed class WasmRuntimeContext : IDisposable
     private readonly Dictionary<string, object> _imports = new(StringComparer.Ordinal);
     private readonly Dictionary<string, byte[]> _files = new(StringComparer.Ordinal);
     private readonly List<string> _stdin = [];
+    private readonly object _resourceLock = new();
+    private const int MaximumMemoryBytes = 64 * 1024 * 1024;
+    private const int MaximumFiles = 4096;
+    private int _nextAllocation;
+    private int _fileBytes;
+    private int _stdinChars;
     private byte[] _memory;
     private byte[] _framebuffer = [];
     private byte[] _audioBuffer = [];
@@ -22,6 +28,8 @@ public sealed class WasmRuntimeContext : IDisposable
     private double _timeScale = 1.0;
     private bool _paused;
     private bool _disposed;
+    internal event Action<WasmRuntimeContext>? Released;
+    private int _pendingNotifications;
 
     /// <summary>
     /// [EN] Creates a runtime context with deterministic initial memory and optional EventBus.
@@ -168,20 +176,29 @@ public sealed class WasmRuntimeContext : IDisposable
                 Publish("FileAccessed", new Dictionary<string, string> { ["operation"] = "read", ["path"] = validPath });
                 return true;
             })
-            from content in _files.TryGetValue(validPath, out var bytes)
-                ? Result<byte[]>.Success(bytes.ToArray())
-                : Result<byte[]>.Fail($"WASM runtime file not found: {validPath}. ErrorCode=WASM_FILE_NOT_FOUND")
+            from content in ReadFileCopy(validPath)
             select content;
+
+    private Result<byte[]> ReadFileCopy(string path)
+    {
+        lock (_resourceLock)
+        {
+            return _files.TryGetValue(path, out var bytes)
+                ? Result<byte[]>.Success(bytes.ToArray())
+                : Result<byte[]>.Fail($"WASM runtime file not found: {path}. ErrorCode=WASM_FILE_NOT_FOUND");
+        }
+    }
 
     /// <summary>[EN] Safely restores linear-memory state. [JA] linear-memory state を安全に復元します。</summary>
     public Result<bool> TryRestoreState(ReadOnlyMemory<byte> state)
         =>
-            from validState in state.IsEmpty
-                ? Result<ReadOnlyMemory<byte>>.Fail("Save state bytes are required. ErrorCode=WASM_SAVE_STATE_REQUIRED")
+            from available in ValidateNotDisposed()
+            from validState in state.Length != _memory.Length
+                ? Result<ReadOnlyMemory<byte>>.Fail("Save state must match the configured memory size. ErrorCode=WASM_SAVE_STATE_REQUIRED")
                 : Result<ReadOnlyMemory<byte>>.Success(state)
             from restored in Try.Run(() =>
             {
-                _memory = validState.ToArray();
+                validState.Span.CopyTo(_memory);
                 return true;
             })
             select restored;
@@ -195,9 +212,9 @@ public sealed class WasmRuntimeContext : IDisposable
             select SetTimeScaleCore(validScale);
 
     private static Result<bool> ValidateInitialMemory(int initialMemoryBytes)
-        => initialMemoryBytes > 0
+        => initialMemoryBytes is > 0 and <= MaximumMemoryBytes
             ? Result<bool>.Success(true)
-            : Result<bool>.Fail("Initial memory size must be positive. ErrorCode=WASM_INITIAL_MEMORY_INVALID");
+            : Result<bool>.Fail("Initial memory must be between 1 byte and 64 MiB. ErrorCode=WASM_INITIAL_MEMORY_INVALID");
 
     private Result<bool> ValidateNotDisposed()
         => !_disposed
@@ -209,10 +226,12 @@ public sealed class WasmRuntimeContext : IDisposable
             ? Result<bool>.Fail("WASM runtime operation was cancelled. ErrorCode=WASM_OPERATION_CANCELLED")
             : Result<bool>.Success(true);
 
-    private static Result<ReadOnlyMemory<byte>> ValidateModuleBytes(ReadOnlyMemory<byte> moduleBytes)
+    internal static Result<ReadOnlyMemory<byte>> ValidateModuleBytes(ReadOnlyMemory<byte> moduleBytes)
         => moduleBytes.IsEmpty
             ? Result<ReadOnlyMemory<byte>>.Fail("WASM module bytes are required. ErrorCode=WASM_MODULE_BYTES_REQUIRED")
-            : Result<ReadOnlyMemory<byte>>.Success(moduleBytes);
+            : moduleBytes.Span.StartsWith((ReadOnlySpan<byte>)[0, 97, 115, 109, 1, 0, 0, 0])
+                ? Result<ReadOnlyMemory<byte>>.Success(moduleBytes)
+                : Result<ReadOnlyMemory<byte>>.Fail("Expected a WebAssembly version 1 header. ErrorCode=WASM_MODULE_HEADER_INVALID");
 
     private Result<bool> ValidateModuleLoaded()
         => IsModuleLoaded
@@ -293,7 +312,10 @@ public sealed class WasmRuntimeContext : IDisposable
 
     /// <summary>[EN] Writes linear memory with range checks. [JA] 範囲 check 付きで linear memory に書き込みます。</summary>
     public void WriteMemory(int offset, ReadOnlySpan<byte> data)
-        => RequireSuccess(TryWriteMemory(offset, data.ToArray()));
+    {
+        ValidateRange(offset, data.Length);
+        RequireSuccess(TryWriteMemory(offset, data.ToArray()));
+    }
 
     /// <summary>[EN] Writes a single byte to linear memory. [JA] linear memory に 1 byte を書き込みます。</summary>
     public void WriteByte(int offset, byte value)
@@ -306,8 +328,15 @@ public sealed class WasmRuntimeContext : IDisposable
     /// <summary>[EN] Sends a stdin line into the runtime. [JA] runtime に stdin line を送信します。</summary>
     public void SendStdin(string line)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        _stdin.Add(line ?? string.Empty);
+        line ??= string.Empty;
+        lock (_resourceLock)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (_stdin.Count >= 4096 || line.Length > 1024 * 1024 - _stdinChars)
+                throw new InvalidOperationException("WASM stdin limit exceeded.");
+            _stdinChars += line.Length;
+            _stdin.Add(line);
+        }
         if (_exports.TryGetValue("stdin", out var stdin))
         {
             stdin([line ?? string.Empty]);
@@ -318,14 +347,24 @@ public sealed class WasmRuntimeContext : IDisposable
 
     /// <summary>[EN] Returns stdin lines sent to the runtime. [JA] runtime へ送信された stdin line を返します。</summary>
     public IReadOnlyList<string> StdinLines()
-        => _stdin.ToArray();
+    {
+        lock (_resourceLock) return _stdin.ToArray();
+    }
 
     /// <summary>[EN] Writes a runtime file. [JA] runtime file を書き込みます。</summary>
     public void WriteFile(string path, ReadOnlyMemory<byte> content)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        _files[path] = content.ToArray();
+        lock (_resourceLock)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
+            var exists = _files.TryGetValue(path, out var previous);
+            var retained = _fileBytes - (previous?.Length ?? 0);
+            if (path.Length > 4096 || (!exists && _files.Count >= MaximumFiles) || content.Length > MaximumMemoryBytes - retained)
+                throw new InvalidOperationException("WASM file storage limit exceeded.");
+            _files[path] = content.ToArray();
+            _fileBytes = retained + content.Length;
+        }
         Publish("FileAccessed", new Dictionary<string, string> { ["operation"] = "write", ["path"] = path });
     }
 
@@ -335,7 +374,9 @@ public sealed class WasmRuntimeContext : IDisposable
 
     /// <summary>[EN] Lists runtime file paths. [JA] runtime file path を列挙します。</summary>
     public IReadOnlyList<string> ListFiles()
-        => _files.Keys.Order(StringComparer.Ordinal).ToArray();
+    {
+        lock (_resourceLock) return _files.Keys.Order(StringComparer.Ordinal).ToArray();
+    }
 
     /// <summary>[EN] Publishes a runtime event through EventBus. [JA] EventBus 経由で runtime event を publish します。</summary>
     public void PublishEvent(string eventName, object payload)
@@ -343,7 +384,9 @@ public sealed class WasmRuntimeContext : IDisposable
 
     /// <summary>[EN] Sets the latest audio buffer. [JA] 最新 audio buffer を設定します。</summary>
     public void SetAudioBuffer(ReadOnlyMemory<byte> audio)
-        => _audioBuffer = audio.ToArray();
+    {
+        lock (_resourceLock) _audioBuffer = CopyBuffer(audio);
+    }
 
     /// <summary>[EN] Gets the latest audio buffer. [JA] 最新 audio buffer を取得します。</summary>
     public byte[] GetAudioBuffer()
@@ -351,7 +394,30 @@ public sealed class WasmRuntimeContext : IDisposable
 
     /// <summary>[EN] Sets the latest framebuffer. [JA] 最新 framebuffer を設定します。</summary>
     public void SetFramebuffer(ReadOnlyMemory<byte> framebuffer)
-        => _framebuffer = framebuffer.ToArray();
+    {
+        lock (_resourceLock) _framebuffer = CopyBuffer(framebuffer);
+    }
+
+    internal int Allocate(int length)
+    {
+        lock (_resourceLock)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (length <= 0 || length > _memory.Length - _nextAllocation)
+                throw new ArgumentOutOfRangeException(nameof(length));
+            var offset = _nextAllocation;
+            _nextAllocation += length;
+            return offset;
+        }
+    }
+
+    private byte[] CopyBuffer(ReadOnlyMemory<byte> data)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (data.Length > MaximumMemoryBytes)
+            throw new ArgumentOutOfRangeException(nameof(data));
+        return data.ToArray();
+    }
 
     /// <summary>[EN] Gets the latest framebuffer. [JA] 最新 framebuffer を取得します。</summary>
     public byte[] GetFramebuffer()
@@ -387,13 +453,22 @@ public sealed class WasmRuntimeContext : IDisposable
     /// <summary>[EN] Disposes runtime state. [JA] runtime state を dispose します。</summary>
     public void Dispose()
     {
-        _disposed = true;
-        IsRunning = false;
-        _exports.Clear();
-        _imports.Clear();
-        _files.Clear();
-        _stdin.Clear();
-        _memory = [];
+        lock (_resourceLock)
+        {
+            if (_disposed) return;
+            _disposed = true;
+            IsRunning = false;
+            _exports.Clear();
+            _imports.Clear();
+            _files.Clear();
+            _stdin.Clear();
+            _memory = [];
+            _audioBuffer = [];
+            _framebuffer = [];
+            IsModuleLoaded = false;
+        }
+        Released?.Invoke(this);
+        Released = null;
     }
 
     private void ValidateRange(int offset, int length)
@@ -410,7 +485,23 @@ public sealed class WasmRuntimeContext : IDisposable
             select validRange;
 
     private void Publish(string eventName, object payload)
-        => _eventBus?.PublishAsync(eventName, payload).GetAwaiter().GetResult();
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_eventBus is null) return;
+        if (Interlocked.Increment(ref _pendingNotifications) > 64)
+        {
+            Interlocked.Decrement(ref _pendingNotifications);
+            return;
+        }
+        _ = NotifyAsync(eventName, payload);
+    }
+
+    private async Task NotifyAsync(string eventName, object payload)
+    {
+        try { await _eventBus!.PublishAsync(eventName, payload).ConfigureAwait(false); }
+        catch (Exception ex) { System.Diagnostics.Trace.TraceWarning("WASM event {0}: {1}", eventName, ex.GetType().Name); }
+        finally { Interlocked.Decrement(ref _pendingNotifications); }
+    }
 }
 
 /// <summary>

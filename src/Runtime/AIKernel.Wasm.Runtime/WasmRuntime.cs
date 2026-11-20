@@ -9,10 +9,11 @@ using AIKernel.Wasm.Runtime.Abstractions;
 /// [EN] AIKernel browser/WebAssembly runtime boundary.
 /// [JA] AIKernel browser / WebAssembly runtime 境界です。
 /// </summary>
-public sealed class WasmRuntime : WasmProviderBase, IWasmRuntime, IDisposable
+public sealed class WasmRuntime : WasmProviderBase, IWasmProcessRuntime, IDisposable
 {
     private readonly IEventBus? _eventBus;
-    private readonly List<WasmRuntimeContext> _contexts = [];
+    private readonly HashSet<WasmRuntimeContext> _contexts = [];
+    private bool _disposed;
 
     /// <summary>[EN] Initializes the WASM runtime. [JA] WASM runtime を初期化します。</summary>
     public WasmRuntime(IEventBus? eventBus = null)
@@ -44,9 +45,14 @@ public sealed class WasmRuntime : WasmProviderBase, IWasmRuntime, IDisposable
     {
         return Try.Run(() =>
         {
-            var context = new WasmRuntimeContext(initialMemoryBytes, _eventBus);
-            _contexts.Add(context);
-            return context;
+            lock (_contexts)
+            {
+                ObjectDisposedException.ThrowIf(_disposed, this);
+                var context = new WasmRuntimeContext(initialMemoryBytes, _eventBus);
+                context.Released += Release;
+                _contexts.Add(context);
+                return context;
+            }
         });
     }
 
@@ -59,11 +65,10 @@ public sealed class WasmRuntime : WasmProviderBase, IWasmRuntime, IDisposable
     public Task<Result<IProcess>> TryCreateProcessAsync(string name, object? args = null)
     {
         var options = args as WasmProcessOptions ?? new WasmProcessOptions();
-        var moduleBytes = options.ModuleBytes is { Length: > 0 }
-            ? options.ModuleBytes
-            : new byte[] { 0x00 };
+        var moduleBytes = options.ModuleBytes ?? [];
 
         return
+            from header in WasmRuntimeContext.ValidateModuleBytes(moduleBytes).AsTask()
             from context in TryCreateContext(options.InitialMemoryBytes).AsTask()
             from loaded in context.TryLoadModuleAsync(moduleBytes)
             select (IProcess)new WasmProcess(name, context, _eventBus);
@@ -72,12 +77,19 @@ public sealed class WasmRuntime : WasmProviderBase, IWasmRuntime, IDisposable
     /// <summary>[EN] Disposes all runtime contexts. [JA] すべての runtime context を dispose します。</summary>
     public void Dispose()
     {
-        foreach (var context in _contexts)
+        WasmRuntimeContext[] contexts;
+        lock (_contexts)
         {
-            context.Dispose();
+            _disposed = true;
+            contexts = _contexts.ToArray();
+            _contexts.Clear();
         }
+        foreach (var context in contexts) context.Dispose();
+    }
 
-        _contexts.Clear();
+    private void Release(WasmRuntimeContext context)
+    {
+        lock (_contexts) _contexts.Remove(context);
     }
 
     private static T RequireSuccess<T>(Result<T> result)

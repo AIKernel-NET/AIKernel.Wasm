@@ -78,7 +78,9 @@ public sealed class WebGpuComputeProviderContractTests
         Assert.Equal("providers.webgpu", provider.ToCapabilityDescriptor().CapabilityId);
 
         await provider.ShutdownAsync();
-        Assert.True(provider.IsAvailable());
+        Assert.False(provider.IsAvailable());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => provider.InitializeAsync());
+        await provider.ShutdownAsync();
     }
 
     [Fact]
@@ -204,6 +206,10 @@ public sealed class WebGpuComputeProviderContractTests
 
         await using var context = await provider.CreateContextAsync(new(), TestContext.Current.CancellationToken);
         var validation = GpuCanonicalValidation.ValidateFrameDiagnostics(context.Diagnostics);
+        await using var cpu = await provider.CreateContextAsync(new() { ForceCpuFallback = true }, TestContext.Current.CancellationToken);
+        Assert.True(cpu.UsingCpuFallback);
+        Assert.False(provider.UsingCpuFallback);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => provider.CreateBufferAsync(int.MaxValue));
 
         Assert.False(context.UsingCpuFallback);
         Assert.Equal(GpuBackend.WebGpu, context.Backend);

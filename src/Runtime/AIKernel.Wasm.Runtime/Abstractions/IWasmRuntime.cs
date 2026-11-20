@@ -55,3 +55,11 @@ public interface IWasmRuntime : IProcessHost
     /// </returns>
     Task<Result<IProcess>> TryCreateProcessAsync(string name, object? args = null);
 }
+
+/// <summary>
+/// Controls managed process and memory contexts for host-registered callbacks.
+/// Use AIKernel.Abstractions.Runtime.IWasmRuntime for engine-supplied bytecode invocations.
+/// </summary>
+public interface IWasmProcessRuntime : IWasmRuntime
+{
+}

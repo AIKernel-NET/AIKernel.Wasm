@@ -51,6 +51,7 @@ public sealed class WasmProcess : IProcess
     public Task CrashAsync(string reason)
     {
         State = ProcessState.Error;
+        _context.Dispose();
         return PublishAsync("ProcessCrashed", reason);
     }
 
@@ -80,22 +81,18 @@ public sealed class WasmProcess : IProcess
     public WasmRuntimeContext Context => _context;
 
     private Task<Result<bool>> EnsureModuleLoadedAsync()
-        => ModuleLoadDecision(_context.IsModuleLoaded)
-            .Match(
-                _ => _context.TryLoadModuleAsync(new byte[] { 0x00 }),
-                loaded => Result<bool>.Success(loaded).AsTask());
+        => _context.IsModuleLoaded
+            ? Result<bool>.Success(true).AsTask()
+            : Result<bool>.Fail("A module must be loaded before starting. ErrorCode=WASM_MODULE_NOT_LOADED").AsTask();
 
     private static string NormalizeProcessName(string name)
         => MonadicDecision.TextOrDefault(name, "wasm-process");
 
-    private static Either<string, bool> ModuleLoadDecision(bool isModuleLoaded)
-        => isModuleLoaded
-            ? Either<string, bool>.FromRight(true)
-            : Either<string, bool>.FromLeft("load-default-module");
 
     private bool SetState(ProcessState state)
     {
         State = state;
+        if (state == ProcessState.Stopped) _context.Dispose();
         return true;
     }
 
@@ -131,9 +128,10 @@ public sealed class WasmProcess : IProcess
 /// <summary>[EN] Provides WASM process lifecycle services. [JA] WASM process lifecycle service を提供します。</summary>
 public sealed class WasmProcessProvider(IEventBus? eventBus = null)
     : WasmProviderBase("wasm.process", "WASM Process Provider", ["wasm.process.start", "wasm.process.stop"], ["process"]),
-      IWasmProcessProvider
+      IWasmProcessProvider, IDisposable
 {
-    private readonly List<WasmProcess> _processes = [];
+    private readonly Dictionary<string, WasmProcess> _processes = new(StringComparer.Ordinal);
+    private bool _disposed;
 
     /// <summary>[EN] Creates a WASM process handle. [JA] WASM process handle を作成します。</summary>
     public async Task<IProcess> CreateProcessAsync(string name, object? args = null)
@@ -143,14 +141,14 @@ public sealed class WasmProcessProvider(IEventBus? eventBus = null)
     public Task<Result<IProcess>> TryCreateProcessAsync(string name, object? args = null)
     {
         var options = args as WasmProcessOptions ?? new WasmProcessOptions();
-        var moduleBytes = options.ModuleBytes is { Length: > 0 }
-            ? options.ModuleBytes
-            : new byte[] { 0x00 };
+        var moduleBytes = options.ModuleBytes ?? [];
 
         return
+            from header in WasmRuntimeContext.ValidateModuleBytes(moduleBytes).AsTask()
             from context in Try.Run(() => new WasmRuntimeContext(options.InitialMemoryBytes, eventBus)).AsTask()
             from loaded in context.TryLoadModuleAsync(moduleBytes)
-            select AddProcess(name, context);
+            from process in Try.Run(() => AddProcess(name, context)).AsTask()
+            select process;
     }
 
     /// <summary>[EN] Starts a WASM process. [JA] WASM process を開始します。</summary>
@@ -169,19 +167,41 @@ public sealed class WasmProcessProvider(IEventBus? eventBus = null)
 
     /// <summary>[EN] Returns currently created WASM process handles. [JA] 現在作成済みの WASM process handle を返します。</summary>
     public IReadOnlyList<WasmProcess> ListProcesses()
-        => _processes.ToArray();
+    {
+        lock (_processes) return _processes.Values.ToArray();
+    }
 
     private IProcess AddProcess(string name, WasmRuntimeContext context)
     {
         var process = new WasmProcess(name, context, eventBus);
-        _processes.Add(process);
-        return process;
+        lock (_processes)
+        {
+            if (_disposed || !_processes.TryAdd(process.Name, process))
+            {
+                context.Dispose();
+                throw new InvalidOperationException("Process provider closed or process name already registered.");
+            }
+            context.Released += _ => { lock (_processes) _processes.Remove(process.Name); };
+            return process;
+        }
     }
 
     private Option<WasmProcess> FindProcess(string processName)
     {
-        var process = _processes.FirstOrDefault(item => string.Equals(item.Name, processName, StringComparison.Ordinal));
-        return MonadicDecision.Optional(process);
+        lock (_processes) return MonadicDecision.Optional(_processes.GetValueOrDefault(processName));
+    }
+
+    /// <summary>Releases the process contexts owned by this provider.</summary>
+    public void Dispose()
+    {
+        WasmProcess[] processes;
+        lock (_processes)
+        {
+            _disposed = true;
+            processes = _processes.Values.ToArray();
+            _processes.Clear();
+        }
+        foreach (var process in processes) process.Context.Dispose();
     }
 
     private static Result<WasmProcess> ProcessOptionToResult(Option<WasmProcess> process, string processName)
@@ -210,7 +230,7 @@ public sealed class WasmProcessProvider(IEventBus? eventBus = null)
 
 /// <summary>[EN] Provides checked WASM linear-memory services. [JA] 範囲 check 付き WASM linear memory service を提供します。</summary>
 public sealed class WasmMemoryProvider(WasmRuntimeContext? context = null)
-    : WasmProviderBase("wasm.memory", "WASM Memory Provider", ["wasm.memory.allocate", "wasm.memory.free"], ["memory"])
+    : WasmProviderBase("wasm.memory", "WASM Memory Provider", ["wasm.memory.allocate"], ["memory"])
 {
     /// <summary>[EN] Allocates WASM memory. [JA] WASM memory を確保します。</summary>
     private readonly WasmRuntimeContext _context = context ?? new WasmRuntimeContext();
@@ -219,12 +239,7 @@ public sealed class WasmMemoryProvider(WasmRuntimeContext? context = null)
     public ValueTask<int> AllocateAsync(int byteCount, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (byteCount < 0 || byteCount > _context.MemorySize)
-        {
-            throw new ArgumentOutOfRangeException(nameof(byteCount));
-        }
-
-        return ValueTask.FromResult(0);
+        return ValueTask.FromResult(_context.Allocate(byteCount));
     }
 
     /// <summary>[EN] Reads linear memory. [JA] linear memory を読み取ります。</summary>
@@ -258,7 +273,7 @@ public sealed class WasmStdinProvider(WasmRuntimeContext? context = null)
 
 /// <summary>[EN] Provides deterministic WASI-style file system services. [JA] deterministic な WASI style file system service を提供します。</summary>
 public sealed class WasmFileSystemProvider(WasmRuntimeContext? context = null)
-    : WasmProviderBase("wasm.filesystem", "WASM File System Provider", ["wasm.fs.mount", "wasm.fs.read", "wasm.fs.write"], ["file", "directory"])
+    : WasmProviderBase("wasm.filesystem", "WASM File System Provider", ["wasm.fs.read", "wasm.fs.write"], ["file", "directory"])
 {
     /// <summary>[EN] Mounts a WASM file system root. [JA] WASM file system root を mount します。</summary>
     private readonly WasmRuntimeContext _context = context ?? new WasmRuntimeContext();
@@ -268,7 +283,7 @@ public sealed class WasmFileSystemProvider(WasmRuntimeContext? context = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentException.ThrowIfNullOrWhiteSpace(mountPoint);
-        return Task.CompletedTask;
+        throw new NotSupportedException("Mounting external file systems is not supported by the in-memory runtime.");
     }
 
     /// <summary>[EN] Writes a WASI-style file. [JA] WASI style file を書き込みます。</summary>

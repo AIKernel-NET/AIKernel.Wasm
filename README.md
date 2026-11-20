@@ -14,14 +14,13 @@ Core abstractions such as `IProcess`, `IProcessHost`, `IComputeProvider`, and
 browser/WebAssembly implementations without leaking WASM runtime concerns back
 into Core or AIKernel.Providers.
 
-In the AIOS SDK, AIKernel.Wasm is the sandboxed runtime layer: a lightweight VM
-surface for browser/WebAssembly processes, isolated memory, WASI-style services,
-and WebGPU boundaries. Users add it only when their AIOS distribution needs a
-WASM sandbox.
+Use `AIKernel.Wasm.Runtime.Abstractions.IWasmProcessRuntime` to manage process state, bounded memory, and host callbacks. An embedding engine implements `AIKernel.Abstractions.Runtime.IWasmRuntime` for invocation requests.
+For bytecode execution, configure a browser or another WebAssembly engine.
+The embedding host must enforce isolation and restrict imports before loading untrusted modules.
 
 AIKernel also provides an official AIOS distribution, codenamed
 **AIKernel.Monolith**. Monolith has begun development as the standard AIOS that
-will integrate the sandboxed runtime layer with the broader SDK after the 0.1.x
+will integrate the runtime model with the broader SDK after the 0.1.x
 line stabilizes.
 
 ## Package
@@ -201,8 +200,8 @@ provider-specific implementation details.
 ## Running WASM Applications
 
 WASM applications are represented as AIKernel processes. A host creates a
-process through `IProcessHost.CreateProcessAsync`, optionally passing
-`WasmProcessOptions` with module bytes and initial memory size. The resulting
+process through `IProcessHost.CreateProcessAsync` and supplies a WebAssembly v1 module in
+`WasmProcessOptions.ModuleBytes`. `InitialMemoryBytes` is optional and defaults to 65,536 bytes. The resulting
 `IProcess` can be started, stopped, listed, killed, restarted, observed through
 logs, and connected to scheduler rules through the same OS command model used
 by other providers.

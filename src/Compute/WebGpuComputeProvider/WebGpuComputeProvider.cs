@@ -30,6 +30,7 @@ public class WebGpuComputeProvider(
     private readonly IEventBus? _eventBus = eventBus;
     private readonly SemaphoreSlim _initializeLock = new(1, 1);
     private readonly WebGpuComputeSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+    private volatile bool _shutdown;
     private volatile bool _initialized;
     private volatile bool _usingCpuFallback = true;
 
@@ -90,7 +91,7 @@ public class WebGpuComputeProvider(
     /// [EN] Returns compute availability for the public compute contract.
     /// [JA] public compute contract 用の compute availability を返します。
     /// </summary>
-    public bool IsAvailable() => true;
+    public bool IsAvailable() => !_shutdown;
 
     /// <summary>
     /// [EN] Lazily initializes WebGPU adapter, device, and queue when a backend is available.
@@ -107,6 +108,16 @@ public class WebGpuComputeProvider(
     /// </summary>
     public async Task ShutdownAsync()
     {
+        await _initializeLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            if (_shutdown) return;
+            _shutdown = true;
+        }
+        finally
+        {
+            _initializeLock.Release();
+        }
         if (_backend is IAsyncDisposable asyncDisposable)
         {
             await asyncDisposable.DisposeAsync().ConfigureAwait(false);
@@ -126,7 +137,7 @@ public class WebGpuComputeProvider(
     /// </summary>
     public Task<ProviderHealthStatus> GetHealthAsync()
         => Task.FromResult(new ProviderHealthStatus(
-            true,
+            !_shutdown,
             MonadicDecision.SelectText(
                 !_usingCpuFallback,
                 "Provider available with CPU fallback.",
@@ -140,13 +151,20 @@ public class WebGpuComputeProvider(
     /// </summary>
     public async Task<ComputeBuffer> CreateBufferAsync(int size)
     {
+        if (size < 0 || size > _settings.MaximumBufferBytes || size > Array.MaxLength) throw new ArgumentOutOfRangeException(nameof(size));
         await EnsureInitializedAsync(CancellationToken.None).ConfigureAwait(false);
         var native = await BackendSelection(_usingCpuFallback)
             .Match(
                 _ => Task.FromResult<object?>(null),
                 async backend => await backend.CreateBufferAsync(size).ConfigureAwait(false))
             .ConfigureAwait(false);
-        return new ComputeBuffer(size, native);
+        try { return new ComputeBuffer(size, native); }
+        catch
+        {
+            if (native is IAsyncDisposable asyncNative) await asyncNative.DisposeAsync().ConfigureAwait(false);
+            else if (native is IDisposable disposable) disposable.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -238,21 +256,16 @@ public class WebGpuComputeProvider(
         GpuProviderOptions options,
         CancellationToken cancellationToken = default)
     {
-        if (options.ForceCpuFallback)
-        {
-            _usingCpuFallback = true;
-            _initialized = true;
-        }
-        else
-        {
+        ObjectDisposedException.ThrowIf(_shutdown, this);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!options.ForceCpuFallback)
             await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
-        }
 
         return new WebGpuRuntimeContext(
             $"{ProviderId}:{Guid.NewGuid():N}",
-            Backend,
+            options.ForceCpuFallback ? GpuBackend.CpuFallback : Backend,
             Capabilities,
-            _usingCpuFallback);
+            options.ForceCpuFallback || _usingCpuFallback);
     }
 
     /// <summary>
@@ -412,6 +425,8 @@ public class WebGpuComputeProvider(
 
     private async Task EnsureInitializedAsync(CancellationToken cancellationToken)
     {
+        ObjectDisposedException.ThrowIf(_shutdown, this);
+        cancellationToken.ThrowIfCancellationRequested();
         if (_initialized)
         {
             return;
@@ -420,6 +435,7 @@ public class WebGpuComputeProvider(
         await _initializeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
+            ObjectDisposedException.ThrowIf(_shutdown, this);
             if (_initialized)
             {
                 return;
@@ -427,12 +443,16 @@ public class WebGpuComputeProvider(
 
             if (!_settings.ForceCpuFallback)
             {
-                _usingCpuFallback = (await Try.RunAsync(async () =>
+                try
                 {
                     await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
-                    return !_backend.IsAvailable;
-                }).ConfigureAwait(false))
-                .Match(_ => true, useFallback => useFallback);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _usingCpuFallback = !_backend.IsAvailable;
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    _usingCpuFallback = true;
+                }
             }
 
             _initialized = true;
