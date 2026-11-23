@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <WasmMainHTMLPath>index.html</WasmMainHTMLPath>
+    <WasmMainJSPath>main.mjs</WasmMainJSPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../src/Compute/WebGpuComputeProvider/WebGpuComputeProvider.csproj" />
+    <WasmExtraFilesToDeploy Include="worker.mjs" />
+    <WasmExtraFilesToDeploy Include="../../../src/Compute/WebGpuComputeProvider/Runtime/Browser/opfs-weight-memory.mjs" />
+  </ItemGroup>
+</Project>

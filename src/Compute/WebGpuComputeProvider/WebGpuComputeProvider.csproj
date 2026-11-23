@@ -2,6 +2,10 @@
   <PropertyGroup>
     <Title>AIKernel.Wasm.WebGpuComputeProvider</Title>
     <PackageId>AIKernel.Wasm.WebGpuComputeProvider</PackageId>
+    <PackageVersion Condition="'$(UseLocalPackageVersion)' != 'true'">0.1.5</PackageVersion>
+    <Version>$(PackageVersion)</Version>
+    <InformationalVersion>$(PackageVersion)</InformationalVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>EN: Official AIKernel.NET WASM provider for WebGPU compute with deterministic CPU fallback.
 
 JA: deterministic CPU fallback を備えた WebGPU compute 向け AIKernel.NET 公式 WASM Provider です。</Description>
@@ -9,6 +13,7 @@ JA: deterministic CPU fallback を備えた WebGPU compute 向け AIKernel.NET �
 
   <ItemGroup>
     <PackageReference Include="AIKernel.Common" Version="[$(AIKernelCorePackageVersion)]" />
+    <PackageReference Include="AIKernel.Kernel" Version="[$(AIKernelCorePackageVersion)]" />
     <PackageReference Include="AIKernel.Abstractions" Version="$(AIKernelPackageVersion)" />
     <PackageReference Include="AIKernel.Dtos" Version="$(AIKernelPackageVersion)" />
     <PackageReference Include="AIKernel.Enums" Version="$(AIKernelPackageVersion)" />
@@ -24,5 +29,6 @@ JA: deterministic CPU fallback を備えた WebGPU compute 向け AIKernel.NET �
     <None Include="Shaders\Spatial\spatial-reasoning.wgsl" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="shaders\spatial\" />
     <None Include="Buffers\Layouts\gpu-layouts.json" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="buffers\layouts\" />
     <None Include="Runtime\Browser\webgpu-envelope-bridge.js" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="runtime\browser\" />
+    <None Include="Runtime\Browser\opfs-weight-memory.mjs" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="runtime\browser\" />
   </ItemGroup>
 </Project>

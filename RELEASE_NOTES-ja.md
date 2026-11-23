@@ -2,6 +2,12 @@
 
 [English](RELEASE_NOTES.md)
 
+## WebGPU Compute Provider 0.1.5
+
+- .NET プロジェクトの依存を公開済みの AIKernel 0.1.4 にそろえました。
+- `BrowserWeightMemory` は、ブラウザーの Worker で OPFS に置いた読み取り専用の重みを、AIKernel の仮想メモリの RAM キャッシュに接続します。ページを呼び出し側の WebGPU バッファに転送できます。
+- ブラウザー試験で、繰り返し読み出し、追い出し、末尾ページのゼロ埋め、WebGPU の実計算と読み戻し、OPFS ハンドルの解放を確認できます。
+
 ## 0.1.3（公開準備中）
 
 AIKernel.Wasm 0.1.3 は browser/WASM runtime family 向けの canonical GPU

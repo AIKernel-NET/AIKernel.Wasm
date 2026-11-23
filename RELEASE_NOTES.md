@@ -2,6 +2,12 @@
 
 [日本語](RELEASE_NOTES-ja.md)
 
+## WebGPU Compute Provider 0.1.5
+
+- The managed projects use the public AIKernel 0.1.4 contracts.
+- `BrowserWeightMemory` connects immutable OPFS weight files in a browser worker to AIKernel's virtual-memory RAM cache, with page uploads to a caller-owned WebGPU buffer.
+- The browser smoke test covers repeated reads, eviction, final-page padding, real WebGPU compute and readback, and releasing the OPFS handle.
+
 ## 0.1.3 (Unreleased)
 
 AIKernel.Wasm 0.1.3 is the canonical GPU integration release line for the

@@ -9,15 +9,17 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $projectPath = Join-Path $repoRoot "src/Compute/WebGpuComputeProvider/WebGpuComputeProvider.csproj"
+$props = [xml](Get-Content -Raw (Join-Path $repoRoot "Directory.Build.props"))
+$localVersion = "$($props.Project.PropertyGroup.LocalPackageVersionPrefix)-dev$LocalPackageBuildNumber"
 
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
-    $OutputDirectory = Join-Path $repoRoot "artifacts/package-smoke/v0.1.3-dev$LocalPackageBuildNumber"
+    $OutputDirectory = Join-Path $repoRoot "artifacts/package-smoke/v$localVersion"
 }
 
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 
 if (-not $SkipPack) {
-    $localFeed = Join-Path $repoRoot "../artifacts/local-nuget/v0.1.3-dev$LocalPackageBuildNumber"
+    $localFeed = Join-Path $repoRoot "../artifacts/local-nuget/v$localVersion"
     dotnet pack $projectPath `
         --configuration $Configuration `
         --output $OutputDirectory `
@@ -25,6 +27,9 @@ if (-not $SkipPack) {
         /p:LocalPackageBuildNumber=$LocalPackageBuildNumber `
         --source $localFeed `
         --source "https://api.nuget.org/v3/index.json"
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet pack failed with exit code $LASTEXITCODE."
+    }
 }
 
 $packagePath = Get-ChildItem -Path $OutputDirectory -Filter "AIKernel.Wasm.WebGpuComputeProvider.*.nupkg" |
@@ -41,6 +46,7 @@ try {
     $requiredEntries = @(
         "providers/webgpu.provider.json",
         "runtime/browser/webgpu-envelope-bridge.js",
+        "runtime/browser/opfs-weight-memory.mjs",
         "shaders/hud/hud-composite.wgsl",
         "shaders/aisthesis/aisthesis.wgsl",
         "shaders/spatial/spatial-reasoning.wgsl",

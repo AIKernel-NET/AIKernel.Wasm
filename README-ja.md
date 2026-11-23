@@ -24,6 +24,20 @@ AIKernel には、公式 AIOS ディストリビューションである **AIKer
 Monolith は 0.1.x 系の安定化後に、ランタイムモデル をより広い SDK と
 統合する標準 AIOS として開発が開始されています。
 
+## ブラウザーで重みをページ単位で読む
+
+`AIKernel.Wasm.WebGpuComputeProvider` 0.1.5 に `BrowserWeightMemory` が入ります。AIKernel SDK の依存バージョンは 0.1.4 です。アプリケーションで検証済みの重みファイルを OPFS のルートに保存し、専用 Worker の .NET WebAssembly から開きます。同梱の `runtime/browser/opfs-weight-memory.mjs` をアプリと同じオリジンで配信します。
+
+```csharp
+using var weights = await BrowserWeightMemory.OpenAsync(moduleUrl, "weights.bin",
+    pageSize: 1 << 20, ramPages: 8);
+weights.UploadPage(pageIndex, device, uploadBuffer);
+```
+
+`device` と `uploadBuffer` は同じ WebGPU デバイスに属する JavaScript オブジェクトです。バッファには `COPY_DST` と処理に使う用途を指定します。`ramPages` は常駐ページの上限です。作業中のページを含む確保量は `GetRamUsage()`、OPFS 読み出し回数は `GetStatistics()` で確認できます。JavaScript の転送用領域は1ページ分で、GPU バッファはアプリケーションが管理します。対象は読み取り専用の重みです。
+
+実機試験は `dotnet build tests/browser/WeightMemorySmoke -c Release` で作った `AppBundle` をローカルホストまたは HTTPS で配信し、`index.html` を開きます。試験は実 GPU を使い、結果をページに表示します。
+
 ## Package
 
 - `AIKernel.Wasm.Runtime`

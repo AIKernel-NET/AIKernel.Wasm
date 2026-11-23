@@ -23,6 +23,20 @@ AIKernel also provides an official AIOS distribution, codenamed
 will integrate the runtime model with the broader SDK after the 0.1.x
 line stabilizes.
 
+## Browser weight paging
+
+`AIKernel.Wasm.WebGpuComputeProvider` 0.1.5 includes `BrowserWeightMemory` and depends on the AIKernel 0.1.4 SDK. Save a verified immutable weight file at the origin's OPFS root and open it from .NET WebAssembly in a dedicated worker. Serve the packaged `runtime/browser/opfs-weight-memory.mjs` asset at the application's origin.
+
+```csharp
+using var weights = await BrowserWeightMemory.OpenAsync(moduleUrl, "weights.bin",
+    pageSize: 1 << 20, ramPages: 8);
+weights.UploadPage(pageIndex, device, uploadBuffer);
+```
+
+Pass JavaScript objects for the WebGPU device and a buffer on that device with `COPY_DST` and the intended compute usage. `ramPages` bounds resident pages. Use `GetRamUsage()` for total page-buffer allocation and `GetStatistics()` for OPFS page reads. The JavaScript transfer buffer uses one page of scratch space. The application owns its GPU buffers.
+
+Build the smoke test with `dotnet build tests/browser/WeightMemorySmoke -c Release`. Serve the generated `AppBundle` from localhost or HTTPS and open `index.html` to exercise the pager and WebGPU on real hardware.
+
 ## Package
 
 - `AIKernel.Wasm.Runtime`
